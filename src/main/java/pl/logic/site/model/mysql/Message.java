@@ -2,15 +2,14 @@ package pl.logic.site.model.mysql;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.persistence.Id;
 import org.springframework.data.annotation.Immutable;
-import pl.logic.site.model.enums.Status;
 
 import java.util.Date;
 
@@ -21,30 +20,19 @@ import java.util.Date;
 @Slf4j
 @Immutable
 @Entity
-@Table(name = "patient")
-public class Patient {
+@Table(name = "message")
+public class Message {
     @Id
     @Column(name = "id", nullable = false)
     private int id;
-
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "surname")
-    private String surname;
-
-    @Column(name = "birth_date")
-    private Date birth_date;
-
-    @Column(name = "height")
-    private int height;
-
-    @Column(name = "weight")
-    private int weight;
-
-    @Column(name = "gender")
-    private int gender;
-
-    @Column(name = "status")
-    private Status status;
+    @Column(name = "id_chat")
+    private String chatId;
+    @Column(name = "id_sender")
+    private int senderId;
+    @Column(name = "id_recipient")
+    private int recipientId;
+    @Column(name = "content")
+    private String content;
+    @Column(name = "timestamp")
+    private Date timestamp;
 }

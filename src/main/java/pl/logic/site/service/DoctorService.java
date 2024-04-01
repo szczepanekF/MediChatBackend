@@ -6,6 +6,9 @@ import pl.logic.site.model.mysql.Doctor;
 
 import java.util.List;
 
+/**
+ * A service used for manipulating doctor entity.
+ */
 public interface DoctorService {
     Doctor createDoctor(DoctorDAO doctor);
     void deleteDoctor(int id);
