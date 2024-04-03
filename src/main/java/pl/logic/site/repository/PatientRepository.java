@@ -8,7 +8,7 @@ import pl.logic.site.model.mysql.Patient;
 import java.util.List;
 
 @Repository
-public interface PatientRepository extends JpaRepository<Patient, Long> {
+public interface PatientRepository extends JpaRepository<Patient, Integer> {
     List<Patient> findAllByStatus(Status status);
     Patient findByName(String name);
     Patient findByNameAndAndSurname(String name, String surname);
