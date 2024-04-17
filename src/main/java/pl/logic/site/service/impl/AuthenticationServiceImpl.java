@@ -87,8 +87,6 @@ public class AuthenticationServiceImpl {
         Map<String, Object> extraClaims = getExtraClaims(springUser);
         extraClaims.put("emailAddress", springUser.getEmail());
         extraClaims.put("role", springUser.getRole());
-        extraClaims.put("patient_id", springUser.getPatientId());
-        extraClaims.put("doctor_id", springUser.getDoctorId());
 
         var jwtToken = jwtService.generateToken(extraClaims, springUser);
         return AuthenticationResponse.builder().token(jwtToken).build();
@@ -123,6 +121,7 @@ public class AuthenticationServiceImpl {
 
     private Map<String, Object> getExtraDoctorClaims(Doctor doctor) {
         Map<String, Object> doctorClaims = new HashMap<>();
+        doctorClaims.put("doctor_id", doctor.getId());
         doctorClaims.put("name", doctor.getName());
         doctorClaims.put("surname", doctor.getSurname());
         doctorClaims.put("birth_date", getHumanReadableDate(doctor.getBirth_date()));
@@ -132,6 +131,7 @@ public class AuthenticationServiceImpl {
 
     private Map<String, Object> getExtraPatientClaims(Patient patient) {
         Map<String, Object> patientClaims = new HashMap<>();
+        patientClaims.put("patient_id", patient.getId());
         patientClaims.put("name", patient.getName());
         patientClaims.put("surname", patient.getSurname());
         patientClaims.put("birth_date", getHumanReadableDate(patient.getBirth_date()));
