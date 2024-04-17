@@ -132,7 +132,7 @@ public class AuthenticationServiceImpl {
         Map<String, Object> patientClaims = new HashMap<>();
         patientClaims.put("name", patient.getName());
         patientClaims.put("surname", patient.getSurname());
-        patientClaims.put("birth_date", patient.getBirth_date());
+        patientClaims.put("birth_date", getHumanReadableDate(patient.getBirth_date()));
         patientClaims.put("height", patient.getHeight());
         patientClaims.put("weight", patient.getWeight());
         patientClaims.put("gender", patient.getGender());
