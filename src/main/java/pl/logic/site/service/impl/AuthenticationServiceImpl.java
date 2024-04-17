@@ -45,7 +45,7 @@ public class AuthenticationServiceImpl {
                 .build();
         patientRepository.save(patient);
 
-        SpringUser springUser = createSpringUser(request.getEmail(), request.getUsername(), request.getPassword(), null, patient.getId());
+        SpringUser springUser = createSpringUser(request.getEmail(), request.getUsername(), request.getPassword(), null, patient.getId(), Role.PATIENT);
         return createAuthenticationResponse(springUser);
     }
 
@@ -62,7 +62,7 @@ public class AuthenticationServiceImpl {
                 .build();
         doctorRepository.save(doctor);
 
-        SpringUser springUser = createSpringUser(request.getEmail(), request.getUsername(), request.getPassword(), doctor.getId(), null);
+        SpringUser springUser = createSpringUser(request.getEmail(), request.getUsername(), request.getPassword(), doctor.getId(), null, Role.DOCTOR);
         return createAuthenticationResponse(springUser);
     }
 
@@ -71,14 +71,14 @@ public class AuthenticationServiceImpl {
                 && springUserRepository.findByUsername(username).isPresent();
     }
 
-    private SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId) {
+    private SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId, Role role) {
         SpringUser springUser = SpringUser.builder()
                 .email(email)
                 .username(username)
                 .password(passwordEncoder.encode(password))
                 .doctorId(doctorId)
                 .patientId(patientId)
-                .role(Role.USER)
+                .role(role)
                 .build();
         return springUserRepository.save(springUser);
     }
