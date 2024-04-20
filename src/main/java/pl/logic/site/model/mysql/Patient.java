@@ -1,14 +1,11 @@
 package pl.logic.site.model.mysql;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.persistence.Id;
 import org.springframework.data.annotation.Immutable;
 import pl.logic.site.model.enums.Status;
 
@@ -24,6 +21,7 @@ import java.util.Date;
 @Table(name = "patient")
 public class Patient {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private int id;
 
