@@ -76,6 +76,38 @@ public class DoctorController {
         }
     }
 
+    @GetMapping(value = "/doctorsNonBot", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all doctors from the database", description = "Get all doctors from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getDoctorsNonBot(){
+        List<Doctor> doctors = new ArrayList<>();
+        try{
+            doctors = (List<Doctor>) userFacade.getUsersByDoctorType(new DoctorDAO(new Doctor()), false);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
+        } catch (EntityNotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
+        }
+    }
+
+    @GetMapping(value = "/doctorsBot", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all doctors from the database", description = "Get all doctors from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getDoctorsBot(){
+        List<Doctor> doctors = new ArrayList<>();
+        try{
+            doctors = (List<Doctor>) userFacade.getUsersByDoctorType(new DoctorDAO(new Doctor()), true);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
+        } catch (EntityNotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
+        }
+    }
+
     @GetMapping(value = "/doctors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get doctor from the database", description = "Get doctor from the database")
     @ApiResponses(value = {

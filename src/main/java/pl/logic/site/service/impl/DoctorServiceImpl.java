@@ -31,7 +31,8 @@ public class DoctorServiceImpl implements DoctorService {
                                          doctor.doctor().getName(),
                                          doctor.doctor().getSurname(),
                                          doctor.doctor().getBirth_date(),
-                                         doctor.doctor().getSpecialisation_id()) ;
+                                         doctor.doctor().getSpecialisation_id(),
+                                         doctor.doctor().getIsBot()) ;
         if(doctorEntity.getId() != 0)
             throw new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + doctorEntity);
 
@@ -66,7 +67,8 @@ public class DoctorServiceImpl implements DoctorService {
                 doctor.doctor().getName(),
                 doctor.doctor().getSurname(),
                 doctor.doctor().getBirth_date(),
-                doctor.doctor().getSpecialisation_id());
+                doctor.doctor().getSpecialisation_id(),
+                doctor.doctor().getIsBot());
         doctorEntity.setId(id);
 
         Optional<Doctor> doctorFromDatabse = doctorRepository.findById(id);
@@ -91,6 +93,22 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public List<Doctor> getDoctors() {
         List<Doctor> doctors = doctorRepository.findAll();
+        if(doctors.isEmpty())
+            throw new EntityNotFound(Consts.C404);
+        return doctors;
+    }
+
+    @Override
+    public List<Doctor> getDoctorsNonBot() {
+        List<Doctor> doctors = doctorRepository.findByIsBot(0);
+        if(doctors.isEmpty())
+            throw new EntityNotFound(Consts.C404);
+        return doctors;
+    }
+
+    @Override
+    public List<Doctor> getDoctorsBot() {
+        List<Doctor> doctors = doctorRepository.findByIsBot(1);
         if(doctors.isEmpty())
             throw new EntityNotFound(Consts.C404);
         return doctors;

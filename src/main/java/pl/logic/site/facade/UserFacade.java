@@ -65,6 +65,27 @@ public class UserFacade {
     }
 
     /**
+     * Get all users of class represented by given data access object
+     *
+     * @param user - data access object
+     * @param isBot - integer specifying if doctor is bot (1) or not (0)
+     * @return all users of class represented by user param
+     */
+    public Object getUsersByDoctorType(Object user, boolean isBot) {
+        return switch (user) {
+            case DoctorDAO doctor -> {
+                if (isBot) {
+                    yield doctorService.getDoctorsBot();
+                } else {
+                    yield doctorService.getDoctorsNonBot();
+                }
+            }
+            default -> throw new UnknownUserType(Consts.C452_UKNOWN_USER_TYPE);
+        };
+    }
+
+
+    /**
      * Update user based on data access object class and user ID
      *
      * @param user - data access object

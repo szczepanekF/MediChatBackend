@@ -40,10 +40,12 @@ public class ChatController {
                         savedMsg.getContent()
                 )
         );
+        //here maybe return this message to automatically append in view
     }
 
     /**
-     * Endpoint used for finding messages by sender and recipient ID.
+     * Endpoint used for finding messages by sender and recipient ID
+     * (they are user ID of conversing patient and doctor).
      * @param senderId
      * @param recipientId
      * @return List of messages belonging to the specified sender&recipient ID

@@ -38,4 +38,7 @@ public class Doctor {
 
     @Column(name = "specialisation_id")
     private int specialisation_id;
+
+    @Column(name = "is_bot")
+    private int isBot;
 }

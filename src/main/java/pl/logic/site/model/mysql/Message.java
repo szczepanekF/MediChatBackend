@@ -28,9 +28,9 @@ public class Message {
     @Column(name = "id_chat")
     private String chatId;
     @Column(name = "id_sender")
-    private int senderId;
+    private int senderId; //userId
     @Column(name = "id_recipient")
-    private int recipientId;
+    private int recipientId; //userId
     @Column(name = "content")
     private String content;
     @Column(name = "timestamp")
