@@ -41,8 +41,14 @@ public class Patient {
     private int weight;
 
     @Column(name = "gender")
-    private int gender;
+    private String gender;
 
     @Column(name = "status")
     private Status status;
+
+    @Column(name = "height_unit")
+    private String heightUnit;
+
+    @Column(name = "weight_unit")
+    private String weightUnit;
 }

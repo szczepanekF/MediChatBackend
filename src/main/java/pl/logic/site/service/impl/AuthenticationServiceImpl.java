@@ -42,6 +42,8 @@ public class AuthenticationServiceImpl {
                 .weight(request.getWeight())
                 .gender(request.getGender())
                 .status(request.getStatus())
+                .heightUnit(request.getHeightUnit())
+                .weightUnit(request.getWeightUnit())
                 .build();
         patientRepository.save(patient);
 
@@ -139,6 +141,8 @@ public class AuthenticationServiceImpl {
         patientClaims.put("weight", patient.getWeight());
         patientClaims.put("gender", patient.getGender());
         patientClaims.put("status", patient.getStatus());
+        patientClaims.put("weight_unit", patient.getWeightUnit());
+        patientClaims.put("height_unit", patient.getHeightUnit());
         return patientClaims;
     }
 

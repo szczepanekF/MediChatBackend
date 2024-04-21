@@ -18,9 +18,11 @@ public class RegisterPatientRequest {
     private Date birthDate;
     private int height;
     private int weight;
-    private int gender;
+    private String gender;
     private Status status;
     private String email;
     private String username;
     private String password;
+    private String heightUnit;
+    private String weightUnit;
 }

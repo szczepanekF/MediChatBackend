@@ -38,7 +38,10 @@ public class PatientServiceImpl implements PatientService {
                                             patient.patient().getHeight(),
                                             patient.patient().getWeight(),
                                             patient.patient().getGender(),
-                                            patient.patient().getStatus());
+                                            patient.patient().getStatus(),
+                                            patient.patient().getHeightUnit(),
+                                            patient.patient().getWeightUnit()
+                );
         if (patientEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + patientEntity);
             log.error(err.getMessage());
@@ -95,7 +98,10 @@ public class PatientServiceImpl implements PatientService {
                                             patient.patient().getHeight(),
                                             patient.patient().getWeight(),
                                             patient.patient().getGender(),
-                                            patient.patient().getStatus());
+                                            patient.patient().getStatus(),
+                                            patient.patient().getHeightUnit(),
+                                            patient.patient().getWeightUnit()
+                );
         Optional<Patient> patientFromDatabase = patientRepository.findById(id);
         if (patientFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + patientEntity);
