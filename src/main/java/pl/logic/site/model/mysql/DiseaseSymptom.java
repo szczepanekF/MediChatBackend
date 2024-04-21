@@ -16,7 +16,7 @@ import jakarta.persistence.Column;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class DiagnosisSymptom {
+public class DiseaseSymptom {
     @Id
     @Column(name = "id")
     private int id;

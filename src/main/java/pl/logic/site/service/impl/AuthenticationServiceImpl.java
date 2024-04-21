@@ -89,6 +89,7 @@ public class AuthenticationServiceImpl {
         Map<String, Object> extraClaims = getExtraClaims(springUser);
         extraClaims.put("emailAddress", springUser.getEmail());
         extraClaims.put("role", springUser.getRole());
+        extraClaims.put("SpringUserId", springUser.getId());
 
         var jwtToken = jwtService.generateToken(extraClaims, springUser);
         return AuthenticationResponse.builder().token(jwtToken).build();

@@ -34,10 +34,10 @@ public class Patient {
     @Column(name = "birth_date")
     private Date birth_date;
 
-    @Column(name = "height")
+    @Column(name = "height", nullable = false)
     private int height;
 
-    @Column(name = "weight")
+    @Column(name = "weight", nullable = false)
     private int weight;
 
     @Column(name = "gender")

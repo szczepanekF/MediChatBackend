@@ -68,7 +68,7 @@ public class PatientController {
     public ResponseEntity<Response> getAllPatients() {
         List<Patient> patients = new ArrayList<>();
         try {
-            patients = (List<Patient>) userFacade.getUsers(new PatientDAO(new Patient()));
+            patients = (List<Patient>) userFacade.getUsers(new PatientDAO(new Patient()), -1);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patients));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patients));

@@ -3,6 +3,7 @@ package pl.logic.site.service;
 
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.mysql.Doctor;
+import pl.logic.site.model.mysql.Room;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,5 @@ public interface ChatRoomService {
             boolean createNewRoomIfNotExists
     );
 
-    public String createChatId(int senderId, int recipientId);
+    public List<Room> createChatId(int senderId, int recipientId);
 }
