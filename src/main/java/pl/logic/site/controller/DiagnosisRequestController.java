@@ -1,0 +1,155 @@
+package pl.logic.site.controller;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import pl.logic.site.facade.ObjectFacade;
+import pl.logic.site.model.dao.DiagnosisRequestDAO;
+import pl.logic.site.model.exception.DeleteError;
+import pl.logic.site.model.exception.EntityNotFound;
+import pl.logic.site.model.exception.SaveError;
+import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.response.Response;
+import pl.logic.site.utils.Consts;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+@Slf4j
+@RestController
+@RequestMapping("diagnoseRequestController")
+@Scope("request")
+public class DiagnosisRequestController {
+    @Autowired
+    ObjectFacade objectFacade;
+
+    /**
+     * An endpoint for creating diagnosisRequest entity
+     *
+     * @param diagnosisRequestDao
+     * @return HTTP Response
+     */
+    @PostMapping(value = "/diagnosisRequest", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create diagnosis request entity and push it to database", description = "Create diagnosis request entity and push it to database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
+            @ApiResponse(responseCode = "453", description = "Error during saving an entity")
+    })
+    public ResponseEntity<Response> createDiagnosisRequest(@RequestBody DiagnosisRequestDAO diagnosisRequestDao) {
+        DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
+        try {
+            diagnosisRequest = (DiagnosisRequest) objectFacade.createObject(diagnosisRequestDao);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", diagnosisRequest));
+        } catch (SaveError e) {
+            return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }
+    }
+
+    /**
+     * An endpoint for getting all diagnosis request entities
+     *
+     * @return HTTP response
+     */
+    @GetMapping(value = "/diagnosisRequests", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all diagnosis requests from the database", description = "Get all diagnosis requests from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getAllDiagnosisRequests() {
+        List<DiagnosisRequest> diagnosisRequests = new ArrayList<>();
+        try {
+            diagnosisRequests = (List<DiagnosisRequest>) objectFacade.getObjects(new DiagnosisRequestDAO(new DiagnosisRequest()), -1);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequests));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequests));
+        }
+    }
+
+    /**
+     * An endpoint for getting diagnosisRequest by ID
+     *
+     * @param id - id of the diagnosisRequest
+     * @return HTTP response
+     */
+    @GetMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get diagnosisRequest from the database", description = "Get diagnosisRequest from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getDiagnosisRequest(@Parameter(description = "id of diagnosisRequest to be searched") @PathVariable int id) {
+        DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
+        try {
+            diagnosisRequest = (DiagnosisRequest) objectFacade.getObject(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }
+    }
+
+    /**
+     * An endpoint for updating specific diagnosisRequest entity
+     *
+     * @param id                  - id of the diagnosisRequest
+     * @param diagnosisRequestDAO
+     * @return HTTP response
+     */
+    @ResponseBody
+    @PutMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update specific diagnosisRequest from the database", description = "Update specific diagnosisRequest from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "209", description = "Successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Entity not found"),
+            @ApiResponse(responseCode = "454", description = "Error during update")
+    })
+    public ResponseEntity<Response> updateDiagnosisRequest(@Parameter(description = "id of diagnosisRequest to be searched") @PathVariable int id, @RequestBody DiagnosisRequestDAO diagnosisRequestDAO) {
+        DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
+        try {
+            diagnosisRequest = (DiagnosisRequest) objectFacade.updateObject(diagnosisRequestDAO, id);
+            // Update diagnosisRequest logic here
+            return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", diagnosisRequest));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        } catch (SaveError e) {
+            return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }
+    }
+
+    /**
+     * An endpoint for specific diagnosisRequest deletion
+     *
+     * @param id - id of the diagnosisRequest
+     * @return HTTP response
+     */
+    @ResponseBody
+    @DeleteMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Delete specific diagnosisRequest from the database", description = "Delete specific diagnosisRequest from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "2010", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Entity not found"),
+            @ApiResponse(responseCode = "455", description = "Error during deletion")
+    })
+    public ResponseEntity<Response> deleteDiagnosisRequest(@Parameter(description = "id of diagnosisRequest to be searched") @PathVariable int id) {
+        DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
+        try {
+            objectFacade.deleteObject(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
+            // Update diagnosisRequest logic here
+            return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", diagnosisRequest));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        } catch (DeleteError e) {
+            return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }
+    }
+}

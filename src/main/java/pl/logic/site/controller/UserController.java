@@ -17,13 +17,11 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.logic.site.facade.UserFacade;
+import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.SpringUser;
-import pl.logic.site.model.request.SpringSearchRequest;
 import pl.logic.site.model.response.Response;
 import pl.logic.site.service.impl.UserServiceImpl;
 import pl.logic.site.utils.Consts;
@@ -42,7 +40,7 @@ public class UserController {
 
     private final UserServiceImpl userService;
     @Autowired
-    UserFacade userFacade;
+    ObjectFacade objectFacade;
 
     /**
      * Test endpoint for adding new user. Do not use.
@@ -154,7 +152,7 @@ public class UserController {
     public ResponseEntity<Response> getAllUsers(@Parameter(description = "filter value, 0 all users, 1 patients, 2 doctors") @PathVariable int userFilter){
         List<SpringUser> users = new ArrayList<>();
         try{
-            users = (List<SpringUser>) userFacade.getUsers(new SpringUser(), userFilter);
+            users = (List<SpringUser>) objectFacade.getObjects(new SpringUser(), userFilter);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", users));
         } catch (EntityNotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), userFilter));

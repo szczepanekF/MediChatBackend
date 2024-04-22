@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.logic.site.facade.UserFacade;
+import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.dao.PatientDAO;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
@@ -30,7 +30,7 @@ import java.util.List;
 @Scope("request")
 public class PatientController {
     @Autowired
-    UserFacade userFacade;
+    ObjectFacade objectFacade;
 
     /**
      * An endpoint for creating patient entity
@@ -47,7 +47,7 @@ public class PatientController {
     public ResponseEntity<Response> createPatient(@RequestBody PatientDAO patientDao) {
         Patient patient = new Patient();
         try {
-            patient = (Patient) userFacade.createUser(patientDao);
+            patient = (Patient) objectFacade.createObject(patientDao);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", patient));
         } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), patient));
@@ -68,7 +68,7 @@ public class PatientController {
     public ResponseEntity<Response> getAllPatients() {
         List<Patient> patients = new ArrayList<>();
         try {
-            patients = (List<Patient>) userFacade.getUsers(new PatientDAO(new Patient()), -1);
+            patients = (List<Patient>) objectFacade.getObjects(new PatientDAO(new Patient()), -1);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patients));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patients));
@@ -90,7 +90,7 @@ public class PatientController {
     public ResponseEntity<Response> getPatient(@Parameter(description = "id of patient to be searched") @PathVariable int id) {
         Patient patient = new Patient();
         try {
-            patient = (Patient) userFacade.getUser(new PatientDAO(new Patient()), id);
+            patient = (Patient) objectFacade.getObject(new PatientDAO(new Patient()), id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patient));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patient));
@@ -115,7 +115,7 @@ public class PatientController {
     public ResponseEntity<Response> updatePatient(@Parameter(description = "id of patient to be searched") @PathVariable int id, @RequestBody PatientDAO patientDAO) {
         Patient patient = new Patient();
         try {
-            patient = (Patient) userFacade.updateUser(patientDAO, id);
+            patient = (Patient) objectFacade.updateObject(patientDAO, id);
             // Update patient logic here
             return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", patient));
         } catch (EntityNotFound e) {
@@ -142,7 +142,7 @@ public class PatientController {
     public ResponseEntity<Response> deletePatient(@Parameter(description = "id of patient to be searched") @PathVariable int id) {
         Patient patient = new Patient();
         try {
-            userFacade.deleteUser(new PatientDAO(new Patient()), id);
+            objectFacade.deleteObject(new PatientDAO(new Patient()), id);
             // Update patient logic here
             return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", patient));
         } catch (EntityNotFound e) {
