@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import pl.logic.site.model.mysql.Recognition;
 
 @Repository
-public interface RecognitionRepository extends JpaRepository<Recognition, Long> {
+public interface RecognitionRepository extends JpaRepository<Recognition, Integer> {
 }

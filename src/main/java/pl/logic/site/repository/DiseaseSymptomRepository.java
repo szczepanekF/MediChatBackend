@@ -4,6 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.logic.site.model.mysql.DiseaseSymptom;
 
+import java.util.List;
+
 @Repository
-public interface DiseaseSymptomRepository extends JpaRepository<DiseaseSymptom, Long> {
+public interface DiseaseSymptomRepository extends JpaRepository<DiseaseSymptom, Integer> {
+    List<DiseaseSymptom> findByIdSymtpom(int id);
+    List<DiseaseSymptom> findByIdDisease(int id);
 }

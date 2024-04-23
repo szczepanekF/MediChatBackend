@@ -30,5 +30,5 @@ public class Recognition {
     private int idSymptom;
 
     @Column(name = "symptom_value")
-    private Date symptomValue;
+    private String symptomValue;
 }
