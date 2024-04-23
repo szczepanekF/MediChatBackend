@@ -1,5 +1,7 @@
 package pl.logic.site.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwt;
 import org.springframework.http.HttpStatus;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Patient;
@@ -13,8 +15,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.logic.site.utils.Consts;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.Map;
 
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/app/auth")
@@ -59,4 +66,23 @@ public class AuthenticationController {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
+
+
+    @PostMapping("/decodeJWT")
+    public ResponseEntity<Response> decodeJWT(@RequestBody String token) {
+        try {
+            String[] chunks = token.split("\\.");
+            Base64.Decoder decoder = Base64.getUrlDecoder();
+
+            String payload = new String(decoder.decode(chunks[1]));
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> payloadMap = mapper.readValue(payload, new TypeReference<Map<String, String>>(){});
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", payloadMap));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
 }

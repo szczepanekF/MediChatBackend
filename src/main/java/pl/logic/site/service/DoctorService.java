@@ -14,7 +14,5 @@ public interface DoctorService {
     void deleteDoctor(int id);
     Doctor updateDoctor(DoctorDAO doctor, int id);
     Doctor getDoctor(int id);
-    List<Doctor> getDoctors();
-    List<Doctor> getDoctorsNonBot();
-    List<Doctor> getDoctorsBot();
+    List<Doctor> getDoctors(int doctorFilter);
 }

@@ -13,6 +13,7 @@ import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.repository.DoctorRepository;
 import pl.logic.site.utils.Consts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,26 +92,15 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<Doctor> getDoctors() {
-        List<Doctor> doctors = doctorRepository.findAll();
+    public List<Doctor> getDoctors(int doctorFilter) {
+        List<Doctor> doctors;
+        if (doctorFilter == 2)
+            doctors = doctorRepository.findAll();
+        else
+            doctors = doctorRepository.retrieveDoctorsByType(doctorFilter);
         if(doctors.isEmpty())
             throw new EntityNotFound(Consts.C404);
         return doctors;
     }
 
-    @Override
-    public List<Doctor> getDoctorsNonBot() {
-        List<Doctor> doctors = doctorRepository.findByIsBot(0);
-        if(doctors.isEmpty())
-            throw new EntityNotFound(Consts.C404);
-        return doctors;
-    }
-
-    @Override
-    public List<Doctor> getDoctorsBot() {
-        List<Doctor> doctors = doctorRepository.findByIsBot(1);
-        if(doctors.isEmpty())
-            throw new EntityNotFound(Consts.C404);
-        return doctors;
-    }
 }

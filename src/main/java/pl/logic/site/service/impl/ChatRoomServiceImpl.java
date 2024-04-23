@@ -6,6 +6,8 @@ import pl.logic.site.model.mysql.Room;
 import pl.logic.site.repository.ChatRoomRepository;
 import pl.logic.site.service.ChatRoomService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,16 +27,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .or(() -> {
                     if(createNewRoomIfNotExists) {
                         var chatId = createChatId(senderId, recipientId);
-                        return Optional.of(chatId);
+//                        return Optional.of(chatId);
                     }
 
                     return  Optional.empty();
                 });
     }
 
-    public String createChatId(int senderId, int recipientId) {
+    public List<Room> createChatId(int senderId, int recipientId) {
         var chatId = String.format("%s_%s", senderId, recipientId);
 
+        List<Room> rooms = new ArrayList<>();
         Room senderRecipient = Room
                 .builder()
                 .chatId(chatId)
@@ -42,6 +45,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .recipientId(Integer.parseInt(String.valueOf(recipientId)))
                 .build();
 
+        senderRecipient = chatRoomRepository.saveAndFlush(senderRecipient);
+        rooms.add(senderRecipient);
         Room recipientSender = Room
                 .builder()
                 .chatId(chatId)
@@ -49,9 +54,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .recipientId(Integer.parseInt(String.valueOf(senderId)))
                 .build();
 
-        chatRoomRepository.save(senderRecipient);
-        chatRoomRepository.save(recipientSender);
+        recipientSender = chatRoomRepository.saveAndFlush(recipientSender);
+        rooms.add(recipientSender);
 
-        return chatId;
+        return rooms;
     }
 }

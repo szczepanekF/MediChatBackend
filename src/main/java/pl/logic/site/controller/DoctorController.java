@@ -60,48 +60,16 @@ public class DoctorController {
         }
     }
 
-    @GetMapping(value = "/doctors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getDoctors/{doctorFilter}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all doctors from the database", description = "Get all doctors from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllDoctors(){
+    public ResponseEntity<Response> getAllDoctors(@Parameter(description = "doctor filter, 0 humans, 1 bots, 2 all") @PathVariable int doctorFilter){
         List<Doctor> doctors = new ArrayList<>();
         try{
-            doctors = (List<Doctor>) userFacade.getUsers(new DoctorDAO(new Doctor()));
-            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
-        } catch (EntityNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
-        }
-    }
-
-    @GetMapping(value = "/doctorsNonBot", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all doctors from the database", description = "Get all doctors from the database")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "404", description = "Not found")
-    })
-    public ResponseEntity<Response> getDoctorsNonBot(){
-        List<Doctor> doctors = new ArrayList<>();
-        try{
-            doctors = (List<Doctor>) userFacade.getUsersByDoctorType(new DoctorDAO(new Doctor()), false);
-            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
-        } catch (EntityNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
-        }
-    }
-
-    @GetMapping(value = "/doctorsBot", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all doctors from the database", description = "Get all doctors from the database")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "404", description = "Not found")
-    })
-    public ResponseEntity<Response> getDoctorsBot(){
-        List<Doctor> doctors = new ArrayList<>();
-        try{
-            doctors = (List<Doctor>) userFacade.getUsersByDoctorType(new DoctorDAO(new Doctor()), true);
+            doctors = (List<Doctor>) userFacade.getUsers(new DoctorDAO(new Doctor()), doctorFilter);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
         } catch (EntityNotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));

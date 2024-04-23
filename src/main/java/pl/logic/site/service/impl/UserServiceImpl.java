@@ -6,16 +6,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.logic.site.model.enums.Status;
 import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.mysql.SpringUser;
+import pl.logic.site.repository.DoctorRepository;
 import pl.logic.site.repository.PatientRepository;
+import pl.logic.site.repository.SpringUserRepository;
+import pl.logic.site.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl {
+public class UserServiceImpl implements UserService {
 
     private final PatientRepository repository;
+    private final DoctorRepository doctorRepository;
+    private final SpringUserRepository springUserRepository;
 
     public Patient saveUser(Patient patient) {
         patient.setStatus(Status.ONLINE);
@@ -41,5 +48,39 @@ public class UserServiceImpl {
 
     public Patient findUser(String name, String surname) {
         return repository.findByNameAndAndSurname(name, surname);
+    }
+
+    public Object findUser(int id) {
+        Optional<SpringUser> springUser = springUserRepository.findById(id);
+        if(springUser.get().getPatientId() != null)
+            return repository.findById(springUser.get().getPatientId());
+        else
+            return doctorRepository.findById(springUser.get().getDoctorId());
+    }
+
+    public Optional<SpringUser> findSpringUser(int id, boolean patient) {
+        if(patient)
+            return  springUserRepository.findByPatientId(id);
+        else
+            return  springUserRepository.findByDoctorId(id);
+
+    }
+
+    @Override
+    public Optional<String> getChatRoomId(final int senderId, final int recipientId, final boolean createNewRoomIfNotExists) {
+        return Optional.empty();
+    }
+
+    @Override
+    public String createChatId(final int senderId, final int recipientId) {
+        return null;
+    }
+
+    public List<Optional<SpringUser>> getAllUsers(int userFilter){
+        return switch (userFilter) {
+            case 0 -> springUserRepository.retrieveAll();
+            case 1 -> springUserRepository.findAllByPatientIdNotNull();
+            default -> springUserRepository.findAllByDoctorIdNotNull();
+        };
     }
 }

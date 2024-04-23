@@ -1,25 +1,29 @@
 package pl.logic.site.facade;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.dao.PatientDAO;
 import pl.logic.site.model.exception.UnknownUserType;
+import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.service.DoctorService;
 import pl.logic.site.service.PatientService;
+import pl.logic.site.service.UserService;
 import pl.logic.site.utils.Consts;
 
 @Component
+@RequiredArgsConstructor
 public class UserFacade {
-    private final DoctorService doctorService;
-    private final PatientService patientService;
-
-
     @Autowired
-    public UserFacade(DoctorService doctorService, PatientService patientService) {
-        this.doctorService = doctorService;
-        this.patientService = patientService;
-    }
+    private final DoctorService doctorService;
+    @Autowired
+    private final PatientService patientService;
+    @Autowired
+    private final UserService userService;
+
+
+
 
     /**
      * Create user of given data access object class using suitable service
@@ -56,30 +60,11 @@ public class UserFacade {
      * @param user - data access object
      * @return all users of class represented by user param
      */
-    public Object getUsers(Object user) {
+    public Object getUsers(Object user, int filter) {
         return switch (user) {
-            case DoctorDAO doctor -> doctorService.getDoctors();
+            case DoctorDAO doctor -> doctorService.getDoctors(filter);
             case PatientDAO patient -> patientService.getPatients();
-            default -> throw new UnknownUserType(Consts.C452_UKNOWN_USER_TYPE);
-        };
-    }
-
-    /**
-     * Get all users of class represented by given data access object
-     *
-     * @param user - data access object
-     * @param isBot - integer specifying if doctor is bot (1) or not (0)
-     * @return all users of class represented by user param
-     */
-    public Object getUsersByDoctorType(Object user, boolean isBot) {
-        return switch (user) {
-            case DoctorDAO doctor -> {
-                if (isBot) {
-                    yield doctorService.getDoctorsBot();
-                } else {
-                    yield doctorService.getDoctorsNonBot();
-                }
-            }
+            case SpringUser springUser -> userService.getAllUsers(filter);
             default -> throw new UnknownUserType(Consts.C452_UKNOWN_USER_TYPE);
         };
     }

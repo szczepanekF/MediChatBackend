@@ -1,6 +1,9 @@
 package pl.logic.site.service;
 
 
+import pl.logic.site.model.mysql.SpringUser;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,4 +17,10 @@ public interface UserService {
     );
 
     public String createChatId(int senderId, int recipientId);
+
+    public List<Optional<SpringUser>> getAllUsers(int userFilter);
+
+    public Object findSpringUser(int id, boolean patient);
+
+
 }
