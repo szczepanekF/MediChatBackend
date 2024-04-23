@@ -8,8 +8,9 @@ public class Consts {
     public static String C210 = "The request has been fulfilled, resulting in the deletion of a existing resource.";
     public static String C403 = "Forbidden.";
     public static String C404 = "Resource not found.";
-    public static String C452_UKNOWN_USER_TYPE = "Unknown user type.";
+    public static String C452_UKNOWN_OBJECT_TYPE = "Unknown object type.";
     public static String C453_SAVING_ERROR = "Error during saving an entity.";
     public static String C454_UPDATING_ERROR = "Error during updating an entity.";
     public static String C455_DELETING_ERROR = "Error during deleting an entity.";
+
 }

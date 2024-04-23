@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 //import pl.logic.site.facade.UserFacade;
-import pl.logic.site.facade.UserFacade;
+import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.SaveError;
@@ -40,7 +40,7 @@ import java.util.List;
 //@PreAuthorize("hasAnyAuthority()")
 public class DoctorController {
     @Autowired
-    UserFacade userFacade;
+    ObjectFacade objectFacade;
 
 
 
@@ -53,10 +53,12 @@ public class DoctorController {
     public ResponseEntity<Response> createDoctor(@RequestBody DoctorDAO doctorDAO){
         Doctor doctor = new Doctor();
         try{
-            doctor = (Doctor) userFacade.createUser(doctorDAO);
+            doctor = (Doctor) objectFacade.createObject(doctorDAO);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", doctor));
         } catch (SaveError e){
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -69,10 +71,12 @@ public class DoctorController {
     public ResponseEntity<Response> getAllDoctors(@Parameter(description = "doctor filter, 0 humans, 1 bots, 2 all") @PathVariable int doctorFilter){
         List<Doctor> doctors = new ArrayList<>();
         try{
-            doctors = (List<Doctor>) userFacade.getUsers(new DoctorDAO(new Doctor()), doctorFilter);
+            doctors = (List<Doctor>) objectFacade.getObjects(new DoctorDAO(new Doctor()), doctorFilter);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
         } catch (EntityNotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -85,10 +89,12 @@ public class DoctorController {
     public ResponseEntity<Response> getDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int id){
         Doctor doctor = new Doctor();
         try{
-            doctor = (Doctor) userFacade.getUser(new DoctorDAO(new Doctor()), id);
+            doctor = (Doctor) objectFacade.getObject(new DoctorDAO(new Doctor()), id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -103,13 +109,15 @@ public class DoctorController {
     public ResponseEntity<Response> updateDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int id, @RequestBody DoctorDAO doctorDAO){
         Doctor doctor = new Doctor();
         try{
-            doctor = (Doctor) userFacade.updateUser(doctorDAO, id);
+            doctor = (Doctor) objectFacade.updateObject(doctorDAO, id);
             // Update doctor logic here
             return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", doctor));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (SaveError e) {
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
     @ResponseBody
@@ -123,13 +131,15 @@ public class DoctorController {
     public ResponseEntity<Response> deleteDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int id){
         Doctor doctor = new Doctor();
         try{
-            userFacade.deleteUser(new DoctorDAO(new Doctor()), id);
+            objectFacade.deleteObject(new DoctorDAO(new Doctor()), id);
             // Update doctor logic here
             return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", doctor));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (DeleteError e) {
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 

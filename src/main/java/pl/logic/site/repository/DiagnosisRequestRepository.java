@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 
 @Repository
-public interface DiagnosisRequestRepository extends JpaRepository<DiagnosisRequest, Long> {
+public interface DiagnosisRequestRepository extends JpaRepository<DiagnosisRequest, Integer> {
 }
