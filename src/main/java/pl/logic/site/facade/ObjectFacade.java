@@ -30,6 +30,12 @@ public class ObjectFacade {
     private final DiseaseSymptomService diseaseSymptomService;
     @Autowired
     private final SpecialisationService specialisationService;
+    @Autowired
+    private final DictionaryExaminationService dictionaryExaminationService;
+    @Autowired
+    private final ExaminationService examinationService;
+    @Autowired
+    private final DiseaseService diseaseService;
 
     /**
      * Create object of given data access object class using suitable service
@@ -46,6 +52,7 @@ public class ObjectFacade {
             case ChartDAO chart -> chartService.createChart(chart);
             case RecognitionDAO recognition -> recognitionService.createRecognition(recognition);
             case SpecialisationDAO specialisation -> specialisationService.createSpecialisation(specialisation);
+            case ExaminationDAO examination -> examinationService.createExamination(examination);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
@@ -67,6 +74,10 @@ public class ObjectFacade {
             case DiseaseSymptomDAO diseaseSymptomDAO -> diseaseSymptomService.getDiseaseSymptom(id);
             case SymptomDAO symptomDAO -> symptomService.getSymptom(id);
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisation(id);
+            case ExaminationDAO examination -> examinationService.getExamination(id);
+            case DictionaryExaminationDAO dictionaryExamination ->
+                    dictionaryExaminationService.getDictionaryExamination(id);
+            case DiseaseDAO disease -> diseaseService.getDisease(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
@@ -88,6 +99,10 @@ public class ObjectFacade {
             case DiseaseSymptomDAO diseaseSymptom -> diseaseSymptomService.getDiseaseSymptoms();
             case SymptomDAO symptom -> symptomService.getSymptoms();
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisations();
+            case ExaminationDAO examination -> examinationService.getExaminations();
+            case DictionaryExaminationDAO dictionaryExamination ->
+                    dictionaryExaminationService.getDictionaryExaminations();
+            case DiseaseDAO disease -> diseaseService.getDiseases();
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
@@ -108,6 +123,7 @@ public class ObjectFacade {
             case ChartDAO chart -> chartService.updateChart(chart, id);
             case RecognitionDAO recognition -> recognitionService.updateRecognition(recognition, id);
             case SpecialisationDAO specialisation -> specialisationService.updateSpecialisation(specialisation, id);
+            case ExaminationDAO examination -> examinationService.updateExamination(examination, id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
@@ -126,6 +142,7 @@ public class ObjectFacade {
             case ChartDAO chart -> chartService.deleteChart(id);
             case RecognitionDAO recognition -> recognitionService.deleteRecognition(id);
             case SpecialisationDAO specialisation -> specialisationService.deleteSpecialisation(id);
+            case ExaminationDAO examination -> examinationService.deleteExamination(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         }
     }
