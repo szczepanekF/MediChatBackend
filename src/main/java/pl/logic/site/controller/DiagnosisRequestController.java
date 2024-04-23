@@ -27,14 +27,14 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("diagnoseRequestController")
+@RequestMapping("diagnosisRequestController")
 @Scope("request")
 public class DiagnosisRequestController {
     @Autowired
     ObjectFacade objectFacade;
 
     /**
-     * An endpoint for creating diagnosisRequest entity
+     * An endpoint for creating diagnosis request entity
      *
      * @param diagnosisRequestDao
      * @return HTTP Response
@@ -77,18 +77,18 @@ public class DiagnosisRequestController {
     }
 
     /**
-     * An endpoint for getting diagnosisRequest by ID
+     * An endpoint for getting diagnosis request by ID
      *
-     * @param id - id of the diagnosisRequest
+     * @param id - id of the diagnosis request
      * @return HTTP response
      */
-    @GetMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get diagnosisRequest from the database", description = "Get diagnosisRequest from the database")
+    @GetMapping(value = "/diagnosisRequest/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get diagnosis request from the database", description = "Get diagnosis request from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getDiagnosisRequest(@Parameter(description = "id of diagnosisRequest to be searched") @PathVariable int id) {
+    public ResponseEntity<Response> getDiagnosisRequest(@Parameter(description = "id of diagnosis request to be searched") @PathVariable int id) {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.getObject(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
@@ -99,21 +99,21 @@ public class DiagnosisRequestController {
     }
 
     /**
-     * An endpoint for updating specific diagnosisRequest entity
+     * An endpoint for updating specific diagnosis request entity
      *
-     * @param id                  - id of the diagnosisRequest
+     * @param id                  - id of the diagnosis request
      * @param diagnosisRequestDAO
      * @return HTTP response
      */
     @ResponseBody
     @PutMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Update specific diagnosisRequest from the database", description = "Update specific diagnosisRequest from the database")
+    @Operation(summary = "Update specific diagnosis request from the database", description = "Update specific diagnosis request from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "209", description = "Successfully updated"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "454", description = "Error during update")
     })
-    public ResponseEntity<Response> updateDiagnosisRequest(@Parameter(description = "id of diagnosisRequest to be searched") @PathVariable int id, @RequestBody DiagnosisRequestDAO diagnosisRequestDAO) {
+    public ResponseEntity<Response> updateDiagnosisRequest(@Parameter(description = "id of diagnosis request to be searched") @PathVariable int id, @RequestBody DiagnosisRequestDAO diagnosisRequestDAO) {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.updateObject(diagnosisRequestDAO, id);
@@ -127,20 +127,20 @@ public class DiagnosisRequestController {
     }
 
     /**
-     * An endpoint for specific diagnosisRequest deletion
+     * An endpoint for specific diagnosis request deletion
      *
-     * @param id - id of the diagnosisRequest
+     * @param id - id of the diagnosis request
      * @return HTTP response
      */
     @ResponseBody
     @DeleteMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Delete specific diagnosisRequest from the database", description = "Delete specific diagnosisRequest from the database")
+    @Operation(summary = "Delete specific diagnosis request from the database", description = "Delete specific diagnosis request from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "2010", description = "Successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "455", description = "Error during deletion")
     })
-    public ResponseEntity<Response> deleteDiagnosisRequest(@Parameter(description = "id of diagnosisRequest to be searched") @PathVariable int id) {
+    public ResponseEntity<Response> deleteDiagnosisRequest(@Parameter(description = "id of diagnosis request to be searched") @PathVariable int id) {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             objectFacade.deleteObject(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
