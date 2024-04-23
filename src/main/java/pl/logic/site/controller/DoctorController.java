@@ -57,6 +57,8 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", doctor));
         } catch (SaveError e){
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -73,6 +75,8 @@ public class DoctorController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
         } catch (EntityNotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -89,6 +93,8 @@ public class DoctorController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -110,6 +116,8 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (SaveError e) {
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
     @ResponseBody
@@ -130,6 +138,8 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (DeleteError e) {
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 

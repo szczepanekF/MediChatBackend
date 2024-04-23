@@ -52,6 +52,8 @@ public class DiagnosisRequestController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", diagnosisRequest));
         } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -73,6 +75,8 @@ public class DiagnosisRequestController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequests));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequests));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -95,6 +99,8 @@ public class DiagnosisRequestController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -123,6 +129,8 @@ public class DiagnosisRequestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
         } catch (SaveError e) {
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
@@ -136,7 +144,7 @@ public class DiagnosisRequestController {
     @DeleteMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Delete specific diagnosis request from the database", description = "Delete specific diagnosis request from the database")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "2010", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "201", description = "Successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "455", description = "Error during deletion")
     })
@@ -150,6 +158,8 @@ public class DiagnosisRequestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
         } catch (DeleteError e) {
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), diagnosisRequest));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 }
