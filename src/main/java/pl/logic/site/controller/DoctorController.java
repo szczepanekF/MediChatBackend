@@ -124,7 +124,7 @@ public class DoctorController {
     @DeleteMapping(value = "/doctors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Delete specific doctor from the database", description = "Delete specific doctor from the database")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "2010", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "201", description = "Successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "455", description = "Error during deletion")
     })

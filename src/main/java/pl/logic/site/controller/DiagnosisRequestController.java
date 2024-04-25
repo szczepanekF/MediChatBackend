@@ -36,7 +36,7 @@ public class DiagnosisRequestController {
     /**
      * An endpoint for creating diagnosis request entity
      *
-     * @param diagnosisRequestDao
+     * @param diagnosisRequestDao - diagnosis request data access object
      * @return HTTP Response
      */
     @PostMapping(value = "/diagnosisRequest", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -107,8 +107,8 @@ public class DiagnosisRequestController {
     /**
      * An endpoint for updating specific diagnosis request entity
      *
-     * @param id                  - id of the diagnosis request
-     * @param diagnosisRequestDAO
+     * @param id - id of the diagnosis request
+     * @param diagnosisRequestDAO - diagnosis request data access object
      * @return HTTP response
      */
     @ResponseBody

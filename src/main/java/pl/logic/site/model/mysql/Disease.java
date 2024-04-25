@@ -1,16 +1,14 @@
 package pl.logic.site.model.mysql;
 
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.persistence.Id;
 import org.springframework.data.annotation.Immutable;
-
-
-import jakarta.persistence.Column;
-import java.util.Date;
 
 @Slf4j
 @Immutable
@@ -18,17 +16,11 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Recognition {
+public class Disease {
     @Id
     @Column(name = "id")
     private int id;
 
-    @Column(name = "id_chart")
-    private int idChart;
-
-    @Column(name = "id_symptom")
-    private int idSymptom;
-
-    @Column(name = "symptom_value")
-    private String symptomValue;
+    @Column(name = "name")
+    private String name;
 }

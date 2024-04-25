@@ -3,15 +3,10 @@ package pl.logic.site.facade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pl.logic.site.model.dao.DiagnosisRequestDAO;
-import pl.logic.site.model.dao.DoctorDAO;
-import pl.logic.site.model.dao.PatientDAO;
+import pl.logic.site.model.dao.*;
 import pl.logic.site.model.exception.UnknownObjectType;
 import pl.logic.site.model.mysql.SpringUser;
-import pl.logic.site.service.DiagnosisRequestService;
-import pl.logic.site.service.DoctorService;
-import pl.logic.site.service.PatientService;
-import pl.logic.site.service.UserService;
+import pl.logic.site.service.*;
 import pl.logic.site.utils.Consts;
 
 @Component
@@ -25,10 +20,25 @@ public class ObjectFacade {
     private final UserService userService;
     @Autowired
     private final DiagnosisRequestService diagnosisRequestService;
-
+    @Autowired
+    private final ChartService chartService;
+    @Autowired
+    private final RecognitionService recognitionService;
+    @Autowired
+    private final SymptomService symptomService;
+    @Autowired
+    private final DiseaseSymptomService diseaseSymptomService;
+    @Autowired
+    private final SpecialisationService specialisationService;
+    @Autowired
+    private final DictionaryExaminationService dictionaryExaminationService;
+    @Autowired
+    private final ExaminationService examinationService;
+    @Autowired
+    private final DiseaseService diseaseService;
 
     /**
-     * Create user of given data access object class using suitable service
+     * Create object of given data access object class using suitable service
      *
      * @param obj - data access object providing data for object creation
      * @return created object
@@ -39,12 +49,16 @@ public class ObjectFacade {
             case PatientDAO patient -> patientService.createPatient(patient);
             case DiagnosisRequestDAO diagnosisRequest ->
                     diagnosisRequestService.createDiagnosisRequest(diagnosisRequest);
+            case ChartDAO chart -> chartService.createChart(chart);
+            case RecognitionDAO recognition -> recognitionService.createRecognition(recognition);
+            case SpecialisationDAO specialisation -> specialisationService.createSpecialisation(specialisation);
+            case ExaminationDAO examination -> examinationService.createExamination(examination);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
 
     /**
-     * Get user based on data access object class and ID
+     * Get object based on data access object class and ID
      *
      * @param obj - data access object
      * @param id  - id of the object
@@ -55,15 +69,24 @@ public class ObjectFacade {
             case DoctorDAO doctor -> doctorService.getDoctor(id);
             case PatientDAO patient -> patientService.getPatient(id);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequest(id);
+            case ChartDAO chart -> chartService.getChart(id);
+            case RecognitionDAO recognition -> recognitionService.getRecognition(id);
+            case DiseaseSymptomDAO diseaseSymptomDAO -> diseaseSymptomService.getDiseaseSymptom(id);
+            case SymptomDAO symptomDAO -> symptomService.getSymptom(id);
+            case SpecialisationDAO specialisation -> specialisationService.getSpecialisation(id);
+            case ExaminationDAO examination -> examinationService.getExamination(id);
+            case DictionaryExaminationDAO dictionaryExamination ->
+                    dictionaryExaminationService.getDictionaryExamination(id);
+            case DiseaseDAO disease -> diseaseService.getDisease(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
 
     /**
-     * Get all users of class represented by given data access object
+     * Get all objects of class represented by given data access object
      *
      * @param obj - data access object
-     * @return all users of class represented by user param
+     * @return all objects of class represented by obj param
      */
     public Object getObjects(Object obj, int filter) {
         return switch (obj) {
@@ -71,16 +94,25 @@ public class ObjectFacade {
             case PatientDAO patient -> patientService.getPatients();
             case SpringUser springUser -> userService.getAllUsers(filter);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests();
+            case ChartDAO chart -> chartService.getCharts();
+            case RecognitionDAO recognition -> recognitionService.getRecognitions();
+            case DiseaseSymptomDAO diseaseSymptom -> diseaseSymptomService.getDiseaseSymptoms();
+            case SymptomDAO symptom -> symptomService.getSymptoms();
+            case SpecialisationDAO specialisation -> specialisationService.getSpecialisations();
+            case ExaminationDAO examination -> examinationService.getExaminations();
+            case DictionaryExaminationDAO dictionaryExamination ->
+                    dictionaryExaminationService.getDictionaryExaminations();
+            case DiseaseDAO disease -> diseaseService.getDiseases();
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
 
     /**
-     * Update user based on data access object class and user ID
+     * Update object based on data access object class and ID
      *
      * @param obj - data access object
-     * @param id  - id of the user
-     * @return updated user
+     * @param id  - id of the object
+     * @return updated object
      */
     public Object updateObject(Object obj, int id) {
         return switch (obj) {
@@ -88,21 +120,29 @@ public class ObjectFacade {
             case PatientDAO patient -> patientService.updatePatient(patient, id);
             case DiagnosisRequestDAO diagnosisRequest ->
                     diagnosisRequestService.updateDiagnosisRequest(diagnosisRequest, id);
+            case ChartDAO chart -> chartService.updateChart(chart, id);
+            case RecognitionDAO recognition -> recognitionService.updateRecognition(recognition, id);
+            case SpecialisationDAO specialisation -> specialisationService.updateSpecialisation(specialisation, id);
+            case ExaminationDAO examination -> examinationService.updateExamination(examination, id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
 
     /**
-     * Delete user based on data access object class and user ID
+     * Delete object based on data access object class and ID
      *
      * @param obj - data access object
-     * @param id  - id of the user
+     * @param id  - id of the object
      */
     public void deleteObject(Object obj, int id) {
         switch (obj) {
             case DoctorDAO doctor -> doctorService.deleteDoctor(id);
             case PatientDAO patient -> patientService.deletePatient(id);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.deleteDiagnosisRequest(id);
+            case ChartDAO chart -> chartService.deleteChart(id);
+            case RecognitionDAO recognition -> recognitionService.deleteRecognition(id);
+            case SpecialisationDAO specialisation -> specialisationService.deleteSpecialisation(id);
+            case ExaminationDAO examination -> examinationService.deleteExamination(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         }
     }
