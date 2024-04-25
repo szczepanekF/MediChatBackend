@@ -1,0 +1,9 @@
+package pl.logic.site.model.predictions;
+
+import java.util.Date;
+
+public interface IFeatureVector {
+    Double[] getPersonalInfoFeatures();
+    Date[] getDateFeatures();
+    Double[] getSymptomFeatures();
+}
