@@ -1,15 +1,15 @@
-package pl.logic.site.model.predictions;
+package pl.logic.site.model.predictions.features;
 
 import pl.logic.site.model.exception.IllegalGender;
 import pl.logic.site.model.exception.IllegalHeight;
 import pl.logic.site.model.exception.IllegalWeight;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import static pl.logic.site.utils.features.FeatureConsts.MAX_HEIGHT;
 import static pl.logic.site.utils.features.FeatureConsts.MAX_WEIGHT;
 import static pl.logic.site.utils.features.GenderDict.genderDict;
+import static pl.logic.site.utils.features.SymptomsDict.symptomsDict;
 
 public class FeatureVector implements IFeatureVector {
     private double height;
@@ -25,21 +25,32 @@ public class FeatureVector implements IFeatureVector {
         this.gender = genderToDouble(gender);
         this.birth_date = birth_date;
         this.symptoms = new HashMap<>();
+        symptomsToDouble(symptoms);
     }
 
     @Override
     public Double[] getPersonalInfoFeatures() {
-        return new Double[0];
+        List<Double> result = new ArrayList<>();
+        result.add(this.height);
+        result.add(this.weight);
+        result.add(this.gender);
+
+        return result.toArray(new Double[0]);
     }
 
     @Override
     public Date[] getDateFeatures() {
-        return new Date[0];
+        List<Date> result = new ArrayList<>();
+        result.add(this.birth_date);
+
+        return result.toArray(new Date[0]);
     }
 
     @Override
     public Double[] getSymptomFeatures() {
-        return new Double[0];
+        List<Double> result = new ArrayList<>(this.symptoms.values());
+
+        return result.toArray(new Double[0]);
     }
 
     private double genderToDouble(String gender) {
@@ -74,9 +85,14 @@ public class FeatureVector implements IFeatureVector {
     }
 
     private void symptomsToDouble(HashMap<String, String> symptoms) {
-//        for (String symptom : symptoms.keySet()) {
-//            this.symptoms.put(symptom, Double.parseDouble(symptoms.get(symptom)));
-//        }
-        //TODO finish symptoms
+        for (Map.Entry<String, String> entry : symptoms.entrySet()) {
+            String symptom = entry.getKey();
+            String value = entry.getValue();
+            for (int i = 0; i < symptomsDict.size(); i++) {
+                if (value.equals(symptomsDict.keySet().toArray()[i])) {
+                    this.symptoms.put(symptom, symptomsDict.get(value));
+                }
+            }
+        }
     }
 }
