@@ -1,13 +1,20 @@
 package pl.logic.site.model.predictions.quality;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Quality {
-    public static Double calculateAccuracy(List<Result> diseases){
-        Double accumulator = 0.0;
-        for(Label disease :diseases){
-            if(disease.getExpected().getName().equals(disease.getResult().getName())) accumulator++;
+    public static Double calculateAccuracy(List<Result> results){
+        List<Result> filteredResults = deleteNullExpectedResults(results);
+        double accumulator = 0.0;
+        for(Label result : filteredResults){
+            if(result.getExpected().getName().equals(result.getResult().getName())) accumulator++;
         }
-        return (accumulator/diseases.size());
+        if (filteredResults.isEmpty()) return 0.0;
+        else return (accumulator/filteredResults.size());
+    }
+
+    private static List<Result> deleteNullExpectedResults(List<Result> results){
+        return results.stream().filter(r -> r.getExpected()!=null).toList();
     }
 }
