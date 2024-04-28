@@ -11,7 +11,7 @@ import static pl.logic.site.utils.features.FeatureConsts.MAX_WEIGHT;
 import static pl.logic.site.utils.features.GenderDict.genderDict;
 import static pl.logic.site.utils.features.SymptomsDict.symptomsDict;
 
-public class FeatureVector implements IFeatureVector {
+public class FeatureVector implements Vector {
     private double height;
     private double weight;
     private double gender;

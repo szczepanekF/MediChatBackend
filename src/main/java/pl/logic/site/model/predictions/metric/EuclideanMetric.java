@@ -1,6 +1,6 @@
 package pl.logic.site.model.predictions.metric;
 
-import pl.logic.site.model.predictions.features.IFeatureVector;
+import pl.logic.site.model.predictions.features.Vector;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +10,7 @@ import static pl.logic.site.utils.features.FeatureConsts.MAX_DATE_DIFF;
 public class EuclideanMetric implements Metric {
 
     @Override
-    public double calculateMetric(IFeatureVector v1, IFeatureVector v2) {
+    public double calculateMetric(Vector v1, Vector v2) {
         Double[] v1PersonalInfo = v1.getPersonalInfoFeatures();
         Date[] v1Date = v1.getDateFeatures();
         Double[] v1Symptoms = v1.getSymptomFeatures();

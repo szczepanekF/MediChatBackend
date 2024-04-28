@@ -2,7 +2,7 @@ package pl.logic.site.model.predictions.features;
 
 import java.util.Date;
 
-public interface IFeatureVector {
+public interface Vector {
     Double[] getPersonalInfoFeatures();
 
     Date[] getDateFeatures();
