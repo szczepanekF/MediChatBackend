@@ -2,7 +2,17 @@ package pl.logic.site.utils.features;
 
 import java.util.HashMap;
 
+/**
+ * This class contains a list of symptoms (should be all symptoms in database) and their respective weights.
+ * The weights are used to calculate the severity score of a symptom.
+ * A dictionary class for changing the symptom value from String to a numeric value.
+ *
+ * @author Kacper
+ */
 public class SymptomsDict {
+    /**
+     * A map containing the symptoms and their weights.
+     */
     public static final HashMap<String, Double> symptomsDict = new HashMap<String, Double>() {{
         put("null", 0.0);
         put("mild", 0.2);

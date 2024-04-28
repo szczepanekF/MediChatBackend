@@ -7,8 +7,20 @@ import java.util.concurrent.TimeUnit;
 
 import static pl.logic.site.utils.features.FeatureConsts.MAX_DATE_DIFF;
 
+/**
+ * Calculates the Euclidean distance (as a metric) between two vectors.
+ *
+ * @author Kacper
+ */
 public class EuclideanMetric implements Metric {
 
+    /**
+     * Calculates the entire Euclidean distance between two vectors.
+     *
+     * @param v1 the first vector
+     * @param v2 the second vector
+     * @return the Euclidean distance between the two vectors
+     */
     @Override
     public double calculateMetric(Vector v1, Vector v2) {
         Double[] v1PersonalInfo = v1.getPersonalInfoFeatures();
@@ -26,6 +38,13 @@ public class EuclideanMetric implements Metric {
         return Math.sqrt(personalInfo + date + symptoms);
     }
 
+    /**
+     * Calculates the sum of the squares of the differences between the values of two lists.
+     *
+     * @param v1 the first array of numbers
+     * @param v2 the second array of numbers
+     * @return the squared Euclidean distance between the two arrays
+     */
     private double calculateNumeric(Double[] v1, Double[] v2) {
         if (v1.length != v2.length) {
             throw new IllegalArgumentException("Arrays v1 and v2 must have the same length");
@@ -37,6 +56,13 @@ public class EuclideanMetric implements Metric {
         return result;
     }
 
+    /**
+     * Calculates the sum of the squares of the differences between the values of two Dates' lists.
+     *
+     * @param v1Date the first array of dates
+     * @param v2Date the second array of dates
+     * @return the squared Euclidean distance between the two Dates arrays
+     */
     private double calculateDate(Date[] v1Date, Date[] v2Date) {
         double result = 0;
         long diffInMillies;

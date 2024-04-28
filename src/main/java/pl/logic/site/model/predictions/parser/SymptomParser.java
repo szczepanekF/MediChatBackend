@@ -13,15 +13,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class is responsible for parsing symptoms from the database.
+ * This class associates symptom names with their severity value,
+ * and associates a patient's symptoms from his chart with the given symptoms.
+ *
+ * @author Kacper
+ */
 public class SymptomParser {
     private final JdbcTemplate jdbcTemplate;
     private HashMap<String, String> patientSymptoms;
     private List<String> allSymptoms;
 
+    /**
+     * Constructs a new SymptomParser instance.
+     *
+     * @param jdbcTemplate the JDBC template used to query the database
+     */
     public SymptomParser(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Connects the given symptoms to the patient's symptoms with his chart,
+     * returning a map of the symptoms' name and symptoms severity level (as String).
+     * If the patient does not have a symptom, the value will be "null".
+     *
+     * @param id_chart the ID of the patient's chart
+     * @param symptoms the symptoms to connect to the patient's symptoms
+     * @return a map of the connected symptoms
+     */
     public HashMap<String, String> connectSymptoms(int id_chart, List<Symptom> symptoms) {
         this.patientSymptoms = searchForSymptoms(id_chart);
         this.allSymptoms = new ArrayList<>();
@@ -40,6 +61,12 @@ public class SymptomParser {
         return result;
     }
 
+    /**
+     * Searches the database for the patient's symptoms with the given ID in his chart.
+     *
+     * @param id_chart the ID of the patient's chart
+     * @return a map of the patient's symptoms (symptoms name, symptoms severity level)
+     */
     public HashMap<String, String> searchForSymptoms(int id_chart) {
         String sql = "SELECT s.name, r.symptom_value FROM recognition r INNER JOIN symptom s ON r.id_symptom = s.id WHERE r.id_chart = ?";
 
