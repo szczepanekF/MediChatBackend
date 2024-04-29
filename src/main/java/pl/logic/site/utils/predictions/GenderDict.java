@@ -1,4 +1,4 @@
-package pl.logic.site.utils.features;
+package pl.logic.site.utils.predictions;
 
 import java.util.HashMap;
 

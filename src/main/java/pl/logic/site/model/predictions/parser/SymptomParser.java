@@ -80,4 +80,18 @@ public class SymptomParser {
                 stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1));
         return new HashMap<>(result);
     }
+
+    public Integer searchChartIdByPatientId(int patientId) {
+        String sql = "SELECT id FROM chart WHERE id_patient = ?";
+        List<Integer> results = jdbcTemplate.query(sql, new Object[]{patientId}, (rs, rowNum) -> rs.getInt("id"));
+        return results.isEmpty() ? null : results.getFirst();
+    }
+
+    public  HashMap<String, String> madeZeroSymptoms(List<Symptom> symptoms) {
+        HashMap<String, String> result = new HashMap<>();
+        for (Symptom symptom : symptoms) {
+            result.put(symptom.getName(), "null");
+        }
+        return result;
+    }
 }

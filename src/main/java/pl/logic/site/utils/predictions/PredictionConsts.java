@@ -1,14 +1,12 @@
-package pl.logic.site.utils.features;
-
-import java.util.HashMap;
+package pl.logic.site.utils.predictions;
 
 /**
- * This class contains all the constants used in the features package.
+ * This class contains all the constants used in the prediction package.
  * Most of them are used to normalize feature values or calculations
  *
  *  @author Kacper
  */
-public class FeatureConsts {
+public class PredictionConsts {
     /**
      * The maximum height allowed for a person (cm).
      */
@@ -25,5 +23,11 @@ public class FeatureConsts {
      * The value range is <0, 2>.
      */
     public static final long MAX_DATE_DIFF = 18250;
+
+    /**
+     * The value of the constant K.
+     * Number of neighbors to consider in the k-NN algorithm.
+     */
+    public static final int K = 1;
 
 }

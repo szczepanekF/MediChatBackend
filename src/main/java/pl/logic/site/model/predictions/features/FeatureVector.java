@@ -6,10 +6,10 @@ import pl.logic.site.model.exception.IllegalWeight;
 
 import java.util.*;
 
-import static pl.logic.site.utils.features.FeatureConsts.MAX_HEIGHT;
-import static pl.logic.site.utils.features.FeatureConsts.MAX_WEIGHT;
-import static pl.logic.site.utils.features.GenderDict.genderDict;
-import static pl.logic.site.utils.features.SymptomsDict.symptomsDict;
+import static pl.logic.site.utils.predictions.PredictionConsts.MAX_HEIGHT;
+import static pl.logic.site.utils.predictions.PredictionConsts.MAX_WEIGHT;
+import static pl.logic.site.utils.predictions.GenderDict.genderDict;
+import static pl.logic.site.utils.predictions.SymptomsDict.symptomsDict;
 
 /**
  * A class that represents a feature vector.

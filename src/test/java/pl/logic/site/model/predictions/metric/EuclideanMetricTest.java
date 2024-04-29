@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static pl.logic.site.utils.features.FeatureConsts.MAX_DATE_DIFF;
+import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DATE_DIFF;
 
 @SpringBootTest
 class EuclideanMetricTest {

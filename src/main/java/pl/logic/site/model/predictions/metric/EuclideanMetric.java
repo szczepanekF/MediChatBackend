@@ -5,7 +5,7 @@ import pl.logic.site.model.predictions.features.Vector;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static pl.logic.site.utils.features.FeatureConsts.MAX_DATE_DIFF;
+import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DATE_DIFF;
 
 /**
  * Calculates the Euclidean distance (as a metric) between two vectors.
