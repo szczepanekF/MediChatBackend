@@ -50,8 +50,10 @@ public class ExaminationController {
             examination = (Examination) objectFacade.createObject(examinationDao);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", examination));
         } catch (SaveError e) {
+            e.printStackTrace();
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), examination));
         }  catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -61,20 +63,22 @@ public class ExaminationController {
      *
      * @return HTTP response
      */
-    @GetMapping(value = "/examinations", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/examinations/{examinationFilter}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all examinations from the database", description = "Get all examinations from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllExaminations() {
+    public ResponseEntity<Response> getAllExaminations(@Parameter(description = "examination filter, fetches all examinations for specific patientId") @PathVariable int examinationFilter) {
         List<Examination> examinations = new ArrayList<>();
         try {
-            examinations = (List<Examination>) objectFacade.getObjects(new ExaminationDAO(new Examination()), -1);
+            examinations = (List<Examination>) objectFacade.getObjects(new ExaminationDAO(new Examination()), examinationFilter);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", examinations));
         } catch (EntityNotFound e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), examinations));
         }  catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -85,7 +89,7 @@ public class ExaminationController {
      * @param id - id of the examination
      * @return HTTP response
      */
-    @GetMapping(value = "/examinations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/examination/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get examination from the database", description = "Get examination from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
@@ -97,8 +101,10 @@ public class ExaminationController {
             examination = (Examination) objectFacade.getObject(new ExaminationDAO(new Examination()), id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", examination));
         } catch (EntityNotFound e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), examination));
         }  catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -125,10 +131,13 @@ public class ExaminationController {
             // Update examination logic here
             return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", examination));
         } catch (EntityNotFound e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), examination));
         } catch (SaveError e) {
+            e.printStackTrace();
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), examination));
         }  catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -143,7 +152,7 @@ public class ExaminationController {
     @DeleteMapping(value = "/examinations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Delete specific examination from the database", description = "Delete specific examination from the database")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "210", description = "Successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "455", description = "Error during deletion")
     })
@@ -154,10 +163,13 @@ public class ExaminationController {
             // Update examination logic here
             return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", examination));
         } catch (EntityNotFound e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), examination));
         } catch (DeleteError e) {
+            e.printStackTrace();
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), examination));
         }  catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

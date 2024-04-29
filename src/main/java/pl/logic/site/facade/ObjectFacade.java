@@ -93,13 +93,13 @@ public class ObjectFacade {
             case DoctorDAO doctor -> doctorService.getDoctors(filter);
             case PatientDAO patient -> patientService.getPatients();
             case SpringUser springUser -> userService.getAllUsers(filter);
-            case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests();
-            case ChartDAO chart -> chartService.getCharts();
+            case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests(filter);
+            case ChartDAO chart -> chartService.getChartsForPatient(filter);
             case RecognitionDAO recognition -> recognitionService.getRecognitions();
             case DiseaseSymptomDAO diseaseSymptom -> diseaseSymptomService.getDiseaseSymptoms();
             case SymptomDAO symptom -> symptomService.getSymptoms();
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisations();
-            case ExaminationDAO examination -> examinationService.getExaminations();
+            case ExaminationDAO examination -> examinationService.getExaminations(filter);
             case DictionaryExaminationDAO dictionaryExamination ->
                     dictionaryExaminationService.getDictionaryExaminations();
             case DiseaseDAO disease -> diseaseService.getDiseases();

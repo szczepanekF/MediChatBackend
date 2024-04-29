@@ -23,7 +23,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import pl.logic.site.config.JwtAuthFilter;
 import pl.logic.site.controller.PatientController;
-import pl.logic.site.facade.ObjectFacade;
+
+//import pl.logic.site.facade.UserFacade;
 import pl.logic.site.model.dao.PatientDAO;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Patient;
