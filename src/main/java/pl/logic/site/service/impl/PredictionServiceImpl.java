@@ -13,7 +13,10 @@ import pl.logic.site.model.predictions.knn.KNN;
 import pl.logic.site.model.predictions.metric.EuclideanMetric;
 import pl.logic.site.model.predictions.parser.DiseaseParser;
 import pl.logic.site.model.predictions.parser.SymptomParser;
+import pl.logic.site.model.predictions.quality.Quality;
 import pl.logic.site.model.predictions.quality.Result;
+import pl.logic.site.model.predictions.statictic.DiseasePrediction;
+import pl.logic.site.model.predictions.statictic.Prediction;
 import pl.logic.site.service.*;
 
 import java.util.ArrayList;
@@ -22,6 +25,11 @@ import java.util.List;
 
 import static pl.logic.site.utils.predictions.PredictionConsts.K;
 
+/**
+ * This service implementation class is responsible for making predictions about diseases based on symptoms.
+ *
+ * @author Kacper
+ */
 @Slf4j
 @Service
 public class PredictionServiceImpl implements PredictionService {
@@ -36,32 +44,37 @@ public class PredictionServiceImpl implements PredictionService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private List<DiseaseVector> dataset;
     private List<DiseaseVector> learningSet;
     private List<DiseaseVector> testingSet;
     private EuclideanMetric euclideanMetric;
+    private int numberOfCompleteDiseaseVectors;
+    private SymptomParser symptomParser;
 
-    @Override
-    public Object getStatisticDisease() {
-        return null;
-    }
+    private List<Disease> diseases;
+    private List<Patient> patients;
+    private List<Symptom> symptoms;
 
-    @Override
-    public double getPredictionAccuracy() {
-        return 0;
-    }
-
-    // ciekawej jest jeśli pacjent którego podamy nie miał wcześniej żadnej choroby
-    @Override
-    public Disease getPatientDisease(int patientId) {
-        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate);
-        List<Disease> diseases = diseaseService.getDiseases();
-        List<Patient> patients = patientService.getPatients();
-        List<Symptom> symptoms = symptomService.getSymptoms();
+    /**
+     * Creates a new prediction service.
+     * This method initializes all necessary parameters.
+     * DiseaseVector calculates for every patient who has a patient card and has previously suffered
+     * from at least one disease.
+     * Such DiseaseVectors are added to the dataset
+     */
+    public PredictionServiceImpl() {
+        this.symptomParser = new SymptomParser(this.jdbcTemplate);
+        this.diseases = diseaseService.getDiseases();
+        this.patients = patientService.getPatients();
+        this.symptoms = symptomService.getSymptoms();
+        this.dataset = new ArrayList<>();
         this.learningSet = new ArrayList<>();
+        this.testingSet = new ArrayList<>();
         this.euclideanMetric = new EuclideanMetric();
+        this.numberOfCompleteDiseaseVectors = 0;
 
         for (int i = 0; i < patients.size(); i++) {
-            List<DiagnosisRequest> patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests();//TODO change method to better
+            List<DiagnosisRequest> patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(patients.get(i).getId());//TODO change method for that one which will return diagnosis for patient by his ID
             Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
             if (chartId == null) {
                 continue;
@@ -72,12 +85,81 @@ public class PredictionServiceImpl implements PredictionService {
                 List<Disease> patientDiseases = diseaseParser.getDiseases();
                 if (!patientDiseases.isEmpty()) {
                     for (Disease disease : patientDiseases) {
-                        this.learningSet.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
+                        this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
+                        this.numberOfCompleteDiseaseVectors++;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the statistic disease for a set of patients without a health card or a previously diagnosed
+     * disease (or both) and based on these patients what is the most popular disease.
+     *
+     * @return the statistic disease
+     */
+    @Override
+    public Object getStatisticDisease() {
+        this.learningSet = this.dataset;
+        KNN knn = new KNN(learningSet);
+
+        for (int i = 0; i < patients.size(); i++) {
+            List<DiagnosisRequest> patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(patients.get(i).getId());//TODO change method for that one which will return diagnosis for patient by his ID
+            Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
+            HashMap<String, String> patientSymptom;
+            if (chartId == null) {
+                patientSymptom = symptomParser.madeZeroSymptoms(symptoms);
+            } else {
+                patientSymptom = symptomParser.connectSymptoms(chartId, symptoms);
+            }
+            if (patientDiagnosisRequests.isEmpty()) {
+                this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
+            } else {
+                for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
+                    DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDaignosis(), diseases);
+                    List<Disease> patientDiseases = diseaseParser.getDiseases();
+                    if (patientDiseases.isEmpty()) {
+                        this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
                     }
                 }
             }
         }
 
+        List<Result> results = knn.classifyVectors(testingSet, K, euclideanMetric, diseases);
+        Prediction diseasePrediction = new DiseasePrediction();
+
+        return (String) diseasePrediction.getPrediction(results);
+    }
+
+    /**
+     * Gets the prediction accuracy.
+     * Only patients with a patient card and at least one disease diagnosed are taken into account.
+     *
+     * @param proportions the proportions between learningSet and testingSet
+     * @return the prediction accuracy
+     */
+    @Override
+    public double getPredictionAccuracy(String[] proportions) {
+        int[] proportionsInts = Quality.countProportions(proportions, numberOfCompleteDiseaseVectors);
+        this.learningSet = dataset.subList(0, proportionsInts[0]);
+        this.testingSet = dataset.subList(proportionsInts[0], numberOfCompleteDiseaseVectors);
+
+        KNN knn = new KNN(learningSet);
+        List<Result> results = knn.classifyVectors(testingSet, K, euclideanMetric, diseases);
+        return Quality.calculateAccuracy(results);
+    }
+
+    /**
+     * Gets a likely diagnosis for a specific patient.
+     * The method counts the most likely disease for the patient.
+     * They are most interesting for patients who have not previously been diagnosed with the disease.
+     *
+     * @param patientId the patient id
+     * @return the patient disease
+     */
+    @Override
+    public Disease getPatientDisease(int patientId) {
         Patient patient = patientService.getPatient(patientId);
         Integer patientChartId = symptomParser.searchChartIdByPatientId(patientId);
         HashMap<String, String> patientSymptom;
@@ -88,7 +170,7 @@ public class PredictionServiceImpl implements PredictionService {
         }
 
         DiseaseVector patientDiseaseVector = new DiseaseVector(null, patient, patientSymptom);
-
+        this.learningSet = this.dataset;
         KNN knn = new KNN(learningSet);
         Result result = knn.classifyVector(patientDiseaseVector, K, euclideanMetric, diseases);
 
