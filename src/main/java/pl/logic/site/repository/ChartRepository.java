@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ChartRepository extends JpaRepository<Chart, Integer> {
     List<Chart> findByIdPatient(int id);
+    List<Chart> findAllByIdPatient(int id);
 }

@@ -37,7 +37,7 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
     public DiagnosisRequest createDiagnosisRequest(DiagnosisRequestDAO diagnosisRequest) {
         DiagnosisRequest diagnosisRequestEntity = new DiagnosisRequest(
                 diagnosisRequest.diagnosisRequest().getId(),
-                diagnosisRequest.diagnosisRequest().getIdPatient(),
+                diagnosisRequest.diagnosisRequest().getIdChart(),
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
                 diagnosisRequest.diagnosisRequest().getDaignosis(),
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis());
@@ -92,7 +92,7 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
     public DiagnosisRequest updateDiagnosisRequest(DiagnosisRequestDAO diagnosisRequest, int id) {
         DiagnosisRequest diagnosisRequestEntity = new DiagnosisRequest(
                 diagnosisRequest.diagnosisRequest().getId(),
-                diagnosisRequest.diagnosisRequest().getIdPatient(),
+                diagnosisRequest.diagnosisRequest().getIdChart(),
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
                 diagnosisRequest.diagnosisRequest().getDaignosis(),
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis());
@@ -135,8 +135,8 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
      * @return list of all diagnosis requests
      */
     @Override
-    public List<DiagnosisRequest> getDiagnosisRequests() {
-        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAll();
+    public List<DiagnosisRequest> getDiagnosisRequests(int filter) {
+        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAllByIdChart(filter);
         if (diagnosisRequests.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());

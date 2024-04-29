@@ -22,8 +22,8 @@ public class DiagnosisRequest {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "id_patient")
-    private int idPatient;
+    @Column(name = "id_chart")
+    private int idChart;
 
     @Column(name = "id_doctor")
     private int idDoctor;

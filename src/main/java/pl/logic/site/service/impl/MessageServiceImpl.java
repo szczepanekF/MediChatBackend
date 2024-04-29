@@ -19,11 +19,10 @@ public class MessageServiceImpl implements MessageService {
     private final RoomRepository roomRepository;
 
     public Message save(Message Message) {
-//        var chatId = chatRoomService
-//                .getChatRoomId(Message.getSenderId(), Message.getRecipientId(), true)
-//                .orElseThrow(); // You can create your own dedicated exception
-//        Message.setChatId(chatId);
-        Message.setChatId("5");
+        var chatId = chatRoomService
+                .getChatRoomId(Message.getSenderId(), Message.getRecipientId(), true)
+                .orElseThrow(); // You can create your own dedicated exception
+        Message.setChatId(chatId);
         repository.save(Message);
         return Message;
     }

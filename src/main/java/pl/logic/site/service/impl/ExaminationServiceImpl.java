@@ -127,8 +127,8 @@ public class ExaminationServiceImpl implements ExaminationService {
      * @return list of all examinations
      */
     @Override
-    public List<Examination> getExaminations() {
-        List<Examination> examinations = examinationRepository.findAll();
+    public List<Examination> getExaminations(int examinationFilter) {
+        List<Examination> examinations = examinationRepository.findAllByIdPatient(examinationFilter);
         if (examinations.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());

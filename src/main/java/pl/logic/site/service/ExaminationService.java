@@ -14,5 +14,5 @@ public interface ExaminationService {
 
     Examination getExamination(int id);
 
-    List<Examination> getExaminations();
+    List<Examination> getExaminations(int examinationFilter);
 }

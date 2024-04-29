@@ -62,16 +62,16 @@ public class DiagnosisRequestController {
      *
      * @return HTTP response
      */
-    @GetMapping(value = "/diagnosisRequests", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all diagnosis requests from the database", description = "Get all diagnosis requests from the database")
+    @GetMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all diagnosis requests for chart id from the database", description = "Get all diagnosis requests for chart id from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllDiagnosisRequests() {
+    public ResponseEntity<Response> getAllDiagnosisRequests(@Parameter(description = "chart id") @PathVariable int id) {
         List<DiagnosisRequest> diagnosisRequests = new ArrayList<>();
         try {
-            diagnosisRequests = (List<DiagnosisRequest>) objectFacade.getObjects(new DiagnosisRequestDAO(new DiagnosisRequest()), -1);
+            diagnosisRequests = (List<DiagnosisRequest>) objectFacade.getObjects(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequests));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequests));

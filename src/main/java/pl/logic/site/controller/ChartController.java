@@ -62,16 +62,16 @@ public class ChartController {
      *
      * @return HTTP response
      */
-    @GetMapping(value = "/charts", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all charts from the database", description = "Get all charts from the database")
+    @GetMapping(value = "/charts/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all charts for specific patient from the database", description = "Get all charts for specific patient from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllCharts() {
+    public ResponseEntity<Response> getAllCharts(@Parameter(description = "chart id") @PathVariable int id) {
         List<Chart> charts = new ArrayList<>();
         try {
-            charts = (List<Chart>) objectFacade.getObjects(new ChartDAO(new Chart()), -1);
+            charts = (List<Chart>) objectFacade.getObjects(new ChartDAO(new Chart()), id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), charts));
@@ -92,7 +92,7 @@ public class ChartController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getChart(@Parameter(description = "id of chart to be searched") @PathVariable int id) {
+    public ResponseEntity<Response> getChart(@Parameter(description = "patient id") @PathVariable int id) {
         Chart chart = new Chart();
         try {
             chart = (Chart) objectFacade.getObject(new ChartDAO(new Chart()), id);

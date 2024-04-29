@@ -9,10 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,12 +36,13 @@ import pl.logic.site.utils.Consts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Controller
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/chatController")
+@CrossOrigin(origins = "https://localhost:3000")
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
@@ -47,16 +51,35 @@ public class ChatController {
 
     private final SpringUserRepository springUserRepository;
 
-    /**
-     * Endpoint used for sending messages to a specific user using WebSocket.
-     * @param Message
-     */
-    @MessageMapping("/chat")
-    public void processMessage(@Payload Message Message) {
-        Message savedMsg = MessageService.save(Message);
+//    /**
+//     * Endpoint used for sending messages to a specific user using WebSocket.
+//     * @param Message
+//     */
+//    @MessageMapping("/sendMessage")
+//    public void processMessage(@Payload Message Message) {
+//        Message savedMsg = MessageService.save(Message);
+//
+//        messagingTemplate.convertAndSendToUser(
+//                String.valueOf(Message.getRecipientId()), "/queue/messages",
+//                new Notification(
+//                        savedMsg.getId(),
+//                        savedMsg.getSenderId(),
+//                        savedMsg.getRecipientId(),
+//                        savedMsg.getContent()
+//                )
+//        );
+//    }
 
+
+    @MessageMapping("/chat.send") // Message mapping for sending messages
+    public void sendMessage(@Payload Message message) {
+        System.out.println(message);
+        Message savedMsg = MessageService.save(message);
+
+        // Send the message to the appropriate recipient
         messagingTemplate.convertAndSendToUser(
-                String.valueOf(Message.getRecipientId()), "/queue/messages",
+                String.valueOf(message.getRecipientId()), // Recipient ID
+                "/queue/messages", // Destination (queue specific to the recipient)
                 new Notification(
                         savedMsg.getId(),
                         savedMsg.getSenderId(),
@@ -64,7 +87,6 @@ public class ChatController {
                         savedMsg.getContent()
                 )
         );
-        //here maybe return this message to automatically append in view
     }
 
     /**
@@ -74,7 +96,7 @@ public class ChatController {
      * @param recipientId
      * @return List of messages belonging to the specified sender&recipient ID
      */
-    @GetMapping("/messages/{senderId}/{recipientId}")
+    @GetMapping("/chatController/messages/{senderId}/{recipientId}")
     public ResponseEntity<List<Message>> findMessages(@PathVariable int senderId,
                                                  @PathVariable int recipientId) {
         log.info("Wywoływana metoda /messages/senderid/recipientid");
@@ -85,7 +107,7 @@ public class ChatController {
 
 
     @ResponseBody
-    @GetMapping(value = "/chats/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/chatController/chats/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Retrieves all chats by spring user id from the database", description = "Retrieves all chats by spring user id from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully retrieved chat rooms"),
@@ -103,11 +125,13 @@ public class ChatController {
         } catch (DeleteError e) {
             e.printStackTrace();
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), rooms));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), rooms));
         }
     }
 
     @ResponseBody
-    @PostMapping(value = "/createChat", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/chatController/createChat", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Creates chat for senderId and recipient id", description = "Creates chat for senderId (taken as yours spring user id) and recipient id (taken as recipient user id)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created chat room"),
