@@ -15,5 +15,6 @@ public class GenderDict {
     public static final HashMap<String, Double> genderDict = new HashMap<String, Double>() {{
         put("male", 0.);
         put("female", 1.);
+        put("other", 0.5);
     }};
 }

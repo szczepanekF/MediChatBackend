@@ -1,5 +1,7 @@
 package pl.logic.site.model.predictions.quality;
 
+import pl.logic.site.model.exception.InvalidProportion;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +53,7 @@ public class Quality {
                 k[i] = Integer.parseInt(input[i]);
             }
         } catch (NumberFormatException e){
-            throw new IllegalArgumentException("Value of proportion is not a number");
+            throw new InvalidProportion("Value of proportion is not a positive number");
         }
 
         int whole = Arrays.stream(k).sum();

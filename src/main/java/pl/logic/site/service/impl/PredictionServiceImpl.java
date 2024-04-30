@@ -1,5 +1,6 @@
 package pl.logic.site.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,24 +58,37 @@ public class PredictionServiceImpl implements PredictionService {
 
     /**
      * Creates a new prediction service.
-     * This method initializes all necessary parameters.
-     * DiseaseVector calculates for every patient who has a patient card and has previously suffered
-     * from at least one disease.
-     * Such DiseaseVectors are added to the dataset
+     * This method initializes first part of necessary parameters.
      */
     public PredictionServiceImpl() {
-        this.symptomParser = new SymptomParser(this.jdbcTemplate);
-        this.diseases = diseaseService.getDiseases();
-        this.patients = patientService.getPatients();
-        this.symptoms = symptomService.getSymptoms();
         this.dataset = new ArrayList<>();
         this.learningSet = new ArrayList<>();
         this.testingSet = new ArrayList<>();
         this.euclideanMetric = new EuclideanMetric();
         this.numberOfCompleteDiseaseVectors = 0;
+    }
 
+    /**
+     * This method initializes rest of necessary parameters.
+     * DiseaseVector calculates for every patient who has a patient card and has previously suffered
+     * from at least one disease.
+     * Such DiseaseVectors are added to the dataset
+     */
+    @PostConstruct
+    public void init() {
+        this.symptomParser = new SymptomParser(this.jdbcTemplate);
+        this.diseases = diseaseService.getDiseases();
+        this.patients = patientService.getPatients();
+        this.symptoms = symptomService.getSymptoms();
+        log.info("Prediction service initialized");
         for (int i = 0; i < patients.size(); i++) {
-            List<DiagnosisRequest> patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(patients.get(i).getId());//TODO change method for that one which will return diagnosis for patient by his ID
+            List<DiagnosisRequest> patientDiagnosisRequests;
+            try {
+                patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(patients.get(i).getId());//TODO change method for that one which will return diagnosis for patient by his ID
+            } catch (Exception e) {
+                log.error("Error while getting diagnosis requests for patient with ID: " + patients.get(i).getId());
+                continue;
+            }
             Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
             if (chartId == null) {
                 continue;
@@ -93,6 +107,7 @@ public class PredictionServiceImpl implements PredictionService {
         }
     }
 
+
     /**
      * Gets the statistic disease for a set of patients without a health card or a previously diagnosed
      * disease (or both) and based on these patients what is the most popular disease.
@@ -105,7 +120,6 @@ public class PredictionServiceImpl implements PredictionService {
         KNN knn = new KNN(learningSet);
 
         for (int i = 0; i < patients.size(); i++) {
-            List<DiagnosisRequest> patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(patients.get(i).getId());//TODO change method for that one which will return diagnosis for patient by his ID
             Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
             HashMap<String, String> patientSymptom;
             if (chartId == null) {
@@ -113,17 +127,7 @@ public class PredictionServiceImpl implements PredictionService {
             } else {
                 patientSymptom = symptomParser.connectSymptoms(chartId, symptoms);
             }
-            if (patientDiagnosisRequests.isEmpty()) {
-                this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
-            } else {
-                for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
-                    DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDaignosis(), diseases);
-                    List<Disease> patientDiseases = diseaseParser.getDiseases();
-                    if (patientDiseases.isEmpty()) {
-                        this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
-                    }
-                }
-            }
+            this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
         }
 
         List<Result> results = knn.classifyVectors(testingSet, K, euclideanMetric, diseases);
