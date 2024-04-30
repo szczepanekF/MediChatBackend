@@ -13,11 +13,13 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class DiseaseServiceImpl implements DiseaseService {    @Autowired
-private DiseaseRepository diseaseRepository;
+public class DiseaseServiceImpl implements DiseaseService {
+    @Autowired
+    private DiseaseRepository diseaseRepository;
 
     /**
      * Get disease with given id
+     *
      * @param id - id of disease
      * @return disease with given id.
      */
@@ -32,6 +34,7 @@ private DiseaseRepository diseaseRepository;
 
     /**
      * Get all diseases
+     *
      * @return list of all diseases
      */
     @Override
@@ -45,5 +48,5 @@ private DiseaseRepository diseaseRepository;
         log.info("All diseases were successfully retrieved");
         return diseases;
     }
-    
+
 }
