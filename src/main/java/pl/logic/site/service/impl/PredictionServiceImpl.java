@@ -105,6 +105,7 @@ public class PredictionServiceImpl implements PredictionService {
                 }
             }
         }
+        log.info("Dataset initialized");
     }
 
 
@@ -129,9 +130,11 @@ public class PredictionServiceImpl implements PredictionService {
             }
             this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
         }
+        log.info("Testing set prepared");
 
         List<Result> results = knn.classifyVectors(testingSet, K, euclideanMetric, diseases);
         Prediction diseasePrediction = new DiseasePrediction();
+        log.info("Prediction made successfully");
 
         return (String) diseasePrediction.getPrediction(results);
     }
@@ -148,9 +151,12 @@ public class PredictionServiceImpl implements PredictionService {
         int[] proportionsInts = Quality.countProportions(proportions, numberOfCompleteDiseaseVectors);
         this.learningSet = dataset.subList(0, proportionsInts[0]);
         this.testingSet = dataset.subList(proportionsInts[0], numberOfCompleteDiseaseVectors);
+        log.info("Successfully divided dataset on learning set and testing set by given proportion");
 
         KNN knn = new KNN(learningSet);
         List<Result> results = knn.classifyVectors(testingSet, K, euclideanMetric, diseases);
+        log.info("Compute accuracy successfully");
+
         return Quality.calculateAccuracy(results);
     }
 
@@ -177,6 +183,7 @@ public class PredictionServiceImpl implements PredictionService {
         this.learningSet = this.dataset;
         KNN knn = new KNN(learningSet);
         Result result = knn.classifyVector(patientDiseaseVector, K, euclideanMetric, diseases);
+        log.info("Prediction made successfully");
 
         return result.getResult();
     }
