@@ -29,6 +29,6 @@ public class Recognition {
     @Column(name = "id_symptom")
     private int idSymptom;
 
-    @Column(name = "symptom_value")
-    private String symptomValue;
+    @Column(name = "symptom_value_level")
+    private String symptomValueLevel;
 }

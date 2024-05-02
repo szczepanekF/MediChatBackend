@@ -14,6 +14,6 @@ public interface RecognitionService {
 
     Recognition getRecognition(int id);
 
-    List<Recognition> getRecognitions();
+    List<Recognition> getRecognitions(int id);
 
 }

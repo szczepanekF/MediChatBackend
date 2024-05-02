@@ -27,6 +27,8 @@ public class ObjectFacade {
     @Autowired
     private final SymptomService symptomService;
     @Autowired
+    private final SymptomValuesService symptomValuesService;
+    @Autowired
     private final DiseaseSymptomService diseaseSymptomService;
     @Autowired
     private final SpecialisationService specialisationService;
@@ -95,9 +97,10 @@ public class ObjectFacade {
             case SpringUser springUser -> userService.getAllUsers(filter);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests(filter);
             case ChartDAO chart -> chartService.getChartsForPatient(filter);
-            case RecognitionDAO recognition -> recognitionService.getRecognitions();
+            case RecognitionDAO recognition -> recognitionService.getRecognitions(filter);
             case DiseaseSymptomDAO diseaseSymptom -> diseaseSymptomService.getDiseaseSymptoms();
             case SymptomDAO symptom -> symptomService.getSymptoms();
+            case SymptomValuesDAO symptomValues -> symptomValuesService.getSymptomsValues();
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisations();
             case ExaminationDAO examination -> examinationService.getExaminations(filter);
             case DictionaryExaminationDAO dictionaryExamination ->

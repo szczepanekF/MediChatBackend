@@ -11,6 +11,8 @@ import org.springframework.data.annotation.Immutable;
 
 import jakarta.persistence.Column;
 
+import java.util.Date;
+
 @Slf4j
 @Immutable
 @Data
@@ -29,8 +31,11 @@ public class DiagnosisRequest {
     private int idDoctor;
 
     @Column(name = "diagnosis")
-    private String daignosis;
+    private String diagnosis;
 
     @Column(name = "voice_diagnosis")
     private String voiceDiagnosis;
+
+    @Column(name = "creation_date")
+    private Date creationDate;
 }
