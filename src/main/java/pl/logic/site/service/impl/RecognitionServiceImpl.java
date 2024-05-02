@@ -34,7 +34,7 @@ public class RecognitionServiceImpl implements RecognitionService {
         Recognition recognitionEntity = new Recognition(recognition.recognition().getId(),
                 recognition.recognition().getIdChart(),
                 recognition.recognition().getIdSymptom(),
-                recognition.recognition().getSymptomValue());
+                recognition.recognition().getSymptomValueLevel());
 
         if (recognitionEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + recognitionEntity);
@@ -88,7 +88,7 @@ public class RecognitionServiceImpl implements RecognitionService {
         Recognition recognitionEntity = new Recognition(recognition.recognition().getId(),
                 recognition.recognition().getIdChart(),
                 recognition.recognition().getIdSymptom(),
-                recognition.recognition().getSymptomValue());
+                recognition.recognition().getSymptomValueLevel());
 
         Optional<Recognition> recognitionFromDatabase = recognitionRepository.findById(id);
         if (recognitionFromDatabase.isEmpty()) {
@@ -129,8 +129,8 @@ public class RecognitionServiceImpl implements RecognitionService {
      * @return list of all recognitions
      */
     @Override
-    public List<Recognition> getRecognitions() {
-        List<Recognition> recognitions = recognitionRepository.findAll();
+    public List<Recognition> getRecognitions(int id) {
+        List<Recognition> recognitions = recognitionRepository.findAllByIdChart(id);
         if (recognitions.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());

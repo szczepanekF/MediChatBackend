@@ -68,7 +68,7 @@ public class ChartController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllCharts(@Parameter(description = "chart id") @PathVariable int id) {
+    public ResponseEntity<Response> getAllCharts(@Parameter(description = "patient id") @PathVariable int id) {
         List<Chart> charts = new ArrayList<>();
         try {
             charts = (List<Chart>) objectFacade.getObjects(new ChartDAO(new Chart()), id);

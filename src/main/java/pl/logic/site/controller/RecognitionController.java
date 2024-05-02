@@ -61,16 +61,16 @@ public class RecognitionController {
      *
      * @return HTTP response
      */
-    @GetMapping(value = "/recognitions", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all recognitions from the database", description = "Get all recognitions from the database")
+    @GetMapping(value = "/recognitions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all recognitions from the database", description = "Get all recognitions for chart id from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllRecognitions() {
+    public ResponseEntity<Response> getAllRecognitions(@Parameter(description = "chart id") @PathVariable int id) {
         List<Recognition> recognitions = new ArrayList<>();
         try {
-            recognitions = (List<Recognition>) objectFacade.getObjects(new RecognitionDAO(new Recognition()), -1);
+            recognitions = (List<Recognition>) objectFacade.getObjects(new RecognitionDAO(new Recognition()), id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", recognitions));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), recognitions));
@@ -79,29 +79,6 @@ public class RecognitionController {
         }
     }
 
-    /**
-     * An endpoint for getting recognition by ID
-     *
-     * @param id - id of the recognition
-     * @return HTTP response
-     */
-    @GetMapping(value = "/recognitions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get recognition from the database", description = "Get recognition from the database")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "404", description = "Not found")
-    })
-    public ResponseEntity<Response> getRecognition(@Parameter(description = "id of recognition to be searched") @PathVariable int id) {
-        Recognition recognition = new Recognition();
-        try {
-            recognition = (Recognition) objectFacade.getObject(new RecognitionDAO(new Recognition()), id);
-            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", recognition));
-        } catch (EntityNotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), recognition));
-        }  catch (Exception e) {
-            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
-        }
-    }
 
     /**
      * An endpoint for updating specific recognition entity

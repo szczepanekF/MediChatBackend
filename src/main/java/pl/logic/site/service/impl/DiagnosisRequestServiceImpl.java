@@ -39,8 +39,10 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getId(),
                 diagnosisRequest.diagnosisRequest().getIdChart(),
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
-                diagnosisRequest.diagnosisRequest().getDaignosis(),
-                diagnosisRequest.diagnosisRequest().getVoiceDiagnosis());
+                diagnosisRequest.diagnosisRequest().getDiagnosis(),
+                diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
+                diagnosisRequest.diagnosisRequest().getCreationDate()
+                );
         if (diagnosisRequestEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + diagnosisRequestEntity);
             log.error(err.getMessage());
@@ -94,8 +96,10 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getId(),
                 diagnosisRequest.diagnosisRequest().getIdChart(),
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
-                diagnosisRequest.diagnosisRequest().getDaignosis(),
-                diagnosisRequest.diagnosisRequest().getVoiceDiagnosis());
+                diagnosisRequest.diagnosisRequest().getDiagnosis(),
+                diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
+                diagnosisRequest.diagnosisRequest().getCreationDate()
+                );
         Optional<DiagnosisRequest> diagnosisRequestFromDatabase = diagnosisRequestRepository.findById(id);
         if (diagnosisRequestFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + diagnosisRequestEntity);
