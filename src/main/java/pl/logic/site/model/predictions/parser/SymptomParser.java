@@ -68,11 +68,12 @@ public class SymptomParser {
      * @return a map of the patient's symptoms (symptoms name, symptoms severity level)
      */
     public HashMap<String, String> searchForSymptoms(int id_chart) {
-        String sql = "SELECT s.name, r.symptom_value FROM recognition r INNER JOIN symptom s ON r.id_symptom = s.id WHERE r.id_chart = ?";
+//        String sql = "SELECT s.name, r.symptom_value FROM recognition r INNER JOIN symptom s ON r.id_symptom = s.id WHERE r.id_chart = ?";
+        String sql = "SELECT s.name, r.symptom_value_level FROM recognition r INNER JOIN symptom s ON r.id_symptom = s.id WHERE r.id_chart = ?";
 
         RowMapper<HashMap<String, String>> mapper = (rs, rowNum) -> {
             HashMap<String, String> results = new HashMap<>();
-            results.put(rs.getString("name"), rs.getString("symptom_value"));
+            results.put(rs.getString("name"), rs.getString("symptom_value_level"));
             return results;
         };
 

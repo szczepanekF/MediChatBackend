@@ -93,17 +93,17 @@ public class PredictionServiceImpl implements PredictionService {
             if (chartId == null) {
                 continue;
             }
-            HashMap<String, String> patientSymptoms = symptomParser.connectSymptoms(chartId, symptoms);
-            for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
-                DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDaignosis(), diseases);
-                List<Disease> patientDiseases = diseaseParser.getDiseases();
-                if (!patientDiseases.isEmpty()) {
-                    for (Disease disease : patientDiseases) {
-                        this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
-                        this.numberOfCompleteDiseaseVectors++;
-                    }
-                }
-            }
+//            HashMap<String, String> patientSymptoms = symptomParser.connectSymptoms(chartId, symptoms);
+//            for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
+//                DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDiagnosis(), diseases);
+//                List<Disease> patientDiseases = diseaseParser.getDiseases();
+//                if (!patientDiseases.isEmpty()) {
+//                    for (Disease disease : patientDiseases) {
+//                        this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
+//                        this.numberOfCompleteDiseaseVectors++;
+//                    }
+//                }
+//            }
         }
         log.info("Dataset initialized");
     }
