@@ -36,4 +36,10 @@ class PredictionServiceImplTest {
         Disease predictedDisease = this.predictionService.getPatientDisease(1);
         System.out.println(predictedDisease.getName());
     }
+
+    @Test
+    void getFutureDiagnosisRequest() {
+        double futureDiagnosisRequest = this.predictionService.getFutureDiagnosisRequest(31);
+        System.out.println(futureDiagnosisRequest);
+    }
 }

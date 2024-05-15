@@ -30,4 +30,13 @@ public interface PredictionService {
      * @return the predicted disease of the patient
      */
     Disease getPatientDisease(int patientId);
+
+    /**
+     * Returns the number of future diagnosis requests in the next daysInterval.
+     * Max number of how many interval will be considered is in MAX_DEEP_OF_PREDICTIONS.
+     *
+     * @param daysInterval - how many days have the single interval
+     * @return the number of future diagnosis requests in next daysInterval
+     */
+    double getFutureDiagnosisRequest(int daysInterval);
 }

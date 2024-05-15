@@ -20,11 +20,16 @@ import pl.logic.site.model.predictions.statictic.DiseasePrediction;
 import pl.logic.site.model.predictions.statictic.Prediction;
 import pl.logic.site.service.*;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
+import static pl.logic.site.model.predictions.statictic.StatisticPrediction.getDiagnosisRequestsByDaysInterval;
 import static pl.logic.site.utils.predictions.PredictionConsts.K;
+import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDICTIONS;
 
 /**
  * This service implementation class is responsible for making predictions about diseases based on symptoms.
@@ -34,6 +39,7 @@ import static pl.logic.site.utils.predictions.PredictionConsts.K;
 @Slf4j
 @Service
 public class PredictionServiceImpl implements PredictionService {
+    //TODO Dostosuj klasę pod to że dany pacjent może mieć wiele kart
     @Autowired
     private DiagnosisRequestService diagnosisRequestService;
     @Autowired
@@ -42,6 +48,8 @@ public class PredictionServiceImpl implements PredictionService {
     private DiseaseService diseaseService;
     @Autowired
     private SymptomService symptomService;
+    @Autowired
+    private ChartService chartService;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -84,7 +92,7 @@ public class PredictionServiceImpl implements PredictionService {
         for (int i = 0; i < patients.size(); i++) {
             List<DiagnosisRequest> patientDiagnosisRequests;
             try {
-                patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(patients.get(i).getId());//TODO change method for that one which will return diagnosis for patient by his ID
+                patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(symptomParser.searchChartIdByPatientId(patients.get(i).getId()));
             } catch (Exception e) {
                 log.error("Error while getting diagnosis requests for patient with ID: " + patients.get(i).getId());
                 continue;
@@ -93,17 +101,17 @@ public class PredictionServiceImpl implements PredictionService {
             if (chartId == null) {
                 continue;
             }
-//            HashMap<String, String> patientSymptoms = symptomParser.connectSymptoms(chartId, symptoms);
-//            for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
-//                DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDiagnosis(), diseases);
-//                List<Disease> patientDiseases = diseaseParser.getDiseases();
-//                if (!patientDiseases.isEmpty()) {
-//                    for (Disease disease : patientDiseases) {
-//                        this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
-//                        this.numberOfCompleteDiseaseVectors++;
-//                    }
-//                }
-//            }
+            HashMap<String, String> patientSymptoms = symptomParser.connectSymptoms(chartId, symptoms);
+            for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
+                DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDiagnosis(), diseases);
+                List<Disease> patientDiseases = diseaseParser.getDiseases();
+                if (!patientDiseases.isEmpty()) {
+                    for (Disease disease : patientDiseases) {
+                        this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
+                        this.numberOfCompleteDiseaseVectors++;
+                    }
+                }
+            }
         }
         log.info("Dataset initialized");
     }
@@ -186,5 +194,26 @@ public class PredictionServiceImpl implements PredictionService {
         log.info("Prediction made successfully");
 
         return result.getResult();
+    }
+
+    /**
+     * Gets the number of future diagnosis requests in the next daysInterval.
+     * The maximum number of intervals considered is MAX_DEEP_OF_PREDICTIONS.
+     * From the current time it subtracts the interval as many times as it is
+     * in MAX_DEEP_OF_PREDICTIONS.
+     *
+     * @param daysInterval how many days have the single interval
+     * @return the number of future diagnosis requests in the next daysInterval
+     */
+    @Override
+    public double getFutureDiagnosisRequest(int daysInterval) {
+        List<Integer> results = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            results.add(getDiagnosisRequestsByDaysInterval(
+                    this.jdbcTemplate, daysInterval * i, currentDate));
+            currentDate = currentDate.minusDays(daysInterval);
+        }
+        return results.stream().mapToInt(Integer::intValue).average().orElse(0.0);
     }
 }

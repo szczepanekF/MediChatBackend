@@ -87,6 +87,6 @@ class EuclideanMetricTest {
         System.out.println();
 
         System.out.println(result);
-        assertEquals(1.3074, result, 0.001);
+        assertEquals(1.0145, result, 0.001);
     }
 }

@@ -15,6 +15,9 @@ public class SymptomsDict {
      */
     public static final HashMap<String, Double> symptomsDict = new HashMap<String, Double>() {{
         put("null", 0.0);
+        put("hard", 0.8);
+        put("weak", 0.25);
+        put("average", 0.5);
         put("mild", 0.2);
         put("strong", 0.8);
         put("moderate", 0.5);
