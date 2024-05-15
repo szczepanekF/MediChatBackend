@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -29,6 +30,7 @@ public class SpringUser implements UserDetails {
 
     private Integer patientId;
     private Integer doctorId;
+    private Date creationDate;
 
     @Enumerated(EnumType.STRING)
     private Role role;

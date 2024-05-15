@@ -56,9 +56,9 @@ class FeatureVectorTest {
     @Test
     void getSymptomFeatures() {
         System.out.println(Arrays.toString(this.featureVector.getSymptomFeatures()));
-        assertEquals(0.8, this.featureVector.getSymptomFeatures()[0], 0.001);
-        assertEquals(0.0, this.featureVector.getSymptomFeatures()[1], 0.001);
-        assertEquals(0.2, this.featureVector.getSymptomFeatures()[2], 0.001);
-        assertEquals(0.5, this.featureVector.getSymptomFeatures()[3], 0.001);
+        assertEquals(0.2, this.featureVector.getSymptomFeatures()[0], 0.001);
+        assertEquals(0.8, this.featureVector.getSymptomFeatures()[1], 0.001);
+        assertEquals(0.5, this.featureVector.getSymptomFeatures()[2], 0.001);
+        assertEquals(0.0, this.featureVector.getSymptomFeatures()[3], 0.001);
     }
 }

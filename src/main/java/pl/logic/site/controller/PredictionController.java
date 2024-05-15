@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.logic.site.model.exception.InvalidProportion;
 import pl.logic.site.model.mysql.Disease;
+import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.model.response.Response;
 import pl.logic.site.service.PredictionService;
 import pl.logic.site.utils.Consts;
@@ -112,20 +113,68 @@ public class PredictionController {
     }
 
     /**
-     * Gets the predicted disease of a specific patient.
+     * Gets the predicted disease of a specific patient by his chart id.
+     * If we want to make a prediction and the patient does not have a card, enter 0 as a parameter.
      *
-     * @param id the id of the patient
+     * @param chartId the id of the patient's chart
      * @return the predicted disease of the patient
      */
-    @GetMapping(value = "/patientDisease/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/patientDisease/{chartId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the predicted disease of a specific patient.",
             description = "Get the predicted disease of a specific patient.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully computed"),
     })
-    public ResponseEntity<Response> getPatientDisease(@Parameter(description = "id of patient to predicted disease") @PathVariable int id) {
+    public ResponseEntity<Response> getPatientDisease(@Parameter(description = "patient's chart id") @PathVariable int chartId) {
         try {
-            Disease result = this.predictionService.getPatientDisease(id);
+            Disease result = this.predictionService.getPatientDisease(chartId);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", result));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    /**
+     * The return value tells us how many diagnosis requests there are likely
+     * to be in the future in a given time interval.
+     * The amount of past intervals that is taken into account is in constant MAX_DEEP_OF_PREDICTIONS.
+     *
+     * @param daysInterval - number of days as interval
+     * @return the predicted number of future diagnosis requests
+     */
+    @GetMapping(value = "/futureDiagnosis/{daysInterval}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the number of predicted future diagnosis requests in the given interval.",
+            description = "Get the number of predicted future diagnosis requests in the given interval (in days).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully computed"),
+    })
+    public ResponseEntity<Response> getFutureDiagnosisRequest(@Parameter(description = "number of days interval") @PathVariable int daysInterval) {
+        try {
+            double result = this.predictionService.getFutureDiagnosisRequest(daysInterval);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", result));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    /**
+     * The return value tells us which doctor is most likely to be sought after in the future.
+     * The amount of past intervals that is taken into account is in constant MAX_DEEP_OF_PREDICTIONS.
+     * In case of a tie in the calculation, the first doctor found is returned
+     *
+     * @param daysInterval - number of days as interval
+     * @return the most wanted doctor
+     */
+    @GetMapping(value = "/mostWantedDoctor/{daysInterval}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the most wanted Doctor, predicted within given interval",
+            description = "Get the most wanted Doctor, predicted within given interval (in days). " +
+                    "He checks all the doctors and returns the most sought-after one")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully computed"),
+    })
+    public ResponseEntity<Response> getMostWantedDoctor(@Parameter(description = "number of days interval") @PathVariable int daysInterval) {
+        try {
+            Doctor result = this.predictionService.getMostWantedDoctor(daysInterval);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", result));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
