@@ -10,7 +10,6 @@ import org.springframework.data.annotation.Immutable;
 
 
 import jakarta.persistence.Column;
-import java.util.Date;
 
 @Slf4j
 @Immutable
@@ -18,7 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Recognition {
+public class ChartSymptom {
     @Id
     @Column(name = "id")
     private int id;
