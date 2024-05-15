@@ -12,9 +12,11 @@ import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.repository.ChartRepository;
+import pl.logic.site.repository.DiagnosisRequestRepository;
 import pl.logic.site.service.ChartService;
 import pl.logic.site.utils.Consts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,8 @@ import java.util.Optional;
 public class ChartServiceImpl implements ChartService {
     @Autowired
     private ChartRepository chartRepository;
+    @Autowired
+    private DiagnosisRequestRepository diagnosisRequestRepository;
 
 
     /**
@@ -155,4 +159,26 @@ public class ChartServiceImpl implements ChartService {
         log.info("All charts were successfully retrieved");
         return charts;
     }
+
+    @Override
+    public List<Chart> getChartsByState(int state) {
+        List<Chart> charts = new ArrayList<>(chartRepository.findAll());
+
+        List<Chart> chartsToRemove = new ArrayList<>();
+
+        for (Chart chart : charts) {
+            List<DiagnosisRequest> diagnosisRequestList = diagnosisRequestRepository.findAllByIdChart(chart.getId());
+            if (state == 1) {
+                if (!diagnosisRequestList.isEmpty())
+                    chartsToRemove.add(chart);
+            } else {
+                if (diagnosisRequestList.isEmpty())
+                    chartsToRemove.add(chart);
+            }
+        }
+
+        log.info("All charts were successfully retrieved");
+        return chartsToRemove;
+    }
+
 }

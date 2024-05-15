@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.logic.site.model.dao.*;
 import pl.logic.site.model.exception.UnknownObjectType;
+import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.service.*;
 import pl.logic.site.utils.Consts;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -86,6 +89,9 @@ public class ObjectFacade {
 
     public Object getDoctorByDiagnosisRequest(int id){
         return doctorService.getDoctorByDiagnosisRequest(id);
+    }
+    public List<Chart> getChartsByState(int state){
+        return chartService.getChartsByState(state);
     }
 
 
