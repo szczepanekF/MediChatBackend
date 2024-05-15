@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.predictions.features.DiseaseVector;
 import pl.logic.site.model.predictions.knn.KNN;
@@ -33,7 +34,6 @@ import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDI
 @Slf4j
 @Service
 public class PredictionServiceImpl implements PredictionService {
-    //TODO Dostosuj klasę pod to że dany pacjent może mieć wiele kart
     @Autowired
     private DiagnosisRequestService diagnosisRequestService;
     @Autowired
@@ -267,7 +267,7 @@ public class PredictionServiceImpl implements PredictionService {
             Integer mostWantedDoctorId = maxEntry.get().getKey();
             return doctorService.getDoctor(mostWantedDoctorId);
         } else {
-            return null;
+            throw new EntityNotFound("No doctor found");
         }
     }
 }
