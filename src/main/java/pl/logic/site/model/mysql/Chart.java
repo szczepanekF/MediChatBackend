@@ -24,4 +24,7 @@ public class Chart {
 
     @Column(name = "id_patient")
     private int idPatient;
+
+    @Column(name = "date")
+    private int date;
 }
