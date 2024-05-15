@@ -80,10 +80,10 @@ public class SymptomParser {
         return new HashMap<>(result);
     }
 
-    public Integer searchChartIdByPatientId(int patientId) {
+    public List<Integer> searchChartIdByPatientId(int patientId) {
         String sql = "SELECT id FROM chart WHERE id_patient = ?";
         List<Integer> results = jdbcTemplate.query(sql, new Object[]{patientId}, (rs, rowNum) -> rs.getInt("id"));
-        return results.isEmpty() ? null : results.getFirst();
+        return results.isEmpty() ? null : results;
     }
 
     public  HashMap<String, String> madeZeroSymptoms(List<Symptom> symptoms) {

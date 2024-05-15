@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import pl.logic.site.model.mysql.DiagnosisRequest;
-import pl.logic.site.model.mysql.Disease;
-import pl.logic.site.model.mysql.Patient;
-import pl.logic.site.model.mysql.Symptom;
+import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.predictions.features.DiseaseVector;
 import pl.logic.site.model.predictions.knn.KNN;
 import pl.logic.site.model.predictions.metric.EuclideanMetric;
@@ -18,16 +15,13 @@ import pl.logic.site.model.predictions.quality.Quality;
 import pl.logic.site.model.predictions.quality.Result;
 import pl.logic.site.model.predictions.statictic.DiseasePrediction;
 import pl.logic.site.model.predictions.statictic.Prediction;
+import pl.logic.site.model.predictions.statictic.StatisticPrediction;
 import pl.logic.site.service.*;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import static pl.logic.site.model.predictions.statictic.StatisticPrediction.getDiagnosisRequestsByDaysInterval;
+import static pl.logic.site.model.predictions.statictic.StatisticPrediction.*;
 import static pl.logic.site.utils.predictions.PredictionConsts.K;
 import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDICTIONS;
 
@@ -44,6 +38,8 @@ public class PredictionServiceImpl implements PredictionService {
     private DiagnosisRequestService diagnosisRequestService;
     @Autowired
     private PatientService patientService;
+    @Autowired
+    private DoctorService doctorService;
     @Autowired
     private DiseaseService diseaseService;
     @Autowired
@@ -90,25 +86,33 @@ public class PredictionServiceImpl implements PredictionService {
         this.symptoms = symptomService.getSymptoms();
         log.info("Prediction service initialized");
         for (int i = 0; i < patients.size(); i++) {
-            List<DiagnosisRequest> patientDiagnosisRequests;
+            List<DiagnosisRequest> patientDiagnosisRequests = new ArrayList<>();
             try {
-                patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(symptomParser.searchChartIdByPatientId(patients.get(i).getId()));
+                List<Integer> chartIds = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
+                for (Integer chartId : chartIds) {
+                    List<DiagnosisRequest> newDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(chartId);
+                    patientDiagnosisRequests.addAll(newDiagnosisRequests);
+                }
+//                patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(symptomParser.searchChartIdByPatientId(patients.get(i).getId()));
             } catch (Exception e) {
                 log.error("Error while getting diagnosis requests for patient with ID: " + patients.get(i).getId());
                 continue;
             }
-            Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
-            if (chartId == null) {
+            List<Integer> chartIds = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
+//            Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
+            if (chartIds.isEmpty()) {
                 continue;
             }
-            HashMap<String, String> patientSymptoms = symptomParser.connectSymptoms(chartId, symptoms);
-            for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
-                DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDiagnosis(), diseases);
-                List<Disease> patientDiseases = diseaseParser.getDiseases();
-                if (!patientDiseases.isEmpty()) {
-                    for (Disease disease : patientDiseases) {
-                        this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
-                        this.numberOfCompleteDiseaseVectors++;
+            for (Integer chartId : chartIds) {
+                HashMap<String, String> patientSymptoms = symptomParser.connectSymptoms(chartId, symptoms);
+                for (int j = 0; j < patientDiagnosisRequests.size(); j++) {
+                    DiseaseParser diseaseParser = new DiseaseParser(patientDiagnosisRequests.get(j).getDiagnosis(), diseases);
+                    List<Disease> patientDiseases = diseaseParser.getDiseases();
+                    if (!patientDiseases.isEmpty()) {
+                        for (Disease disease : patientDiseases) {
+                            this.dataset.add(new DiseaseVector(disease, patients.get(i), patientSymptoms));
+                            this.numberOfCompleteDiseaseVectors++;
+                        }
                     }
                 }
             }
@@ -211,7 +215,7 @@ public class PredictionServiceImpl implements PredictionService {
         List<Integer> results = new ArrayList<>();
         LocalDate currentDate = LocalDate.now();
         for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
-            results.add(getDiagnosisRequestsByDaysInterval(
+            results.add(getDiagnosisRequestsSizeByDaysInterval(
                     this.jdbcTemplate, daysInterval, currentDate) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
             currentDate = currentDate.minusDays(daysInterval);
         }
@@ -222,5 +226,38 @@ public class PredictionServiceImpl implements PredictionService {
         int meter = results.stream().mapToInt(Integer::intValue).sum();
 
         return (double) meter / denominator;
+    }
+
+    /**
+     * Gets the most wanted doctor in the next daysInterval.
+     * The maximum number of intervals considered is MAX_DEEP_OF_PREDICTIONS.
+     * In the case of several doctors with the same result, the one found first is taken
+     *
+     * @param daysInterval - how many days have the single interval
+     * @return - the most wanted doctor in the next daysInterval
+     *
+     */
+    @Override
+    public Doctor getMostWantedDoctor(int daysInterval) {
+        List<HashMap<Integer, Integer>> doctorsCounter = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+        List<Doctor> doctors = this.doctorService.getDoctors(2); // because filter == 2 returns all doctors
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            doctorsCounter.add(getDoctorsInInterval(this.jdbcTemplate, doctors, daysInterval, currentDate));
+            currentDate = currentDate.minusDays(daysInterval);
+        }
+
+        HashMap<Integer, Double> doctorsWeightAverage = getIntegerDoubleHashMap(doctorsCounter);
+
+        Optional<Map.Entry<Integer, Double>> maxEntry = doctorsWeightAverage.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue());
+
+        if (maxEntry.isPresent()) {
+            Integer mostWantedDoctorId = maxEntry.get().getKey();
+            return doctorService.getDoctor(mostWantedDoctorId);
+        } else {
+            return null;
+        }
     }
 }
