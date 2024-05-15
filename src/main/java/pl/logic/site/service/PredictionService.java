@@ -27,10 +27,10 @@ public interface PredictionService {
     /**
      * Returns the predicted disease of a specific patient (based on their ID).
      *
-     * @param patientId the ID of the patient
+     * @param chartId the patient's chart id (if patient does not have a chart, then give 0 as charId).
      * @return the predicted disease of the patient
      */
-    Disease getPatientDisease(int patientId);
+    Disease getPatientDisease(int chartId);
 
     /**
      * Returns the number of future diagnosis requests in the next daysInterval.

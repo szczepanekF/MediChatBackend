@@ -133,14 +133,22 @@ public class PredictionServiceImpl implements PredictionService {
         KNN knn = new KNN(learningSet);
 
         for (int i = 0; i < patients.size(); i++) {
-            Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
-            HashMap<String, String> patientSymptom;
-            if (chartId == null) {
+            List<Integer> chartIds = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
+            if (chartIds == null || chartIds.isEmpty()) {
+                HashMap<String, String> patientSymptom;
                 patientSymptom = symptomParser.madeZeroSymptoms(symptoms);
-            } else {
-                patientSymptom = symptomParser.connectSymptoms(chartId, symptoms);
+                this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
+                continue;
             }
-            this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
+            for (Integer chartId : chartIds) {
+                HashMap<String, String> patientSymptom;
+                if (chartId == null) {
+                    patientSymptom = symptomParser.madeZeroSymptoms(symptoms);
+                } else {
+                    patientSymptom = symptomParser.connectSymptoms(chartId, symptoms);
+                }
+                this.testingSet.add(new DiseaseVector(null, patients.get(i), patientSymptom));
+            }
         }
         log.info("Testing set prepared");
 
@@ -177,18 +185,20 @@ public class PredictionServiceImpl implements PredictionService {
      * The method counts the most likely disease for the patient.
      * They are most interesting for patients who have not previously been diagnosed with the disease.
      *
-     * @param patientId the patient id
+     * @param chartId the patient's chart id (if patient does not have a chart, then give 0 as charId).
      * @return the patient disease
      */
     @Override
-    public Disease getPatientDisease(int patientId) {
+    public Disease getPatientDisease(int chartId) {
+        int patientId = chartService.getChart(chartId).getIdPatient();
         Patient patient = patientService.getPatient(patientId);
-        Integer patientChartId = symptomParser.searchChartIdByPatientId(patientId);
+
         HashMap<String, String> patientSymptom;
-        if (patientChartId == null) {
+
+        if (chartId == 0) {
             patientSymptom = symptomParser.madeZeroSymptoms(symptoms);
         } else {
-            patientSymptom = symptomParser.connectSymptoms(patientChartId, symptoms);
+            patientSymptom = symptomParser.connectSymptoms(chartId, symptoms);
         }
 
         DiseaseVector patientDiseaseVector = new DiseaseVector(null, patient, patientSymptom);
