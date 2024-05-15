@@ -201,6 +201,7 @@ public class PredictionServiceImpl implements PredictionService {
      * The maximum number of intervals considered is MAX_DEEP_OF_PREDICTIONS.
      * From the current time it subtracts the interval as many times as it is
      * in MAX_DEEP_OF_PREDICTIONS.
+     * A weighted average is calculated to increase the impact of the final intervals
      *
      * @param daysInterval how many days have the single interval
      * @return the number of future diagnosis requests in the next daysInterval
@@ -211,9 +212,15 @@ public class PredictionServiceImpl implements PredictionService {
         LocalDate currentDate = LocalDate.now();
         for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
             results.add(getDiagnosisRequestsByDaysInterval(
-                    this.jdbcTemplate, daysInterval * i, currentDate));
+                    this.jdbcTemplate, daysInterval, currentDate) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
             currentDate = currentDate.minusDays(daysInterval);
         }
-        return results.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        int denominator = 0;
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            denominator += i;
+        }
+        int meter = results.stream().mapToInt(Integer::intValue).sum();
+
+        return (double) meter / denominator;
     }
 }
