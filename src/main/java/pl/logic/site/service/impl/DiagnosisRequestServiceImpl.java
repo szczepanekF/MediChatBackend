@@ -41,7 +41,8 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
                 diagnosisRequest.diagnosisRequest().getDiagnosis(),
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
-                diagnosisRequest.diagnosisRequest().getCreationDate()
+                diagnosisRequest.diagnosisRequest().getCreationDate(),
+                diagnosisRequest.diagnosisRequest().getModificationDate()
                 );
         if (diagnosisRequestEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + diagnosisRequestEntity);
@@ -98,7 +99,8 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
                 diagnosisRequest.diagnosisRequest().getDiagnosis(),
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
-                diagnosisRequest.diagnosisRequest().getCreationDate()
+                diagnosisRequest.diagnosisRequest().getCreationDate(),
+                diagnosisRequest.diagnosisRequest().getModificationDate()
                 );
         Optional<DiagnosisRequest> diagnosisRequestFromDatabase = diagnosisRequestRepository.findById(id);
         if (diagnosisRequestFromDatabase.isEmpty()) {

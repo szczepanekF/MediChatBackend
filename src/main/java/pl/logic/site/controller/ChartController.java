@@ -80,6 +80,34 @@ public class ChartController {
         }
     }
 
+
+    /**
+     * An endpoint for getting all chart entities
+     *
+     * @return HTTP response
+     */
+    @GetMapping(value = "/chartsByState/{state}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all charts with specific state for patient from the database",
+            description = "Get all charts with specific state for patient from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getChartsByDiagnosis(@Parameter(description = "1 for charts with diagnosis request, 0 otherwise") @PathVariable int state) {
+        List<Chart> charts = new ArrayList<>();
+        try {
+            charts = (List<Chart>) objectFacade.getChartsByState(state);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), charts));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+
+
+
     /**
      * An endpoint for getting chart by ID
      *

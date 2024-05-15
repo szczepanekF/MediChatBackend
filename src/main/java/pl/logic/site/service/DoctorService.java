@@ -15,4 +15,5 @@ public interface DoctorService {
     Doctor updateDoctor(DoctorDAO doctor, int id);
     Doctor getDoctor(int id);
     List<Doctor> getDoctors(int doctorFilter);
+    Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId);
 }

@@ -98,6 +98,25 @@ public class DoctorController {
         }
     }
 
+    @GetMapping(value = "/getDoctorByDiagnosis/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get doctor from the database", description = "Get doctor from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getDoctorByDiagnosisId(@Parameter(description = "id of diagnosis request") @PathVariable int id){
+        Doctor doctor = new Doctor();
+        try{
+            doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(id);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
+        } catch (EntityNotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
+        }  catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+
     @ResponseBody
     @PutMapping(value = "/doctors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update specific doctor from the database", description = "Update specific doctor from the database")

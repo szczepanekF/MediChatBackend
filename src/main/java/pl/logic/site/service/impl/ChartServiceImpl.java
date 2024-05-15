@@ -12,17 +12,22 @@ import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.repository.ChartRepository;
+import pl.logic.site.repository.DiagnosisRequestRepository;
 import pl.logic.site.service.ChartService;
 import pl.logic.site.utils.Consts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ChartServiceImpl implements ChartService {
     @Autowired
     private ChartRepository chartRepository;
+    @Autowired
+    private DiagnosisRequestRepository diagnosisRequestRepository;
 
 
     /**
@@ -34,7 +39,7 @@ public class ChartServiceImpl implements ChartService {
     @Override
     @Transactional
     public Chart createChart(ChartDAO chart) {
-        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient());
+        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient(), chart.chart().getDate());
 
         if (chartEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + chartEntity);
@@ -87,7 +92,7 @@ public class ChartServiceImpl implements ChartService {
 
     @Override
     public Chart updateChart(ChartDAO chart, int id) {
-        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient());
+        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient(), chart.chart().getDate());
         Optional<Chart> diagnosisRequestFromDatabase = chartRepository.findById(id);
         if (diagnosisRequestFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + chartEntity);
@@ -155,4 +160,38 @@ public class ChartServiceImpl implements ChartService {
         log.info("All charts were successfully retrieved");
         return charts;
     }
+
+    @Override
+    public List<Chart> getChartsByState(int state) {
+        List<Chart> charts = new ArrayList<>(chartRepository.findAll());
+
+        List<Chart> chartsToRemove = new ArrayList<>();
+
+        for (Chart chart : charts) {
+            List<DiagnosisRequest> diagnosisRequestList = diagnosisRequestRepository.findAllByIdChart(chart.getId());
+                if (state == 1) {
+                    if (!diagnosisRequestList.isEmpty() ) {
+                        for (DiagnosisRequest diagnosisRequest: diagnosisRequestList) {
+                            if (!diagnosisRequest.getDiagnosis().isEmpty())
+                                chartsToRemove.add(chart);
+                        }
+                    }
+                } else {
+                    if (diagnosisRequestList.isEmpty())
+                        chartsToRemove.add(chart);
+                    else {
+                        for (DiagnosisRequest diagnosisRequest: diagnosisRequestList) {
+                            if (diagnosisRequest.getDiagnosis().isEmpty())
+                                chartsToRemove.add(chart);
+                        }
+
+                    }
+                }
+
+        }
+
+        log.info("All charts were successfully retrieved");
+        return chartsToRemove;
+    }
+
 }

@@ -19,4 +19,6 @@ public interface ChartService {
     List<Chart> getChartsForPatient(int id);
 
     List<Chart> getCharts();
+
+    List<Chart> getChartsByState(int state);
 }
