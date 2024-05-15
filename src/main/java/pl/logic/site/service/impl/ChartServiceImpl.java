@@ -19,6 +19,7 @@ import pl.logic.site.utils.Consts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -168,13 +169,25 @@ public class ChartServiceImpl implements ChartService {
 
         for (Chart chart : charts) {
             List<DiagnosisRequest> diagnosisRequestList = diagnosisRequestRepository.findAllByIdChart(chart.getId());
-            if (state == 1) {
-                if (!diagnosisRequestList.isEmpty())
-                    chartsToRemove.add(chart);
-            } else {
-                if (diagnosisRequestList.isEmpty())
-                    chartsToRemove.add(chart);
-            }
+                if (state == 1) {
+                    if (!diagnosisRequestList.isEmpty() ) {
+                        for (DiagnosisRequest diagnosisRequest: diagnosisRequestList) {
+                            if (!diagnosisRequest.getDiagnosis().isEmpty())
+                                chartsToRemove.add(chart);
+                        }
+                    }
+                } else {
+                    if (diagnosisRequestList.isEmpty())
+                        chartsToRemove.add(chart);
+                    else {
+                        for (DiagnosisRequest diagnosisRequest: diagnosisRequestList) {
+                            if (diagnosisRequest.getDiagnosis().isEmpty())
+                                chartsToRemove.add(chart);
+                        }
+
+                    }
+                }
+
         }
 
         log.info("All charts were successfully retrieved");
