@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.logic.site.model.exception.DeleteError;
+import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.repository.DiagnosisRequestRepository;
 import pl.logic.site.service.DoctorService;
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.exception.SaveError;
@@ -23,6 +25,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Autowired
     private DoctorRepository doctorRepository;
+    @Autowired
+    private DiagnosisRequestRepository diagnosisRequestRepository;
 
 
     @Override
@@ -101,6 +105,12 @@ public class DoctorServiceImpl implements DoctorService {
         if(doctors.isEmpty())
             throw new EntityNotFound(Consts.C404);
         return doctors;
+    }
+
+    @Override
+    public Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId){
+        return doctorRepository.findAllById(diagnosisRequestRepository.findById(diagnosisRequestId).get().getIdDoctor());
+
     }
 
 }

@@ -11,6 +11,8 @@ import org.springframework.data.annotation.Immutable;
 
 import jakarta.persistence.Column;
 
+import java.util.Date;
+
 @Slf4j
 @Immutable
 @Data
@@ -26,5 +28,5 @@ public class Chart {
     private int idPatient;
 
     @Column(name = "date")
-    private int date;
+    private Date date;
 }

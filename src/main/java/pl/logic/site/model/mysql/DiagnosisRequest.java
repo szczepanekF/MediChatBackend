@@ -37,5 +37,8 @@ public class DiagnosisRequest {
     private String voiceDiagnosis;
 
     @Column(name = "creation_date")
-    private String creationDate;
+    private Date creationDate;
+
+    @Column(name = "modification_date")
+    private Date modificationDate;
 }

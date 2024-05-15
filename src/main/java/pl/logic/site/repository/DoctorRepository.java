@@ -12,4 +12,6 @@ import java.util.List;
 public interface DoctorRepository extends JpaRepository<Doctor, Integer> {
     @Query(value = "SELECT d FROM Doctor d WHERE d.isBot = :doctorFilter")
     List<Doctor> retrieveDoctorsByType(@Param("doctorFilter")  int doctorFilter);
+
+    Doctor findAllById(int id);
 }

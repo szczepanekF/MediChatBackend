@@ -34,7 +34,7 @@ public class ChartServiceImpl implements ChartService {
     @Override
     @Transactional
     public Chart createChart(ChartDAO chart) {
-        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient());
+        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient(), chart.chart().getDate());
 
         if (chartEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + chartEntity);
@@ -87,7 +87,7 @@ public class ChartServiceImpl implements ChartService {
 
     @Override
     public Chart updateChart(ChartDAO chart, int id) {
-        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient());
+        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient(), chart.chart().getDate());
         Optional<Chart> diagnosisRequestFromDatabase = chartRepository.findById(id);
         if (diagnosisRequestFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + chartEntity);

@@ -23,7 +23,7 @@ public class ObjectFacade {
     @Autowired
     private final ChartService chartService;
     @Autowired
-    private final RecognitionService recognitionService;
+    private final ChartSymptomService chartSymptomService;
     @Autowired
     private final SymptomService symptomService;
     @Autowired
@@ -52,7 +52,7 @@ public class ObjectFacade {
             case DiagnosisRequestDAO diagnosisRequest ->
                     diagnosisRequestService.createDiagnosisRequest(diagnosisRequest);
             case ChartDAO chart -> chartService.createChart(chart);
-            case RecognitionDAO recognition -> recognitionService.createRecognition(recognition);
+            case ChartSymptomDAO recognition -> chartSymptomService.createChartSymptom(recognition);
             case SpecialisationDAO specialisation -> specialisationService.createSpecialisation(specialisation);
             case ExaminationDAO examination -> examinationService.createExamination(examination);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
@@ -72,7 +72,7 @@ public class ObjectFacade {
             case PatientDAO patient -> patientService.getPatient(id);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequest(id);
             case ChartDAO chart -> chartService.getChart(id);
-            case RecognitionDAO recognition -> recognitionService.getRecognition(id);
+            case ChartSymptomDAO recognition -> chartSymptomService.getChartSymptom(id);
             case DiseaseSymptomDAO diseaseSymptomDAO -> diseaseSymptomService.getDiseaseSymptom(id);
             case SymptomDAO symptomDAO -> symptomService.getSymptom(id);
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisation(id);
@@ -83,6 +83,11 @@ public class ObjectFacade {
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }
+
+    public Object getDoctorByDiagnosisRequest(int id){
+        return doctorService.getDoctorByDiagnosisRequest(id);
+    }
+
 
     /**
      * Get all objects of class represented by given data access object
@@ -97,7 +102,7 @@ public class ObjectFacade {
             case SpringUser springUser -> userService.getAllUsers(filter);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests(filter);
             case ChartDAO chart -> chartService.getChartsForPatient(filter);
-            case RecognitionDAO recognition -> recognitionService.getRecognitions(filter);
+            case ChartSymptomDAO chartSymptom -> chartSymptomService.getChartSymptoms(filter);
             case DiseaseSymptomDAO diseaseSymptom -> diseaseSymptomService.getDiseaseSymptoms();
             case SymptomDAO symptom -> symptomService.getSymptoms();
             case SymptomValuesDAO symptomValues -> symptomValuesService.getSymptomsValues();
@@ -124,7 +129,7 @@ public class ObjectFacade {
             case DiagnosisRequestDAO diagnosisRequest ->
                     diagnosisRequestService.updateDiagnosisRequest(diagnosisRequest, id);
             case ChartDAO chart -> chartService.updateChart(chart, id);
-            case RecognitionDAO recognition -> recognitionService.updateRecognition(recognition, id);
+            case ChartSymptomDAO chartSymptom -> chartSymptomService.updateChartSymptom(chartSymptom, id);
             case SpecialisationDAO specialisation -> specialisationService.updateSpecialisation(specialisation, id);
             case ExaminationDAO examination -> examinationService.updateExamination(examination, id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
@@ -143,7 +148,7 @@ public class ObjectFacade {
             case PatientDAO patient -> patientService.deletePatient(id);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.deleteDiagnosisRequest(id);
             case ChartDAO chart -> chartService.deleteChart(id);
-            case RecognitionDAO recognition -> recognitionService.deleteRecognition(id);
+            case ChartSymptomDAO chartSymptom -> chartSymptomService.deleteChartSymptom(id);
             case SpecialisationDAO specialisation -> specialisationService.deleteSpecialisation(id);
             case ExaminationDAO examination -> examinationService.deleteExamination(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
