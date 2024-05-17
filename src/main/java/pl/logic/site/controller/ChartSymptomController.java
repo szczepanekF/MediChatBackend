@@ -62,7 +62,7 @@ public class ChartSymptomController {
      * @return HTTP response
      */
     @GetMapping(value = "/chartSymptoms/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all chartSymptoms from the database", description = "Get all chartSymptoms for chart id from the database")
+    @Operation(summary = "Get all chartSymptoms from the database for chart", description = "Get all chartSymptoms for chart id from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")

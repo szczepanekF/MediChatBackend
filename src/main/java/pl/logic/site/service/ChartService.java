@@ -20,5 +20,5 @@ public interface ChartService {
 
     List<Chart> getCharts();
 
-    List<Chart> getChartsByState(int state);
+    List<Chart> getChartsByStateAndPatientId(int state, int patientId);
 }

@@ -62,19 +62,19 @@ public class DiagnosisRequestController {
      *
      * @return HTTP response
      */
-    @GetMapping(value = "/diagnosisRequests/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/diagnosisRequestByChart/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all diagnosis requests for chart id from the database", description = "Get all diagnosis requests for chart id from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllDiagnosisRequests(@Parameter(description = "chart id") @PathVariable int id) {
-        List<DiagnosisRequest> diagnosisRequests = new ArrayList<>();
+    public ResponseEntity<Response> getDiagnosisRequestByChart(@Parameter(description = "chart id") @PathVariable int id) {
+        DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
-            diagnosisRequests = (List<DiagnosisRequest>) objectFacade.getObjects(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
-            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequests));
+            diagnosisRequest = (DiagnosisRequest) objectFacade.getDiagnosisRequestByChartId(id);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
         } catch (EntityNotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequests));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         }  catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }

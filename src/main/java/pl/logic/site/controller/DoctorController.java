@@ -110,7 +110,7 @@ public class DoctorController {
             doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(id);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         }  catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }

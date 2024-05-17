@@ -87,11 +87,15 @@ public class ObjectFacade {
         };
     }
 
+    public Object getDiagnosisRequestByChartId(int id){
+        return diagnosisRequestService.getDiagnosisRequestByChart(id);
+    }
+
     public Object getDoctorByDiagnosisRequest(int id){
         return doctorService.getDoctorByDiagnosisRequest(id);
     }
-    public List<Chart> getChartsByState(int state){
-        return chartService.getChartsByState(state);
+    public List<Chart> getChartsByStateAndPatientId(int state, int patientId){
+        return chartService.getChartsByStateAndPatientId(state, patientId);
     }
 
 

@@ -162,8 +162,8 @@ public class ChartServiceImpl implements ChartService {
     }
 
     @Override
-    public List<Chart> getChartsByState(int state) {
-        List<Chart> charts = new ArrayList<>(chartRepository.findAll());
+    public List<Chart> getChartsByStateAndPatientId(int state, int patientId) {
+        List<Chart> charts = new ArrayList<>(getChartsForPatient(patientId));
 
         List<Chart> chartsToRemove = new ArrayList<>();
 

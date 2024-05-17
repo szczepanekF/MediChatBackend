@@ -136,6 +136,21 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
     }
 
     /**
+     * Get diagnosis request entity by chart id
+     *
+     * @param id - id of the chart
+     * @return diagnosis request assigned to given
+     */
+    @Override
+    public DiagnosisRequest getDiagnosisRequestByChart(int id) {
+        return diagnosisRequestRepository.findByIdChart(id).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " Chart ID: " + id + " Type: " + this.getClass());
+            log.error(err.getMessage());
+            return err;
+        });
+    }
+
+    /**
      * Get all diagnosis requests
      *
      * @return list of all diagnosis requests
