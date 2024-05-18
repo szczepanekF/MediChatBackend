@@ -20,7 +20,6 @@ public class SecurityConfig {
     private final Filter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private static final String[] WHITE_LIST_URL = {"**"};
-    //test change to test commit
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {

@@ -1,5 +1,6 @@
 package pl.logic.site.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import pl.logic.site.model.exception.EmailOrUsernameJustExist;
 import pl.logic.site.model.exception.InvalidPassword;
 import pl.logic.site.model.exception.UserNotFound;
@@ -9,6 +10,7 @@ import pl.logic.site.model.request.RegisterDoctorRequest;
 import pl.logic.site.model.request.RegisterPatientRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
 import pl.logic.site.repository.DoctorRepository;
+import pl.logic.site.repository.PasswordRecoveryTokenRepository;
 import pl.logic.site.repository.PatientRepository;
 import pl.logic.site.repository.SpringUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class AuthenticationServiceImpl {
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtServiceImpl jwtService;
+    private final PasswordRecoveryTokenRepository passwordRecoveryTokenRepository;
 
     public AuthenticationResponse registerPatient(RegisterPatientRequest request) {
         if (isEmailOrUsernameJustExist(request.getEmail(), request.getUsername())) {
@@ -154,5 +158,25 @@ public class AuthenticationServiceImpl {
         return dateFormat.format(date);
     }
 
+    public Optional<SpringUser> findUserByEmailAddress(String userEmailAddress) {
+        return springUserRepository.findByEmail(userEmailAddress);
+    }
+
+    public Optional<SpringUser> findUserById(Integer id) {
+        return springUserRepository.findById(id);
+    }
+
+    public Optional<PasswordResetToken> findToken(String token) {
+        return passwordRecoveryTokenRepository.findByRecoveryToken(token);
+    }
+
+    public void createPasswordRecoveryToken(SpringUser springUser, String token) {
+        PasswordResetToken resetToken = new PasswordResetToken(token, springUser);
+        passwordRecoveryTokenRepository.save(resetToken);
+    }
+
+//    public Optional<PasswordResetToken> findUserRecoveryTokenByUserId(SpringUser springUser) {
+//        return passwordRecoveryTokenRepository.findBySpringUser(springUser.getId());
+//    }
 }
 
