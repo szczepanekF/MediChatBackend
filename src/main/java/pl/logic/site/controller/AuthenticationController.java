@@ -118,7 +118,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C201, 201, "", "Pair emailAddress and recoveryToken match"));
         }
         else {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C201, 400, "", "Pair emailAddress and recoveryToken dont match"));
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C201, 400, "", "Pair emailAddress and recoveryToken do not match"));
         }
     }
 }
