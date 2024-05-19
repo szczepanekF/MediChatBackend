@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -18,20 +19,24 @@ import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.mysql.Message;
+import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.model.response.Response;
+import pl.logic.site.service.ChartService;
+import pl.logic.site.service.UserService;
+import pl.logic.site.service.impl.MessageServiceImpl;
+import pl.logic.site.service.impl.UserServiceImpl;
 import pl.logic.site.utils.Consts;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("diagnosisRequestController")
 @Scope("request")
 public class DiagnosisRequestController {
-    @Autowired
-    ObjectFacade objectFacade;
+    private final ObjectFacade objectFacade;
 
     /**
      * An endpoint for creating diagnosis request entity
@@ -49,10 +54,11 @@ public class DiagnosisRequestController {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.createObject(diagnosisRequestDao);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", diagnosisRequest));
         } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), diagnosisRequest));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -75,7 +81,7 @@ public class DiagnosisRequestController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -96,10 +102,11 @@ public class DiagnosisRequestController {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.getObject(new DiagnosisRequestDAO(new DiagnosisRequest()), id);
+
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -107,7 +114,7 @@ public class DiagnosisRequestController {
     /**
      * An endpoint for updating specific diagnosis request entity
      *
-     * @param id - id of the diagnosis request
+     * @param id                  - id of the diagnosis request
      * @param diagnosisRequestDAO - diagnosis request data access object
      * @return HTTP response
      */
@@ -129,7 +136,7 @@ public class DiagnosisRequestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
         } catch (SaveError e) {
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), diagnosisRequest));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -158,7 +165,7 @@ public class DiagnosisRequestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diagnosisRequest));
         } catch (DeleteError e) {
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), diagnosisRequest));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
