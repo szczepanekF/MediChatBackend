@@ -16,6 +16,7 @@ public interface PatientService {
     Patient updatePatient(PatientDAO patient, int id);
 
     Patient getPatient(int id);
-
     List<Patient> getPatients();
+    List<Patient> getPatients(int patientsFilter);
+
 }
