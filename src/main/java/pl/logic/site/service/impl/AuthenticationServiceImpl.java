@@ -81,6 +81,7 @@ public class AuthenticationServiceImpl {
                 .doctorId(doctorId)
                 .patientId(patientId)
                 .role(role)
+                .creationDate(new Date())
                 .build();
         return springUserRepository.save(springUser);
     }
@@ -105,16 +106,16 @@ public class AuthenticationServiceImpl {
             throw new InvalidPassword("Invalid password");
         }
 
-       return createAuthenticationResponse(springUser);
+        return createAuthenticationResponse(springUser);
     }
 
     private Map<String, Object> getExtraClaims(SpringUser springUser) {
-        if(springUser.getDoctorId() != null) {
+        if (springUser.getDoctorId() != null) {
             Doctor doctor = doctorRepository
                     .findById(springUser.getDoctorId())
                     .orElseThrow();
             return getExtraDoctorClaims(doctor);
-        } else if(springUser.getPatientId() != null) {
+        } else if (springUser.getPatientId() != null) {
             Patient patient = patientRepository.findById(springUser.getPatientId()).orElseThrow();
             return getExtraPatientClaims(patient);
         } else {
