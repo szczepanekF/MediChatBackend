@@ -55,13 +55,13 @@ public class ExaminationServiceImpl implements ExaminationService {
     /**
      * Delete examination with given id
      *
-     * @param id - id of the examination
+     * @param examinationId - id of the examination
      */
     @Override
-    public void deleteExamination(int id) {
-        Optional<Examination> examination = examinationRepository.findById(id);
+    public void deleteExamination(int examinationId) {
+        Optional<Examination> examination = examinationRepository.findById(examinationId);
         if (examination.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + examinationId + " Type: " + this.getClass());
             log.error(err.getMessage());
             throw err;
         }
@@ -72,23 +72,23 @@ public class ExaminationServiceImpl implements ExaminationService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Examination with id: {} was successfully deleted", id);
+        log.info("Examination with id: {} was successfully deleted", examinationId);
     }
 
     /**
      * Update examination based on examination data access object and examinations id
      *
-     * @param examination - data access object
-     * @param id          - id of the examination
+     * @param examination   - data access object
+     * @param examinationId - id of the examination
      * @return updated examination
      */
     @Override
-    public Examination updateExamination(ExaminationDAO examination, int id) {
+    public Examination updateExamination(ExaminationDAO examination, int examinationId) {
         Examination examinationEntity = new Examination(examination.examination().getId(),
                 examination.examination().getIdPatient(),
                 examination.examination().getExamination(),
                 examination.examination().getExaminationValue());
-        Optional<Examination> examinationFromDatabase = examinationRepository.findById(id);
+        Optional<Examination> examinationFromDatabase = examinationRepository.findById(examinationId);
         if (examinationFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + examinationEntity);
             log.error(err.getMessage());
@@ -102,33 +102,34 @@ public class ExaminationServiceImpl implements ExaminationService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Examination with id: {} was successfully updated: {}", id, returned);
+        log.info("Examination with id: {} was successfully updated: {}", examinationId, returned);
         return returned;
     }
 
     /**
      * Get examination entity by id
      *
-     * @param id - id of the examination
+     * @param examinationId - id of the examination
      * @return examination entity with given id
      */
     @Override
-    public Examination getExamination(int id) {
-        return examinationRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public Examination getExamination(int examinationId) {
+        return examinationRepository.findById(examinationId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + examinationId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
     }
 
     /**
-     * Get all examinations
+     * Get all examinations for given patient id
      *
+     * @param patientId - id of the patient
      * @return list of all examinations
      */
     @Override
-    public List<Examination> getExaminations(int examinationFilter) {
-        List<Examination> examinations = examinationRepository.findAllByIdPatient(examinationFilter);
+    public List<Examination> getExaminations(int patientId) {
+        List<Examination> examinations = examinationRepository.findAllByIdPatient(patientId);
         if (examinations.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());

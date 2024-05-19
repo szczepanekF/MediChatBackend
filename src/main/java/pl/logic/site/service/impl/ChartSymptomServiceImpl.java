@@ -56,13 +56,13 @@ public class ChartSymptomServiceImpl implements ChartSymptomService {
     /**
      * Delete chartSymptom with given id
      *
-     * @param id - id of the chartSymptom
+     * @param chartSymptomId - id of the chartSymptom
      */
     @Override
-    public void deleteChartSymptom(int id) {
-        Optional<ChartSymptom> recognition = chartSymptomRepository.findById(id);
+    public void deleteChartSymptom(int chartSymptomId) {
+        Optional<ChartSymptom> recognition = chartSymptomRepository.findById(chartSymptomId);
         if (recognition.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + chartSymptomId + " Type: " + this.getClass());
             log.error(err.getMessage());
             throw err;
         }
@@ -73,24 +73,24 @@ public class ChartSymptomServiceImpl implements ChartSymptomService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("ChartSymptom with id: {} was successfully deleted", id);
+        log.info("ChartSymptom with ID: {} was successfully deleted", chartSymptomId);
     }
 
     /**
      * Update chartSymptom based on chartSymptom data access object and recognitions id
      *
      * @param chartSymptomDAO - data access object
-     * @param id          - id of the chartSymptom
+     * @param chartSymptomId  - id of the chartSymptom
      * @return updated chartSymptom
      */
     @Override
-    public ChartSymptom updateChartSymptom(ChartSymptomDAO chartSymptomDAO, int id) {
+    public ChartSymptom updateChartSymptom(ChartSymptomDAO chartSymptomDAO, int chartSymptomId) {
         ChartSymptom chartSymptomEntity = new ChartSymptom(chartSymptomDAO.chartSymptom().getId(),
                 chartSymptomDAO.chartSymptom().getIdChart(),
                 chartSymptomDAO.chartSymptom().getIdSymptom(),
                 chartSymptomDAO.chartSymptom().getSymptomValueLevel());
 
-        Optional<ChartSymptom> recognitionFromDatabase = chartSymptomRepository.findById(id);
+        Optional<ChartSymptom> recognitionFromDatabase = chartSymptomRepository.findById(chartSymptomId);
         if (recognitionFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + chartSymptomEntity);
             log.error(err.getMessage());
@@ -104,39 +104,40 @@ public class ChartSymptomServiceImpl implements ChartSymptomService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("ChartSymptom with id: {} was successfully updated: {}", id, returned);
+        log.info("ChartSymptom with ID: {} was successfully updated: {}", chartSymptomId, returned);
         return returned;
     }
 
     /**
      * Get chartSymptom entity by id
      *
-     * @param id - id of the chartSymptom
-     * @return chartSymptom entity with given id
+     * @param chartSymptomId - id of the chartSymptom
+     * @return chartSymptom entity with given chartSymptomId
      */
     @Override
-    public ChartSymptom getChartSymptom(int id) {
-        return chartSymptomRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public ChartSymptom getChartSymptom(int chartSymptomId) {
+        return chartSymptomRepository.findById(chartSymptomId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + chartSymptomId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
     }
 
     /**
-     * Get all chartSymptoms
+     * Get all chartSymptoms for specified chartId
      *
-     * @return list of all chartSymptoms
+     * @param chartId - id of the chart
+     * @return list of all chartSymptoms for specified chartId
      */
     @Override
-    public List<ChartSymptom> getChartSymptoms(int id) {
-        List<ChartSymptom> chartSymptoms = chartSymptomRepository.findAllByIdChart(id);
+    public List<ChartSymptom> getChartSymptoms(int chartId) {
+        List<ChartSymptom> chartSymptoms = chartSymptomRepository.findAllByIdChart(chartId);
         if (chartSymptoms.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());
             throw err;
         }
-        log.info("All chartSymptoms were successfully retrieved");
+        log.info("All chartSymptoms, for chard ID: {}, were successfully retrieved", chartId);
         return chartSymptoms;
     }
 }

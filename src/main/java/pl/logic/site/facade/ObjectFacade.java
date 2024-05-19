@@ -87,12 +87,12 @@ public class ObjectFacade {
         };
     }
 
-    public Object getDiagnosisRequestByChartId(int id){
-        return diagnosisRequestService.getDiagnosisRequestByChart(id);
+    public Object getDiagnosisRequestByChartId(int chartId){
+        return diagnosisRequestService.getDiagnosisRequestByChart(chartId);
     }
 
-    public Object getDoctorByDiagnosisRequest(int id){
-        return doctorService.getDoctorByDiagnosisRequest(id);
+    public Object getDoctorByDiagnosisRequest(int diagnosisRequestId){
+        return doctorService.getDoctorByDiagnosisRequest(diagnosisRequestId);
     }
     public List<Chart> getChartsByStateAndPatientId(int state, int patientId){
         return chartService.getChartsByStateAndPatientId(state, patientId);
@@ -110,7 +110,7 @@ public class ObjectFacade {
             case DoctorDAO doctor -> doctorService.getDoctors(filter);
             case PatientDAO patient -> patientService.getPatients();
             case SpringUser springUser -> userService.getAllUsers(filter);
-            case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests(filter);
+            case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getAllDiagnosisRequestsByChart(filter);
             case ChartDAO chart -> chartService.getChartsForPatient(filter);
             case ChartSymptomDAO chartSymptom -> chartSymptomService.getChartSymptoms(filter);
             case DiseaseSymptomDAO diseaseSymptom -> diseaseSymptomService.getDiseaseSymptoms();

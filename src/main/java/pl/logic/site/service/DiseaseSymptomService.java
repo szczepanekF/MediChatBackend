@@ -7,8 +7,9 @@ import java.util.List;
 public interface DiseaseSymptomService {
     DiseaseSymptom getDiseaseSymptom(int id);
 
-    List<DiseaseSymptom> getDiseaseSymptomsForSymptom(int id);
-    List<DiseaseSymptom> getDiseaseSymptomsForDisease(int id);
+    List<DiseaseSymptom> getDiseaseSymptomsForSymptom(int symptomId);
+
+    List<DiseaseSymptom> getDiseaseSymptomsForDisease(int diseaseId);
 
     List<DiseaseSymptom> getDiseaseSymptoms();
 }

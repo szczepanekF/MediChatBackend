@@ -32,16 +32,16 @@ public class PatientServiceImpl implements PatientService {
     @Transactional
     public Patient createPatient(PatientDAO patient) {
         Patient patientEntity = new Patient(patient.patient().getId(),
-                                            patient.patient().getName(),
-                                            patient.patient().getSurname(),
-                                            patient.patient().getBirth_date(),
-                                            patient.patient().getHeight(),
-                                            patient.patient().getWeight(),
-                                            patient.patient().getGender(),
-                                            patient.patient().getStatus(),
-                                            patient.patient().getHeightUnit(),
-                                            patient.patient().getWeightUnit()
-                );
+                patient.patient().getName(),
+                patient.patient().getSurname(),
+                patient.patient().getBirth_date(),
+                patient.patient().getHeight(),
+                patient.patient().getWeight(),
+                patient.patient().getGender(),
+                patient.patient().getStatus(),
+                patient.patient().getHeightUnit(),
+                patient.patient().getWeightUnit()
+        );
         if (patientEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + patientEntity);
             log.error(err.getMessage());
@@ -62,13 +62,13 @@ public class PatientServiceImpl implements PatientService {
     /**
      * Delete patient with given id
      *
-     * @param id - id of the patient
+     * @param patientId - id of the patient
      */
     @Override
-    public void deletePatient(int id) {
-        Optional<Patient> patient = patientRepository.findById(id);
+    public void deletePatient(int patientId) {
+        Optional<Patient> patient = patientRepository.findById(patientId);
         if (patient.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + patientId + " Type: " + this.getClass());
             log.error(err.getMessage());
             throw err;
         }
@@ -79,30 +79,30 @@ public class PatientServiceImpl implements PatientService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Patient with id: {} was successfully deleted", id);
+        log.info("Patient with id: {} was successfully deleted", patientId);
     }
 
     /**
      * Update patient based on patient data access object and patients id
      *
-     * @param patient - data access object
-     * @param id      - id of the patient
+     * @param patient   - data access object
+     * @param patientId - id of the patient
      * @return updated patient
      */
     @Override
-    public Patient updatePatient(PatientDAO patient, int id) {
+    public Patient updatePatient(PatientDAO patient, int patientId) {
         Patient patientEntity = new Patient(patient.patient().getId(),
-                                            patient.patient().getName(),
-                                            patient.patient().getSurname(),
-                                            patient.patient().getBirth_date(),
-                                            patient.patient().getHeight(),
-                                            patient.patient().getWeight(),
-                                            patient.patient().getGender(),
-                                            patient.patient().getStatus(),
-                                            patient.patient().getHeightUnit(),
-                                            patient.patient().getWeightUnit()
-                );
-        Optional<Patient> patientFromDatabase = patientRepository.findById(id);
+                patient.patient().getName(),
+                patient.patient().getSurname(),
+                patient.patient().getBirth_date(),
+                patient.patient().getHeight(),
+                patient.patient().getWeight(),
+                patient.patient().getGender(),
+                patient.patient().getStatus(),
+                patient.patient().getHeightUnit(),
+                patient.patient().getWeightUnit()
+        );
+        Optional<Patient> patientFromDatabase = patientRepository.findById(patientId);
         if (patientFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + patientEntity);
             log.error(err.getMessage());
@@ -116,20 +116,20 @@ public class PatientServiceImpl implements PatientService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Patient with id: {} was successfully updated: {}", id, returned);
+        log.info("Patient with id: {} was successfully updated: {}", patientId, returned);
         return returned;
     }
 
     /**
      * Get patient entity by id
      *
-     * @param id - id of the patient
+     * @param patientId - id of the patient
      * @return patient entity with given id
      */
     @Override
-    public Patient getPatient(int id) {
-        return patientRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public Patient getPatient(int patientId) {
+        return patientRepository.findById(patientId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + patientId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });

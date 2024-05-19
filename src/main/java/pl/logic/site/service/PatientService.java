@@ -13,9 +13,9 @@ public interface PatientService {
 
     void deletePatient(int id);
 
-    Patient updatePatient(PatientDAO patient, int id);
+    Patient updatePatient(PatientDAO patient, int patientId);
 
-    Patient getPatient(int id);
+    Patient getPatient(int patientId);
 
     List<Patient> getPatients();
 }
