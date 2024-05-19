@@ -66,6 +66,11 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    public Optional<SpringUser> findSpringUserById(int id) {
+            return  springUserRepository.findById(id);
+
+    }
+
     @Override
     public Optional<String> getChatRoomId(final int senderId, final int recipientId, final boolean createNewRoomIfNotExists) {
         return Optional.empty();

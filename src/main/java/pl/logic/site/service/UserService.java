@@ -21,6 +21,7 @@ public interface UserService {
     public List<Optional<SpringUser>> getAllUsers(int userFilter);
 
     public Object findSpringUser(int id, boolean patient);
+    public Object findSpringUserById(int id);
 
 
 }

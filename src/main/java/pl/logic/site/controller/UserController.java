@@ -119,6 +119,28 @@ public class UserController {
         }
     }
 
+    @GetMapping(value = "/findSpringUserById/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Find spring user", description = "Find spring user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> findSpringUserById(
+            @PathVariable int id
+    ) {
+        Optional<SpringUser> springUser;
+        try {
+            springUser = userService.findSpringUserById(id);
+            if (springUser.isPresent()) {
+                return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", springUser.get()));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>("SpringUser not found", 404, "", null));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
     @GetMapping(value = "/findSpringUser/{id}/{isPatient}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Find spring user", description = "Find spring user")
     @ApiResponses(value = {
