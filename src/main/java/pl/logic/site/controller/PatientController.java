@@ -111,6 +111,7 @@ public class PatientController {
      * @param patientId id of the patient
      * @return HTTP response
      */
+
     @GetMapping(value = "/patients/{patientId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get patient from the database", description = "Get patient from the database")
     @ApiResponses(value = {

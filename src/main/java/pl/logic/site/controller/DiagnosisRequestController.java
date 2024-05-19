@@ -115,7 +115,6 @@ public class DiagnosisRequestController {
      * An endpoint for updating specific diagnosis request entity
      *
      * @param diagnosisRequestId  - id of the diagnosis request
-
      * @param diagnosisRequestDAO - diagnosis request data access object
      * @return HTTP response
      */
