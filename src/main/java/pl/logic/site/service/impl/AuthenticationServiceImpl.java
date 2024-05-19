@@ -196,5 +196,10 @@ public class AuthenticationServiceImpl {
         SpringUser springUser = findUserById(resetToken.get().getSpringUser().getId());
         return emailAddress.equals(springUser.getEmail());
     }
+
+    public String getUsername(String emailAddress) {
+        SpringUser springUser = findUserByEmailAddress(emailAddress);
+        return springUser.getUsername();
+    }
 }
 

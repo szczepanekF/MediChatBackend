@@ -92,7 +92,8 @@ public class AuthenticationController {
         try {
             String recoveryToken = UUID.randomUUID().toString();
             authenticationService.createPasswordRecoveryToken(userEmailAddress, recoveryToken);
-            emailService.sendEmail(recoveryToken, userEmailAddress);
+            String username = authenticationService.getUsername(userEmailAddress);
+            emailService.sendEmail(recoveryToken, userEmailAddress, username);
             return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Mail sent to " + userEmailAddress));
         } catch (Exception e) {
 
