@@ -45,7 +45,7 @@ import java.util.List;
 @CrossOrigin(origins = "https://localhost:3000")
 public class ChatController {
 
-    private final SimpMessagingTemplate messagingTemplate;
+
     private final MessageServiceImpl MessageService;
     private final ChatRoomService chatRoomService;
 
@@ -74,19 +74,7 @@ public class ChatController {
     @MessageMapping("/chat.send") // Message mapping for sending messages
     public void sendMessage(@Payload Message message) {
         System.out.println(message);
-        Message savedMsg = MessageService.save(message);
-
-        // Send the message to the appropriate recipient
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(message.getRecipientId()), // Recipient ID
-                "/queue/messages", // Destination (queue specific to the recipient)
-                new Notification(
-                        savedMsg.getId(),
-                        savedMsg.getSenderId(),
-                        savedMsg.getRecipientId(),
-                        savedMsg.getContent()
-                )
-        );
+        MessageService.save(message);
     }
 
     /**

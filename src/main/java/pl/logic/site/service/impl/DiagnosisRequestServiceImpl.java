@@ -1,5 +1,6 @@
 package pl.logic.site.service.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,21 +11,28 @@ import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.mysql.Message;
+import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.repository.DiagnosisRequestRepository;
+import pl.logic.site.service.ChartService;
 import pl.logic.site.service.DiagnosisRequestService;
 import pl.logic.site.utils.Consts;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 
 @Slf4j
+@AllArgsConstructor
 @Service
 public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
 
-    @Autowired
-    private DiagnosisRequestRepository diagnosisRequestRepository;
 
+    private final DiagnosisRequestRepository diagnosisRequestRepository;
+    private final MessageServiceImpl messageService;
+    private final ChartService chartService;
+    private final UserServiceImpl userService;
 
     /**
      * Create diagnosis request based on given data access object
@@ -52,13 +60,33 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
         DiagnosisRequest returned;
         try {
             returned = diagnosisRequestRepository.saveAndFlush(diagnosisRequestEntity);
+            sendRequestDiagnosisMessage(returned);
         } catch (Exception e) {
+            log.error(e.getMessage());
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " " + diagnosisRequestEntity);
             log.error(err.getMessage());
             throw err;
         }
         log.info("Diagnosis request was successfully created: {}", returned);
         return returned;
+    }
+
+
+    /**
+     * Create and send a diagnostic request message
+     *
+     * @param diagnosisRequest - diagnosis request on which sent message will be based on
+     */
+    private void sendRequestDiagnosisMessage(DiagnosisRequest diagnosisRequest) {
+        int patientId = chartService.getChart(diagnosisRequest.getIdChart()).getIdPatient();
+        log.error(String.valueOf(patientId));
+        int doctorId = diagnosisRequest.getIdDoctor();
+        log.error(String.valueOf(doctorId));
+
+        patientId = userService.findSpringUser(patientId,true).orElseThrow().getId();
+        doctorId = userService.findSpringUser(doctorId,false).orElseThrow().getId();
+        Message message = new Message(0, "", patientId, doctorId, "requesting diagnosis", new Date(), 0, diagnosisRequest.getIdChart());
+        messageService.save(message);
     }
 
     /**

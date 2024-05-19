@@ -1,8 +1,10 @@
 package pl.logic.site.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import pl.logic.site.model.mysql.Message;
+import pl.logic.site.model.mysql.Notification;
 import pl.logic.site.model.mysql.Room;
 import pl.logic.site.repository.MessageRepository;
 import pl.logic.site.repository.RoomRepository;
@@ -17,6 +19,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository repository;
     private final ChatRoomServiceImpl chatRoomService;
     private final RoomRepository roomRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public Message save(Message Message) {
         var chatId = chatRoomService
@@ -24,6 +27,17 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(); // You can create your own dedicated exception
         Message.setChatId(chatId);
         repository.save(Message);
+        // Send the message to the appropriate recipient
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(Message.getRecipientId()), // Recipient ID
+                "/queue/messages", // Destination (queue specific to the recipient)
+                new Notification(
+                        Message.getId(),
+                        Message.getSenderId(),
+                        Message.getRecipientId(),
+                        Message.getContent()
+                )
+        );
         return Message;
     }
 
