@@ -36,11 +36,6 @@ public class ChartSymptomServiceImpl implements ChartSymptomService {
                 chartSymptomDAO.chartSymptom().getIdSymptom(),
                 chartSymptomDAO.chartSymptom().getSymptomValueLevel());
 
-        if (chartSymptomEntity.getId() != 0) {
-            SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + chartSymptomEntity);
-            log.error(err.getMessage());
-            throw err;
-        }
         ChartSymptom returned;
         try {
             returned = chartSymptomRepository.saveAndFlush(chartSymptomEntity);
