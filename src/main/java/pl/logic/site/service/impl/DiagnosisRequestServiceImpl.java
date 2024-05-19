@@ -85,7 +85,7 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
 
         patientId = userService.findSpringUser(patientId,true).orElseThrow().getId();
         doctorId = userService.findSpringUser(doctorId,false).orElseThrow().getId();
-        Message message = new Message(0, "", patientId, doctorId, "Request diagnosis", new Date(), 0, diagnosisRequest.getIdChart());
+        Message message = new Message(0, "", patientId, doctorId, "requesting diagnosis", new Date(), 0, diagnosisRequest.getIdChart());
         messageService.save(message);
     }
 
