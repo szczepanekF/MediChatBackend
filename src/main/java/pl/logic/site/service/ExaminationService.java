@@ -8,11 +8,11 @@ import java.util.List;
 public interface ExaminationService {
     Examination createExamination(ExaminationDAO examination);
 
-    void deleteExamination(int id);
+    void deleteExamination(int examinationID);
 
-    Examination updateExamination(ExaminationDAO examination, int id);
+    Examination updateExamination(ExaminationDAO examination, int examinationID);
 
-    Examination getExamination(int id);
+    Examination getExamination(int examinationID);
 
-    List<Examination> getExaminations(int examinationFilter);
+    List<Examination> getExaminations(int patientId);
 }

@@ -10,6 +10,7 @@ import pl.logic.site.service.SymptomService;
 import pl.logic.site.utils.Consts;
 
 import java.util.List;
+
 @Slf4j
 @Service
 public class SymptomServiceImpl implements SymptomService {
@@ -18,13 +19,14 @@ public class SymptomServiceImpl implements SymptomService {
 
     /**
      * Get symptom with given id
-     * @param id - id of symptom
+     *
+     * @param symptomId - id of symptom
      * @return symptom with given id.
      */
     @Override
-    public Symptom getSymptom(int id) {
-        return symptomRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public Symptom getSymptom(int symptomId) {
+        return symptomRepository.findById(symptomId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + symptomId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
@@ -32,6 +34,7 @@ public class SymptomServiceImpl implements SymptomService {
 
     /**
      * Get all symptoms
+     *
      * @return list of all symptoms
      */
     @Override

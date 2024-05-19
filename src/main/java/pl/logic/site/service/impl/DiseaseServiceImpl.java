@@ -20,13 +20,13 @@ public class DiseaseServiceImpl implements DiseaseService {
     /**
      * Get disease with given id
      *
-     * @param id - id of disease
+     * @param diseaseId - id of disease
      * @return disease with given id.
      */
     @Override
-    public Disease getDisease(int id) {
-        return diseaseRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public Disease getDisease(int diseaseId) {
+        return diseaseRepository.findById(diseaseId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + diseaseId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });

@@ -5,6 +5,6 @@ import pl.logic.site.model.mysql.Disease;
 import java.util.List;
 
 public interface DiseaseService {
-    Disease getDisease(int id);
+    Disease getDisease(int diesaseId);
     List<Disease> getDiseases();
 }
