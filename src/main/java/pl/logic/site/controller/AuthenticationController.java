@@ -6,6 +6,7 @@ import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.exception.UserNotFound;
 import pl.logic.site.model.mysql.PasswordResetToken;
 import pl.logic.site.model.mysql.SpringUser;
+import pl.logic.site.model.request.NewPasswordRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
 import pl.logic.site.model.request.LoginRequest;
 import pl.logic.site.model.request.RegisterPatientRequest;
@@ -119,6 +120,16 @@ public class AuthenticationController {
         }
         else {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C201, 400, "", "Pair emailAddress and recoveryToken do not match"));
+        }
+    }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<Response>changeUserPassword(@RequestBody NewPasswordRequest request) {
+        try {
+            authenticationService.resetUserPassword(request);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C201, 201, "", "Password reset successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C454_UPDATING_ERROR, 454, "", "Reset password operation failed"));
         }
     }
 }

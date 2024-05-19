@@ -6,6 +6,7 @@ import pl.logic.site.model.exception.InvalidPassword;
 import pl.logic.site.model.exception.UserNotFound;
 import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.request.LoginRequest;
+import pl.logic.site.model.request.NewPasswordRequest;
 import pl.logic.site.model.request.RegisterDoctorRequest;
 import pl.logic.site.model.request.RegisterPatientRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
@@ -175,8 +176,13 @@ public class AuthenticationServiceImpl {
         passwordRecoveryTokenRepository.save(resetToken);
     }
 
-//    public Optional<PasswordResetToken> findUserRecoveryTokenByUserId(SpringUser springUser) {
-//        return passwordRecoveryTokenRepository.findBySpringUser(springUser.getId());
-//    }
+    public void resetUserPassword(NewPasswordRequest request) {
+        Optional<SpringUser> springUser = springUserRepository.findByEmail(request.getUserEmailAddress());
+        if (springUser.isEmpty()) {
+            throw new UserNotFound("There is not user with email address: " + request.getUserEmailAddress());
+        }
+        springUser.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
+        springUserRepository.save(springUser.get());
+    }
 }
 
