@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import pl.logic.site.model.dao.*;
 import pl.logic.site.model.exception.UnknownObjectType;
 import pl.logic.site.model.mysql.Chart;
+import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.service.*;
 import pl.logic.site.utils.Consts;
@@ -87,16 +88,18 @@ public class ObjectFacade {
         };
     }
 
-    public Object getDiagnosisRequestByChartId(int id){
+    public Object getDiagnosisRequestByChartId(int id) {
         return diagnosisRequestService.getDiagnosisRequestByChart(id);
     }
 
-    public Object getDoctorByDiagnosisRequest(int id){
+    public Object getDoctorByDiagnosisRequest(int id) {
         return doctorService.getDoctorByDiagnosisRequest(id);
     }
-    public List<Chart> getChartsByStateAndPatientId(int state, int patientId){
+
+    public List<Chart> getChartsByStateAndPatientId(int state, int patientId) {
         return chartService.getChartsByStateAndPatientId(state, patientId);
     }
+
 
 
     /**
@@ -108,7 +111,7 @@ public class ObjectFacade {
     public Object getObjects(Object obj, int filter) {
         return switch (obj) {
             case DoctorDAO doctor -> doctorService.getDoctors(filter);
-            case PatientDAO patient -> patientService.getPatients();
+            case PatientDAO patient -> patientService.getPatients(filter);
             case SpringUser springUser -> userService.getAllUsers(filter);
             case DiagnosisRequestDAO diagnosisRequest -> diagnosisRequestService.getDiagnosisRequests(filter);
             case ChartDAO chart -> chartService.getChartsForPatient(filter);

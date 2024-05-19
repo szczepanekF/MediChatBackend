@@ -51,7 +51,7 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", patient));
         } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), patient));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -74,10 +74,36 @@ public class PatientController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patients));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patients));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
+
+
+    /**
+     * An endpoint for getting patient by ID
+     *
+     * @param patientsFilter - id of the doctor which patients (chat between doctor and patient exists) will be returned
+     * @return HTTP response
+     */
+    @GetMapping(value = "/patientsByDoctor/{patientsFilter}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get patients from the database based on existing chat rooms with given doctor", description = "Get patients from the database based on existing chat rooms with given doctor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getPatientsByDoctor(@Parameter(description = "id of doctor which patients (with existing chat) will be returned") @PathVariable int patientsFilter) {
+        List<Patient> patients = new ArrayList<>();
+        try {
+            patients = (List<Patient>) objectFacade.getObjects(new PatientDAO(new Patient()), patientsFilter);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patients));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patients));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
 
     /**
      * An endpoint for getting patient by ID
@@ -98,10 +124,11 @@ public class PatientController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patient));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patient));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
+
 
     /**
      * An endpoint for updating specific patient entity
@@ -128,7 +155,7 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patient));
         } catch (SaveError e) {
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), patient));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -157,8 +184,9 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), patient));
         } catch (DeleteError e) {
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), patient));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
+
 }
