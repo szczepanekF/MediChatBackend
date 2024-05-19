@@ -37,23 +37,23 @@ public class DictionaryExaminationController {
     /**
      * An endpoint for getting dictionary examination by ID
      *
-     * @param id - id of the dictionary examination
+     * @param dictionaryExaminationId - id of the dictionary examination
      * @return HTTP response
      */
-    @GetMapping(value = "/dictionaryExaminations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/dictionaryExamination/{dictionaryExaminationId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get dictionary examination from the database", description = "Get dictionary examination from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getDictionaryExamination(@Parameter(description = "id of dictionary examination to be searched") @PathVariable int id) {
+    public ResponseEntity<Response> getDictionaryExamination(@Parameter(description = "id of dictionary examination to be searched") @PathVariable int dictionaryExaminationId) {
         DictionaryExamination dictionaryExamination = new DictionaryExamination();
         try {
-            dictionaryExamination = (DictionaryExamination) objectFacade.getObject(new DictionaryExaminationDAO(new DictionaryExamination()), id);
+            dictionaryExamination = (DictionaryExamination) objectFacade.getObject(new DictionaryExaminationDAO(new DictionaryExamination()), dictionaryExaminationId);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", dictionaryExamination));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), dictionaryExamination));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -76,7 +76,7 @@ public class DictionaryExaminationController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", dictionaryExaminations));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), dictionaryExaminations));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

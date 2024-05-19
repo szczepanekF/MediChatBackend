@@ -20,13 +20,14 @@ public class DictionaryExaminationServiceImpl implements DictionaryExaminationSe
 
     /**
      * Get dictionary examination with given id
-     * @param id - id of dictionary examination
+     *
+     * @param dictionaryExaminationId - id of dictionary examination
      * @return dictionary examination with given id.
      */
     @Override
-    public DictionaryExamination getDictionaryExamination(int id) {
-        return dictionaryExaminationRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public DictionaryExamination getDictionaryExamination(int dictionaryExaminationId) {
+        return dictionaryExaminationRepository.findById(dictionaryExaminationId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + dictionaryExaminationId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
@@ -34,6 +35,7 @@ public class DictionaryExaminationServiceImpl implements DictionaryExaminationSe
 
     /**
      * Get all dictionary examinations
+     *
      * @return list of all dictionary examinations
      */
     @Override

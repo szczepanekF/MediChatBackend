@@ -37,23 +37,23 @@ public class DiseaseController {
     /**
      * An endpoint for getting disease by ID
      *
-     * @param id - id of the disease
+     * @param diseaseId - id of the disease
      * @return HTTP response
      */
-    @GetMapping(value = "/diseases/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/disease/{diseaseId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get disease from the database", description = "Get disease from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getDisease(@Parameter(description = "id of disease to be searched") @PathVariable int id) {
+    public ResponseEntity<Response> getDisease(@Parameter(description = "id of disease to be searched") @PathVariable int diseaseId) {
         Disease disease = new Disease();
         try {
-            disease = (Disease) objectFacade.getObject(new DiseaseDAO(new Disease()), id);
+            disease = (Disease) objectFacade.getObject(new DiseaseDAO(new Disease()), diseaseId);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", disease));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), disease));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -76,7 +76,7 @@ public class DiseaseController {
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diseases));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diseases));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

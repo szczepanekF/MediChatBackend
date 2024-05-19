@@ -14,7 +14,8 @@ public interface DiagnosisRequestService {
     DiagnosisRequest updateDiagnosisRequest(DiagnosisRequestDAO diagnosisRequest, int id);
 
     DiagnosisRequest getDiagnosisRequest(int id);
+
     DiagnosisRequest getDiagnosisRequestByChart(int id);
 
-    List<DiagnosisRequest> getDiagnosisRequests(int filter);
+    List<DiagnosisRequest> getAllDiagnosisRequestsByChart(int filter);
 }

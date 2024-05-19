@@ -43,21 +43,20 @@ public class DoctorController {
     ObjectFacade objectFacade;
 
 
-
     @PostMapping(value = "/doctor", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create doctor entity and push it to database", description = "Create doctor entity and push it to database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "453", description = "Error during saving an entity")
     })
-    public ResponseEntity<Response> createDoctor(@RequestBody DoctorDAO doctorDAO){
+    public ResponseEntity<Response> createDoctor(@RequestBody DoctorDAO doctorDAO) {
         Doctor doctor = new Doctor();
-        try{
+        try {
             doctor = (Doctor) objectFacade.createObject(doctorDAO);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", doctor));
-        } catch (SaveError e){
+        } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), doctor));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -68,96 +67,97 @@ public class DoctorController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllDoctors(@Parameter(description = "doctor filter, 0 humans, 1 bots, 2 all") @PathVariable int doctorFilter){
+    public ResponseEntity<Response> getAllDoctors(@Parameter(description = "doctor filter, 0 humans, 1 bots, 2 all") @PathVariable int doctorFilter) {
         List<Doctor> doctors = new ArrayList<>();
-        try{
+        try {
             doctors = (List<Doctor>) objectFacade.getObjects(new DoctorDAO(new Doctor()), doctorFilter);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
-        } catch (EntityNotFound e){
+        } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
-    @GetMapping(value = "/doctors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/doctors/{doctorId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get doctor from the database", description = "Get doctor from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int id){
+    public ResponseEntity<Response> getDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int doctorId) {
         Doctor doctor = new Doctor();
-        try{
-            doctor = (Doctor) objectFacade.getObject(new DoctorDAO(new Doctor()), id);
+        try {
+            doctor = (Doctor) objectFacade.getObject(new DoctorDAO(new Doctor()), doctorId);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
-        } catch (EntityNotFound e){
+        } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
-    @GetMapping(value = "/getDoctorByDiagnosis/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getDoctorByDiagnosis/{diagnosisId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get doctor from the database", description = "Get doctor from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getDoctorByDiagnosisId(@Parameter(description = "id of diagnosis request") @PathVariable int id){
+    public ResponseEntity<Response> getDoctorByDiagnosisId(@Parameter(description = "id of diagnosis request") @PathVariable int diagnosisId) {
         Doctor doctor = new Doctor();
-        try{
-            doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(id);
+        try {
+            doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(diagnosisId);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
-        } catch (EntityNotFound e){
+        } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 
 
     @ResponseBody
-    @PutMapping(value = "/doctors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/doctors/{doctorId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update specific doctor from the database", description = "Update specific doctor from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "209", description = "Successfully updated"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "454", description = "Error during update")
     })
-    public ResponseEntity<Response> updateDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int id, @RequestBody DoctorDAO doctorDAO){
+    public ResponseEntity<Response> updateDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int doctorId, @RequestBody DoctorDAO doctorDAO) {
         Doctor doctor = new Doctor();
-        try{
-            doctor = (Doctor) objectFacade.updateObject(doctorDAO, id);
+        try {
+            doctor = (Doctor) objectFacade.updateObject(doctorDAO, doctorId);
             // Update doctor logic here
             return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", doctor));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (SaveError e) {
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), doctor));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
+
     @ResponseBody
-    @DeleteMapping(value = "/doctors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/doctors/{doctorId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Delete specific doctor from the database", description = "Delete specific doctor from the database")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "455", description = "Error during deletion")
     })
-    public ResponseEntity<Response> deleteDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int id){
+    public ResponseEntity<Response> deleteDoctor(@Parameter(description = "id of doctor to be searched") @PathVariable int doctorId) {
         Doctor doctor = new Doctor();
-        try{
-            objectFacade.deleteObject(new DoctorDAO(new Doctor()), id);
+        try {
+            objectFacade.deleteObject(new DoctorDAO(new Doctor()), doctorId);
             // Update doctor logic here
             return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", doctor));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (DeleteError e) {
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), doctor));
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

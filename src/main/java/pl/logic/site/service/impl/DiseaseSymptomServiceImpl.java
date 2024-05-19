@@ -19,54 +19,58 @@ public class DiseaseSymptomServiceImpl implements DiseaseSymptomService {
 
     /**
      * Get disease-symptom record by it's id
-     * @param id - id of disease-symptom record
+     *
+     * @param diseaseSymptomId - id of disease-symptom record
      * @return disease-symptom record
      */
     @Override
-    public DiseaseSymptom getDiseaseSymptom(int id) {
-        return diseaseSymptomRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public DiseaseSymptom getDiseaseSymptom(int diseaseSymptomId) {
+        return diseaseSymptomRepository.findById(diseaseSymptomId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + diseaseSymptomId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
     }
 
     /**
-     *  Get all disease-symptom records for which symptom id is equal given id
-     * @param id - symptom id of required disease-symptom records
+     * Get all disease-symptom records wtih given symptomId
+     *
+     * @param symptomId - symptom id of required disease-symptom records
      * @return list of disease-symptom records with given symptom id
      */
     @Override
-    public List<DiseaseSymptom> getDiseaseSymptomsForSymptom(int id) {
-        List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomRepository.findByIdSymtpom(id);
+    public List<DiseaseSymptom> getDiseaseSymptomsForSymptom(int symptomId) {
+        List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomRepository.findByIdSymtpom(symptomId);
         if (diseaseSymptoms.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());
             throw err;
         }
-        log.info("All disease-symptom records matching symptom ID: {} requests were successfully retrieved", id);
+        log.info("All disease-symptom records matching symptom ID: {} requests were successfully retrieved", symptomId);
         return diseaseSymptoms;
     }
 
     /**
-     *  Get all disease-symptom records for which disease id is equal given id
-     * @param id - disease id of required disease-symptom records
+     * Get all disease-symptom records with given diseaseId
+     *
+     * @param diseaseId - disease id of required disease-symptom records
      * @return list of disease-symptom records with given disease id
      */
     @Override
-    public List<DiseaseSymptom> getDiseaseSymptomsForDisease(int id) {
-        List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomRepository.findByIdDisease(id);
+    public List<DiseaseSymptom> getDiseaseSymptomsForDisease(int diseaseId) {
+        List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomRepository.findByIdDisease(diseaseId);
         if (diseaseSymptoms.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());
             throw err;
         }
-        log.info("All disease-symptom records matching disease ID: {} requests were successfully retrieved", id);
+        log.info("All disease-symptom records matching disease ID: {} requests were successfully retrieved", diseaseId);
         return diseaseSymptoms;
     }
 
     /**
      * Get all disease-symptom records
+     *
      * @return list of all disease-symptom records.
      */
     @Override

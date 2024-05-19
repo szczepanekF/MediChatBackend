@@ -33,19 +33,18 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public Doctor createDoctor(final DoctorDAO doctor) {
         Doctor doctorEntity = new Doctor(doctor.doctor().getId(),
-                                         doctor.doctor().getName(),
-                                         doctor.doctor().getSurname(),
-                                         doctor.doctor().getBirth_date(),
-                                         doctor.doctor().getSpecialisation_id(),
-                                         doctor.doctor().getIsBot()) ;
-        if(doctorEntity.getId() != 0)
+                doctor.doctor().getName(),
+                doctor.doctor().getSurname(),
+                doctor.doctor().getBirth_date(),
+                doctor.doctor().getSpecialisation_id(),
+                doctor.doctor().getIsBot());
+        if (doctorEntity.getId() != 0)
             throw new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + doctorEntity);
 
         Doctor returned;
         try {
             returned = doctorRepository.saveAndFlush(doctorEntity);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new SaveError(Consts.C453_SAVING_ERROR + " " + doctorEntity);
         }
         return returned;
@@ -53,10 +52,10 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     @Transactional
-    public void deleteDoctor(int id) {
-        Optional<Doctor> doctor = doctorRepository.findById(id);
-        if(doctor.isEmpty())
-            throw new EntityNotFound(Consts.C404 + " ID: "+id + " Type: "+this.getClass());
+    public void deleteDoctor(int doctorId) {
+        Optional<Doctor> doctor = doctorRepository.findById(doctorId);
+        if (doctor.isEmpty())
+            throw new EntityNotFound(Consts.C404 + " ID: " + doctorId + " Type: " + this.getClass());
 
         try {
             doctorRepository.deleteById(doctor.get().getId());
@@ -67,32 +66,31 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     @Transactional
-    public Doctor updateDoctor(final DoctorDAO doctor, int id) {
+    public Doctor updateDoctor(final DoctorDAO doctor, int doctorId) {
         Doctor doctorEntity = new Doctor(doctor.doctor().getId(),
                 doctor.doctor().getName(),
                 doctor.doctor().getSurname(),
                 doctor.doctor().getBirth_date(),
                 doctor.doctor().getSpecialisation_id(),
                 doctor.doctor().getIsBot());
-        doctorEntity.setId(id);
+        doctorEntity.setId(doctorId);
 
-        Optional<Doctor> doctorFromDatabse = doctorRepository.findById(id);
-        if(doctorFromDatabse.isEmpty())
+        Optional<Doctor> doctorFromDatabse = doctorRepository.findById(doctorId);
+        if (doctorFromDatabse.isEmpty())
             throw new EntityNotFound(Consts.C404 + " " + doctorEntity);
 
         Doctor returned;
         try {
             returned = doctorRepository.saveAndFlush(doctorEntity);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new SaveError(Consts.C454_UPDATING_ERROR + " " + doctorEntity);
         }
         return returned;
     }
 
     @Override
-    public Doctor getDoctor(final int id) {
-        return doctorRepository.findById(id).orElseThrow(() -> new EntityNotFound(Consts.C404 + " ID: "+id + " Type: "+this.getClass()));
+    public Doctor getDoctor(final int doctorId) {
+        return doctorRepository.findById(doctorId).orElseThrow(() -> new EntityNotFound(Consts.C404 + " ID: " + doctorId + " Type: " + this.getClass()));
     }
 
     @Override
@@ -102,13 +100,13 @@ public class DoctorServiceImpl implements DoctorService {
             doctors = doctorRepository.findAll();
         else
             doctors = doctorRepository.retrieveDoctorsByType(doctorFilter);
-        if(doctors.isEmpty())
+        if (doctors.isEmpty())
             throw new EntityNotFound(Consts.C404);
         return doctors;
     }
 
     @Override
-    public Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId){
+    public Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId) {
         return doctorRepository.findAllById(diagnosisRequestRepository.findById(diagnosisRequestId).get().getIdDoctor());
 
     }

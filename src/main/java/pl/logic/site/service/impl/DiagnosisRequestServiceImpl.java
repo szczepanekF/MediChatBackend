@@ -51,7 +51,7 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
                 diagnosisRequest.diagnosisRequest().getCreationDate(),
                 diagnosisRequest.diagnosisRequest().getModificationDate()
-                );
+        );
         if (diagnosisRequestEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + diagnosisRequestEntity);
             log.error(err.getMessage());
@@ -92,13 +92,13 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
     /**
      * Delete diagnosis request with given id
      *
-     * @param id - id of the diagnosis request
+     * @param diagnosisRequestId - id of the diagnosis request
      */
     @Override
-    public void deleteDiagnosisRequest(int id) {
-        Optional<DiagnosisRequest> diagnosisRequest = diagnosisRequestRepository.findById(id);
+    public void deleteDiagnosisRequest(int diagnosisRequestId) {
+        Optional<DiagnosisRequest> diagnosisRequest = diagnosisRequestRepository.findById(diagnosisRequestId);
         if (diagnosisRequest.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + diagnosisRequestId + " Type: " + this.getClass());
             log.error(err.getMessage());
             throw err;
         }
@@ -109,18 +109,18 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Diagnosis request with id: {} was successfully deleted", id);
+        log.info("Diagnosis request with id: {} was successfully deleted", diagnosisRequestId);
     }
 
     /**
      * Update diagnosis request based on diagnosis request data access object and diagnosis requests id
      *
-     * @param diagnosisRequest - data access object
-     * @param id               - id of the diagnosis request
+     * @param diagnosisRequest   - data access object
+     * @param diagnosisRequestId - id of the diagnosis request
      * @return updated diagnosis request
      */
     @Override
-    public DiagnosisRequest updateDiagnosisRequest(DiagnosisRequestDAO diagnosisRequest, int id) {
+    public DiagnosisRequest updateDiagnosisRequest(DiagnosisRequestDAO diagnosisRequest, int diagnosisRequestId) {
         DiagnosisRequest diagnosisRequestEntity = new DiagnosisRequest(
                 diagnosisRequest.diagnosisRequest().getId(),
                 diagnosisRequest.diagnosisRequest().getIdChart(),
@@ -129,8 +129,8 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
                 diagnosisRequest.diagnosisRequest().getCreationDate(),
                 diagnosisRequest.diagnosisRequest().getModificationDate()
-                );
-        Optional<DiagnosisRequest> diagnosisRequestFromDatabase = diagnosisRequestRepository.findById(id);
+        );
+        Optional<DiagnosisRequest> diagnosisRequestFromDatabase = diagnosisRequestRepository.findById(diagnosisRequestId);
         if (diagnosisRequestFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + diagnosisRequestEntity);
             log.error(err.getMessage());
@@ -144,20 +144,20 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Diagnosis request with id: {} was successfully updated: {}", id, returned);
+        log.info("Diagnosis request with id: {} was successfully updated: {}", diagnosisRequestId, returned);
         return returned;
     }
 
     /**
      * Get diagnosis request entity by id
      *
-     * @param id - id of the diagnosis request
+     * @param diagnosisRequestId - id of the diagnosis request
      * @return diagnosis request with given id
      */
     @Override
-    public DiagnosisRequest getDiagnosisRequest(int id) {
-        return diagnosisRequestRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public DiagnosisRequest getDiagnosisRequest(int diagnosisRequestId) {
+        return diagnosisRequestRepository.findById(diagnosisRequestId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + diagnosisRequestId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
@@ -166,26 +166,27 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
     /**
      * Get diagnosis request entity by chart id
      *
-     * @param id - id of the chart
-     * @return diagnosis request assigned to given
+     * @param chartId - id of the chart
+     * @return diagnosis request assigned to given chart
      */
     @Override
-    public DiagnosisRequest getDiagnosisRequestByChart(int id) {
-        return diagnosisRequestRepository.findByIdChart(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " Chart ID: " + id + " Type: " + this.getClass());
+    public DiagnosisRequest getDiagnosisRequestByChart(int chartId) {
+        return diagnosisRequestRepository.findByIdChart(chartId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " Chart ID: " + chartId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
     }
 
     /**
-     * Get all diagnosis requests
+     * Get all diagnosis requests by chart id
      *
-     * @return list of all diagnosis requests
+     * @param chartId - if of the chart
+     * @return list of all diagnosis requests with given chart id
      */
     @Override
-    public List<DiagnosisRequest> getDiagnosisRequests(int filter) {
-        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAllByIdChart(filter);
+    public List<DiagnosisRequest> getAllDiagnosisRequestsByChart(int chartId) {
+        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAllByIdChart(chartId);
         if (diagnosisRequests.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());

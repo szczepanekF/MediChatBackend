@@ -8,11 +8,11 @@ import java.util.List;
 public interface SpecialisationService {
     Specialisation createSpecialisation(SpecialisationDAO specialisation);
 
-    void deleteSpecialisation(int id);
+    void deleteSpecialisation(int specialisationId);
 
-    Specialisation updateSpecialisation(SpecialisationDAO specialisation, int id);
+    Specialisation updateSpecialisation(SpecialisationDAO specialisation, int specialisationId);
 
-    Specialisation getSpecialisation(int id);
+    Specialisation getSpecialisation(int specialisationId);
 
     List<Specialisation> getSpecialisations();
 
