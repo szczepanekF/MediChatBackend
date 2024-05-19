@@ -38,4 +38,8 @@ public class Message {
     private String content;
     @Column(name = "timestamp")
     private Date timestamp;
+    @Column(name = "message_status")
+    private int messageStatus;
+    @Column(name = "id_chart")
+    private int chartId;
 }
