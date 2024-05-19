@@ -18,7 +18,6 @@ public class EmailServiceImpl {
         SimpleMailMessage email = new SimpleMailMessage();
         email.setSubject(subject);
         email.setText(body);
-//        email.setTo(springUser.getEmail());
         email.setTo(toEmailAddress);
         email.setFrom("kkowalik408@gmail.com");
         javaMailSender.send(email);

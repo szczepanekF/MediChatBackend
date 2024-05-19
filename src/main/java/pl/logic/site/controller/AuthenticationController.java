@@ -2,10 +2,8 @@ package pl.logic.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
+import pl.logic.site.model.exception.InvalidRecoveryTokenEmailPairException;
 import pl.logic.site.model.exception.SaveError;
-import pl.logic.site.model.exception.UserNotFound;
-import pl.logic.site.model.mysql.PasswordResetToken;
-import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.model.request.NewPasswordRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
 import pl.logic.site.model.request.LoginRequest;
@@ -91,35 +89,26 @@ public class AuthenticationController {
 
     @PostMapping("/passwordRecovery")
     public ResponseEntity<Response> resetPassword(@RequestParam("emailAddress") String userEmailAddress) {
-        Optional<SpringUser> springUser = authenticationService.findUserByEmailAddress(userEmailAddress);
-        if (springUser.isEmpty()) {
-            throw new UserNotFound("There is not user with email address: " + userEmailAddress);
-        }
         try {
             String recoveryToken = UUID.randomUUID().toString();
-            authenticationService.createPasswordRecoveryToken(springUser.get(), recoveryToken);
-            emailService.sendEmail(recoveryToken, springUser.get().getEmail());
-            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C201, 201, "", "mail sent"));
+            authenticationService.createPasswordRecoveryToken(userEmailAddress, recoveryToken);
+            emailService.sendEmail(recoveryToken, userEmailAddress);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Mail sent to " + userEmailAddress));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(e.getMessage(), 417, Arrays.toString(e.getStackTrace()), "Operation of creating recovery token or mail sending failed"));
         }
     }
 
     @PostMapping("/checkEmailAndToken")
     public ResponseEntity<Response> checkEmailAndTokenCorrectness(@RequestParam("userEmailAddress") String userEmailAddress, @RequestParam("token") String token) {
-        Optional<PasswordResetToken> resetToken = authenticationService.findToken(token);
-        if (resetToken.isEmpty()) {
-            throw new UserNotFound("Operaiton failed");
+        try {
+            if(authenticationService.isPairEmailTokenValid(userEmailAddress, token)) {
+                return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Pair emailAddress and recoveryToken match"));
+            } else throw new InvalidRecoveryTokenEmailPairException("Pair emailAddress and recoveryToken do not match");
         }
-        Optional<SpringUser> springUser = authenticationService.findUserById(resetToken.get().getSpringUser().getId());
-        if(springUser.isEmpty()) {
-            throw new UserNotFound("user not found");
-        }
-        if(userEmailAddress.equals(springUser.get().getEmail())) {
-            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C201, 201, "", "Pair emailAddress and recoveryToken match"));
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C201, 400, "", "Pair emailAddress and recoveryToken do not match"));
+        catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(e.getMessage(), 417, "", "Pair emailAddress and recoveryToken do not match"));
         }
     }
 
@@ -127,7 +116,7 @@ public class AuthenticationController {
     public ResponseEntity<Response>changeUserPassword(@RequestBody NewPasswordRequest request) {
         try {
             authenticationService.resetUserPassword(request);
-            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C201, 201, "", "Password reset successfully"));
+            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C209, 209, "", "Password reset successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C454_UPDATING_ERROR, 454, "", "Reset password operation failed"));
         }
