@@ -180,10 +180,8 @@ public class AuthenticationServiceImpl {
         Date currentDate = new Date();
         if(existingResetToken.isPresent()) {
             if (existingResetToken.get().getExpirationDate().compareTo(currentDate) > 0) {
-                System.out.println("obecny");
                 return existingResetToken.get().getRecoveryToken();
             } else {
-                System.out.println("usuwam");
                 passwordRecoveryTokenRepository.delete(existingResetToken.get());
             }
         }

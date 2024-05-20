@@ -14,7 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.logic.site.facade.ObjectFacade;
+import pl.logic.site.model.dao.ChartDAO;
 import pl.logic.site.model.dao.DiagnosisRequestDAO;
+import pl.logic.site.model.dao.PatientDAO;
+import pl.logic.site.model.enums.EmailType;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
@@ -26,6 +29,11 @@ import pl.logic.site.service.ChartService;
 import pl.logic.site.service.UserService;
 import pl.logic.site.service.impl.MessageServiceImpl;
 import pl.logic.site.service.impl.UserServiceImpl;
+
+import pl.logic.site.model.mysql.*;
+import pl.logic.site.model.response.Response;
+import pl.logic.site.service.impl.EmailServiceImpl;
+
 import pl.logic.site.utils.Consts;
 
 import java.util.*;
@@ -37,6 +45,8 @@ import java.util.*;
 @Scope("request")
 public class DiagnosisRequestController {
     private final ObjectFacade objectFacade;
+    private final EmailServiceImpl emailService;
+
 
     /**
      * An endpoint for creating diagnosis request entity
@@ -54,7 +64,22 @@ public class DiagnosisRequestController {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.createObject(diagnosisRequestDao);
-
+            Doctor doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(diagnosisRequest.getId());
+            Chart chart = (Chart) objectFacade.getObject(new ChartDAO(new Chart()), diagnosisRequest.getIdChart());
+            Patient patient = (Patient) objectFacade.getObject(new PatientDAO(new Patient()), chart.getIdPatient());
+            String dateString = diagnosisRequest.getCreationDate().toString();
+            String diagnosis = diagnosisRequest.getDiagnosis();
+            SpringUser springUser = objectFacade.getUserIdByDoctorOrPatientId(doctor.getId(), false).orElseThrow();
+            Map<String, String> emailParameters = new HashMap<>(){{
+                put("requestUserFullName", patient.getName() + " " + patient.getSurname());
+                put("emailAddress", springUser.getEmail());
+                put("name", doctor.getName());
+                put("date", dateString);
+                put("requestContent", diagnosis);
+                put("thisUserId", String.valueOf(springUser.getId()));
+                put("patientUserId", String.valueOf(patient.getId()));
+            }};
+            emailService.sendEmail(EmailType.DIAGNOSIS_REQUEST, emailParameters);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", diagnosisRequest));
         } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), diagnosisRequest));
