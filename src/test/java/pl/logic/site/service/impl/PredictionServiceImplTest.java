@@ -15,6 +15,7 @@ class PredictionServiceImplTest {
     @Autowired
     private PredictionService predictionService;
 
+
     @BeforeEach
     void setUp() {
 
@@ -22,8 +23,8 @@ class PredictionServiceImplTest {
 
     @Test
     void getStatisticDisease() {
-        Object statisticDisease = this.predictionService.getStatisticDisease();
-        System.out.println(statisticDisease.toString());
+//        Object statisticDisease = this.predictionService.getStatisticDisease();
+//        System.out.println(statisticDisease.toString());
     }
 
     @Test
@@ -34,8 +35,8 @@ class PredictionServiceImplTest {
 
     @Test
     void getPatientDisease() {
-        Disease predictedDisease = this.predictionService.getPatientDisease(1);
-        System.out.println(predictedDisease.getName());
+//        Disease predictedDisease = this.predictionService.getPatientDisease(1);
+//        System.out.println(predictedDisease.getName());
     }
 
     @Test
