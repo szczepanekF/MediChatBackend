@@ -12,6 +12,7 @@ import pl.logic.site.service.*;
 import pl.logic.site.utils.Consts;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -97,7 +98,10 @@ public class ObjectFacade {
         return doctorService.getDoctorByDiagnosisRequest(diagnosisRequestId);
     }
 
-    public List<Chart> getChartsByStateAndPatientId(int state, int patientId) {
+    public Optional<SpringUser> getUserIdByDoctorOrPatientId(int id, boolean isPatient){
+        return userService.findSpringUser(id, isPatient);
+    }
+    public List<Chart> getChartsByStateAndPatientId(int state, int patientId){
         return chartService.getChartsByStateAndPatientId(state, patientId);
     }
 
