@@ -2,7 +2,6 @@ package pl.logic.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
-import pl.logic.site.model.exception.InvalidRecoveryTokenEmailPairException;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.request.NewPasswordRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
@@ -103,7 +102,7 @@ public class AuthenticationController {
     @PostMapping("/checkEmailAndToken")
     public ResponseEntity<Response> checkEmailAndTokenCorrectness(@RequestParam("userEmailAddress") String userEmailAddress, @RequestParam("token") String token) {
         try {
-            Integer springUserId = authenticationService.isPairEmailTokenValid(userEmailAddress, token);
+            Integer springUserId = authenticationService.getUserIdIfEmailTokenPairValid(userEmailAddress, token);
             return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", springUserId));
         }
         catch(Exception e) {

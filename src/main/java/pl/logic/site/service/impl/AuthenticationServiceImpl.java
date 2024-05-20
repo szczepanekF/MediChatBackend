@@ -199,7 +199,7 @@ public class AuthenticationServiceImpl {
         springUserRepository.save(springUser);
     }
 
-    public Integer isPairEmailTokenValid(String emailAddress, String token) throws InvalidRecoveryTokenEmailPairException {
+    public Integer getUserIdIfEmailTokenPairValid(String emailAddress, String token) throws InvalidRecoveryTokenEmailPairException {
         Optional<PasswordResetToken> resetToken = passwordRecoveryTokenRepository.findByRecoveryToken(token);
         if (resetToken.isEmpty()) {
             throw new UserNotFound("There is no recovery token " + token + " in database");
