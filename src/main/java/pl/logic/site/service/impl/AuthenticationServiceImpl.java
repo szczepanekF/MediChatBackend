@@ -179,9 +179,11 @@ public class AuthenticationServiceImpl {
         Optional<PasswordResetToken> existingResetToken = passwordRecoveryTokenRepository.findBySpringUser(springUser);
         Date currentDate = new Date();
         if(existingResetToken.isPresent()) {
-            if (existingResetToken.get().getExpirationDate().compareTo(currentDate) <= 0) {
+            if (existingResetToken.get().getExpirationDate().compareTo(currentDate) > 0) {
+                System.out.println("obecny");
                 return existingResetToken.get().getRecoveryToken();
             } else {
+                System.out.println("usuwam");
                 passwordRecoveryTokenRepository.delete(existingResetToken.get());
             }
         }
@@ -192,7 +194,7 @@ public class AuthenticationServiceImpl {
     }
 
     public void resetUserPassword(NewPasswordRequest request) {
-        SpringUser springUser = findUserByEmailAddress(request.getUserEmailAddress());
+        SpringUser springUser = findUserById(request.getUserId());
         springUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
         springUserRepository.save(springUser);
     }

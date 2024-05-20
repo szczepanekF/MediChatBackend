@@ -115,7 +115,7 @@ public class AuthenticationController {
     public ResponseEntity<Response>changeUserPassword(@RequestBody NewPasswordRequest request) {
         try {
             authenticationService.resetUserPassword(request);
-            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C209, 209, "", "Password reset successfully"));
+            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Password reset successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C454_UPDATING_ERROR, 454, "", "Reset password operation failed"));
         }
