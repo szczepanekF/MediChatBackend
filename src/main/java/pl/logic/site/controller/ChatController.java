@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import pl.logic.site.model.dao.PatientDAO;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Message;
 import pl.logic.site.model.mysql.Notification;
+import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Room;
 import pl.logic.site.model.request.SenderRecipientRequest;
 import pl.logic.site.model.response.Response;
@@ -84,12 +86,28 @@ public class ChatController {
      * @param recipientId
      * @return List of messages belonging to the specified sender&recipient ID
      */
+
+    @ResponseBody
     @GetMapping("/chatController/messages/{senderId}/{recipientId}")
-    public ResponseEntity<List<Message>> findMessages(@PathVariable int senderId,
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully retrieved chat rooms"),
+            @ApiResponse(responseCode = "404", description = "Entity not found"),
+            @ApiResponse(responseCode = "455", description = "Error search process")
+    })
+    public ResponseEntity<Response> findMessages(@PathVariable int senderId,
                                                  @PathVariable int recipientId) {
         log.info("Wywoływana metoda /messages/senderid/recipientid");
-        return ResponseEntity
-                .ok(MessageService.findMessages(senderId, recipientId));
+        List<Message> messages;
+
+        try {
+            messages = MessageService.findMessages(senderId, recipientId);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", messages));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+
     }
 
 
