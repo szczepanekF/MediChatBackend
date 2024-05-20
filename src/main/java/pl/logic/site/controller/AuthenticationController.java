@@ -90,8 +90,7 @@ public class AuthenticationController {
     @PostMapping("/passwordRecovery")
     public ResponseEntity<Response> resetPassword(@RequestParam("emailAddress") String userEmailAddress) {
         try {
-            String recoveryToken = UUID.randomUUID().toString();
-            authenticationService.createPasswordRecoveryToken(userEmailAddress, recoveryToken);
+            String recoveryToken = authenticationService.createPasswordRecoveryToken(userEmailAddress);
             String username = authenticationService.getUsername(userEmailAddress);
             emailService.sendEmail(recoveryToken, userEmailAddress, username);
             return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Mail sent to " + userEmailAddress));
@@ -104,9 +103,8 @@ public class AuthenticationController {
     @PostMapping("/checkEmailAndToken")
     public ResponseEntity<Response> checkEmailAndTokenCorrectness(@RequestParam("userEmailAddress") String userEmailAddress, @RequestParam("token") String token) {
         try {
-            if(authenticationService.isPairEmailTokenValid(userEmailAddress, token)) {
-                return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Pair emailAddress and recoveryToken match"));
-            } else throw new InvalidRecoveryTokenEmailPairException("Pair emailAddress and recoveryToken do not match");
+            Integer springUserId = authenticationService.isPairEmailTokenValid(userEmailAddress, token);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", springUserId));
         }
         catch(Exception e) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(e.getMessage(), 417, "", "Pair emailAddress and recoveryToken do not match"));

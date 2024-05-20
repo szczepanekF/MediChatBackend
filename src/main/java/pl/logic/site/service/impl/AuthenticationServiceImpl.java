@@ -3,6 +3,7 @@ package pl.logic.site.service.impl;
 
 import pl.logic.site.model.exception.EmailOrUsernameJustExist;
 import pl.logic.site.model.exception.InvalidPassword;
+import pl.logic.site.model.exception.InvalidRecoveryTokenEmailPairException;
 import pl.logic.site.model.exception.UserNotFound;
 import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.request.LoginRequest;
@@ -19,10 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -176,10 +174,21 @@ public class AuthenticationServiceImpl {
     }
 
 
-    public void createPasswordRecoveryToken(String userEmailAddress, String token) {
+    public String createPasswordRecoveryToken(String userEmailAddress) {
         SpringUser springUser = findUserByEmailAddress(userEmailAddress);
-        PasswordResetToken resetToken = new PasswordResetToken(token, springUser);
+        Optional<PasswordResetToken> existingResetToken = passwordRecoveryTokenRepository.findBySpringUser(springUser);
+        Date currentDate = new Date();
+        if(existingResetToken.isPresent()) {
+            if (existingResetToken.get().getExpirationDate().compareTo(currentDate) <= 0) {
+                return existingResetToken.get().getRecoveryToken();
+            } else {
+                passwordRecoveryTokenRepository.delete(existingResetToken.get());
+            }
+        }
+        String tokenString = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = new PasswordResetToken(tokenString, springUser);
         passwordRecoveryTokenRepository.save(resetToken);
+        return tokenString;
     }
 
     public void resetUserPassword(NewPasswordRequest request) {
@@ -188,13 +197,16 @@ public class AuthenticationServiceImpl {
         springUserRepository.save(springUser);
     }
 
-    public boolean isPairEmailTokenValid(String emailAddress, String token) {
+    public Integer isPairEmailTokenValid(String emailAddress, String token) throws InvalidRecoveryTokenEmailPairException {
         Optional<PasswordResetToken> resetToken = passwordRecoveryTokenRepository.findByRecoveryToken(token);
         if (resetToken.isEmpty()) {
             throw new UserNotFound("There is no recovery token " + token + " in database");
         }
         SpringUser springUser = findUserById(resetToken.get().getSpringUser().getId());
-        return emailAddress.equals(springUser.getEmail());
+        if(emailAddress.equals(springUser.getEmail())) {
+            return resetToken.get().getSpringUser().getId();
+        }
+        throw new InvalidRecoveryTokenEmailPairException("Invalid Email and Token pair ");
     }
 
     public String getUsername(String emailAddress) {
