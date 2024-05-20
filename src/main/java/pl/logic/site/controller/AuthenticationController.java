@@ -2,6 +2,7 @@ package pl.logic.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
+import pl.logic.site.model.enums.EmailType;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.request.NewPasswordRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
@@ -91,7 +92,12 @@ public class AuthenticationController {
         try {
             String recoveryToken = authenticationService.createPasswordRecoveryToken(userEmailAddress);
             String username = authenticationService.getUsername(userEmailAddress);
-            emailService.sendEmail(recoveryToken, userEmailAddress, username);
+            Map<String, String> emailParameters = new HashMap<>(){{
+                put("token", recoveryToken);
+                put("emailAddress", userEmailAddress);
+                put("name", username);
+            }};
+            emailService.sendEmail(EmailType.RESET_PASSWORD, emailParameters);
             return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Mail sent to " + userEmailAddress));
         } catch (Exception e) {
 
