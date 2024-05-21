@@ -17,6 +17,10 @@ public interface ChatRoomService {
             int recipientId,
             boolean createNewRoomIfNotExists
     );
+    public Optional<Room> getChatRoomIdBySenderRecipient(
+            int senderId,
+            int recipientId
+    );
 
     public List<Room> createChatId(int senderId, int recipientId);
 }

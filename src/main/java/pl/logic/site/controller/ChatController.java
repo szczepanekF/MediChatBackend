@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @Slf4j
@@ -110,6 +111,30 @@ public class ChatController {
 
     }
 
+
+    @ResponseBody
+    @GetMapping("/chatController/chats/{senderId}/{recipientId}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully retrieved chat rooms"),
+            @ApiResponse(responseCode = "404", description = "Entity not found"),
+            @ApiResponse(responseCode = "455", description = "Error search process")
+    })
+    public ResponseEntity<Response> findChatsBySenderRecipient(@PathVariable int senderId,
+                                                 @PathVariable int recipientId) {
+        Optional<Room> room;
+        try {
+            room = chatRoomService.getChatRoomIdBySenderRecipient(senderId, recipientId);
+            if(room.isPresent())
+                return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", room));
+            else
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>("Chat room not found", 404, "", null));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+
+    }
 
 
     @ResponseBody
