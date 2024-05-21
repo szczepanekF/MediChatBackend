@@ -167,7 +167,10 @@ public class PatientServiceImpl implements PatientService {
                     return patientUser.isPresent() &&
                             chatRoomService.getChatRoomId(patientUser.get().getId(), doctorSpringUserId, false).isPresent();
                 }).collect(Collectors.toList());
+            } else {
+                patients = List.of();
             }
+
         }
         if (patients.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
