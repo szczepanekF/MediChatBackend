@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -11,17 +12,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.logic.site.aspects.AuthorizationHeaderHolder;
+import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.dao.ChartDAO;
+import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.response.Response;
+import pl.logic.site.service.LoggingService;
 import pl.logic.site.utils.Consts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +37,10 @@ import java.util.List;
 public class ChartController {
     @Autowired
     ObjectFacade objectFacade;
+    @Autowired
+    LoggingService loggingService;
+    @Autowired
+    HttpServletRequest request;
 
 
     /**
@@ -46,9 +56,12 @@ public class ChartController {
             @ApiResponse(responseCode = "453", description = "Error during saving an entity")
     })
     public ResponseEntity<Response> createChart(@RequestBody ChartDAO chartDao) {
+
+
         Chart chart = new Chart();
         try {
             chart = (Chart) objectFacade.createObject(chartDao);
+//            loggingService.addLog(0, new Date(), Consts.LOG_SUCCESFULLY_CREATED)
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", chart));
         } catch (SaveError e) {
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), chart));
@@ -73,6 +86,11 @@ public class ChartController {
         List<Chart> charts = new ArrayList<>();
         try {
             charts = (List<Chart>) objectFacade.getObjects(new ChartDAO(new Chart()), patientId);
+
+            loggingService.createLog(ControllerUtils.combinePaths(request)+"Charts ", Consts.LOG_SUCCESFULLY_RETRIEVED,
+                    LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            loggingService.createLog(ControllerUtils.combinePaths(request)+Consts.LOG_SUCCESFULLY_CREATED+"Charts ", charts,
+                    LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
         } catch (EntityNotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), charts));
