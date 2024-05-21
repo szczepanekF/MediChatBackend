@@ -34,6 +34,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 });
     }
 
+    @Override
+    public Optional<Room> getChatRoomIdBySenderRecipient(final int senderId, final int recipientId) {
+        return chatRoomRepository.findBySenderIdAndRecipientId(senderId, recipientId);
+    }
+
     public List<Room> createChatId(int senderId, int recipientId) {
         var chatId = String.format("%s_%s", senderId, recipientId);
 

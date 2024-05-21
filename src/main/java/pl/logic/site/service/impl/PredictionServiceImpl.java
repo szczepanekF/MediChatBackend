@@ -77,7 +77,7 @@ public class PredictionServiceImpl implements PredictionService {
      * from at least one disease.
      * Such DiseaseVectors are added to the dataset
      */
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         this.symptomParser = new SymptomParser(this.jdbcTemplate);
         this.diseases = diseaseService.getDiseases();
