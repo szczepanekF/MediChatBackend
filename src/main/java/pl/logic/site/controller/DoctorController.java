@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -20,13 +21,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 //import pl.logic.site.facade.UserFacade;
+import pl.logic.site.aspects.AuthorizationHeaderHolder;
+import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.dao.DoctorDAO;
+import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.model.response.Response;
+import pl.logic.site.service.LoggingService;
 import pl.logic.site.utils.Consts;
 
 import java.util.ArrayList;
@@ -41,7 +46,10 @@ import java.util.List;
 public class DoctorController {
     @Autowired
     ObjectFacade objectFacade;
-
+    @Autowired
+    LoggingService loggingService;
+    @Autowired
+    HttpServletRequest request;
 
     @PostMapping(value = "/doctor", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create doctor entity and push it to database", description = "Create doctor entity and push it to database")
@@ -53,10 +61,16 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             doctor = (Doctor) objectFacade.createObject(doctorDAO);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "Doctor ", doctor,
+                    LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", doctor));
         } catch (SaveError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), doctor));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -71,10 +85,17 @@ public class DoctorController {
         List<Doctor> doctors = new ArrayList<>();
         try {
             doctors = (List<Doctor>) objectFacade.getObjects(new DoctorDAO(new Doctor()), doctorFilter);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + "Doctors for fiter: " + doctorFilter,
+                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctors));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -89,10 +110,16 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             doctor = (Doctor) objectFacade.getObject(new DoctorDAO(new Doctor()), doctorId);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + "Doctor ",
+                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -107,10 +134,16 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(diagnosisId);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + "Doctorr by diagnosis id: " + diagnosisId + " ",
+                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -128,13 +161,21 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             doctor = (Doctor) objectFacade.updateObject(doctorDAO, doctorId);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_UPDATED + "Doctor ", doctor,
+                    LogType.update, AuthorizationHeaderHolder.getAuthorizationHeader());
             // Update doctor logic here
             return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", doctor));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (SaveError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), doctor));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -151,13 +192,21 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             objectFacade.deleteObject(new DoctorDAO(new Doctor()), doctorId);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_DELETED + "Doctor ", doctor,
+                    LogType.delete, AuthorizationHeaderHolder.getAuthorizationHeader());
             // Update doctor logic here
             return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", doctor));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), doctor));
         } catch (DeleteError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), doctor));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

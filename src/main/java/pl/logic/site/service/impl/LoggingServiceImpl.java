@@ -48,20 +48,19 @@ public class LoggingServiceImpl implements LoggingService {
     }
 
 
-
     @Override
     public void createLog(String message, Object details, LogType logType, String header) {
         try {
-            int userId =  Integer.parseInt(jwtService.decodeJWT(header).get("SpringUserId"));
-            switch (logType){
+            int userId = Integer.parseInt(jwtService.decodeJWT(header).get("SpringUserId"));
+            switch (logType) {
                 case info, error -> {
-                    addLog(new Log(0, new Date(), message + "Action taken by springUserId: "+userId, logType, (String) details, userId));
+                    addLog(new Log(0, new Date(), message + "Action taken by springUserId: " + userId, logType, (String) details, userId));
                 }
-                case create,delete,update -> {
-                    addLog(new Log(0, new Date(), message + "Action taken by springUserId: "+userId, logType, new ObjectMapper().writeValueAsString(details), userId));
+                case create, delete, update -> {
+                    addLog(new Log(0, new Date(), message + "Action taken by springUserId: " + userId, logType, new ObjectMapper().writeValueAsString(details), userId));
                 }
             }
-         } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error creating log.");
             e.printStackTrace();
         }
