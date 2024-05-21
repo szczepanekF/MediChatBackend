@@ -24,7 +24,7 @@ public class DictionaryExamination {
     private String examinationName;
 
     @Column(name = "id_disease")
-    private String idDisease;
+    private int idDisease;
 
     @Column(name = "examination_required_value")
     private String examinationRequiredValue;
