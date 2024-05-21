@@ -79,6 +79,9 @@ public class DiagnosisRequestImplTest {
         DiagnosisRequestDAO diagnosisRequestDAO = new DiagnosisRequestDAO(diagnosisRequest2);
         Assertions.assertThrows(SaveError.class, () -> diagnosisRequestService.createDiagnosisRequest(diagnosisRequestDAO));
         verify(diagnosisRequestRepository, never()).saveAndFlush(any(DiagnosisRequest.class));
+        verify(chartService, never()).getChart(anyInt());
+        verify(userService, never()).findSpringUser(anyInt(), anyBoolean());
+        verify(messageService, never()).save(any(Message.class));
     }
 
 
@@ -88,7 +91,9 @@ public class DiagnosisRequestImplTest {
         DiagnosisRequestDAO diagnosisRequestDAO = new DiagnosisRequestDAO(diagnosisRequestWithId0);
         Assertions.assertThrows(SaveError.class, () -> diagnosisRequestService.createDiagnosisRequest(diagnosisRequestDAO));
         verify(diagnosisRequestRepository, times(1)).saveAndFlush(any(DiagnosisRequest.class));
-
+        verify(chartService, never()).getChart(anyInt());
+        verify(userService, never()).findSpringUser(anyInt(), anyBoolean());
+        verify(messageService, never()).save(any(Message.class));
     }
 
     @Test

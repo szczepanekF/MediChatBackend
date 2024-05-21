@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import pl.logic.site.aspects.AuthorizationHeaderHolder;
+import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.facade.ObjectFacade;
+import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.model.response.Response;
+import pl.logic.site.service.LoggingService;
 import pl.logic.site.service.impl.UserServiceImpl;
 import pl.logic.site.utils.Consts;
 
@@ -41,9 +46,14 @@ public class UserController {
     private final UserServiceImpl userService;
     @Autowired
     ObjectFacade objectFacade;
+    @Autowired
+    LoggingService loggingService;
+    @Autowired
+    HttpServletRequest request;
 
     /**
      * Test endpoint for adding new user. Do not use.
+     *
      * @param patient
      * @return
      */
@@ -53,15 +63,16 @@ public class UserController {
     public Patient addUser(
             @Payload Patient patient
     ) {
-        log.info("Saving user:"+patient);
+        log.info("Saving user:" + patient);
         Patient patient1 = userService.saveUser(patient);
-        log.info("Returned user:"+patient1);
+        log.info("Returned user:" + patient1);
         return patient1;
     }
 
     /**
      * Endpoint used for disconnecting a specific patient (currently, in fact, it should also detect doctors) by changing
      * their STATUS to 1 (OFFLINE).
+     *
      * @param patient
      * @return
      */
@@ -70,13 +81,14 @@ public class UserController {
     public Patient disconnectUser(
             @Payload Patient patient
     ) {
-        log.info("Disconnecting user:"+patient);
+        log.info("Disconnecting user:" + patient);
         userService.disconnect(patient);
         return patient;
     }
 
     /**
      * Endpoint used for finding all patients (currently, in fact, it should also detect doctors).
+     *
      * @return
      */
     @GetMapping("/users")
@@ -107,14 +119,20 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> findUser(@Parameter(description = "spring user id") @PathVariable int id){
+    public ResponseEntity<Response> findUser(@Parameter(description = "spring user id") @PathVariable int id) {
         Object user;
-        try{
+        try {
             user = userService.findUser(id);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + "SpringUser ",
+                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", user));
-        } catch (EntityNotFound e){
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -132,11 +150,15 @@ public class UserController {
         try {
             springUser = userService.findSpringUserById(id);
             if (springUser.isPresent()) {
+                loggingService.createLog(ControllerUtils.combinePaths(request) + "SpringUser ",
+                        Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
                 return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", springUser.get()));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>("SpringUser not found", 404, "", null));
             }
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -160,6 +182,8 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>("SpringUser not found", 404, "", null));
             }
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -171,14 +195,20 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Response> getAllUsers(@Parameter(description = "filter value, 0 all users, 1 patients, 2 doctors") @PathVariable int userFilter){
+    public ResponseEntity<Response> getAllUsers(@Parameter(description = "filter value, 0 all users, 1 patients, 2 doctors") @PathVariable int userFilter) {
         List<SpringUser> users = new ArrayList<>();
-        try{
+        try {
             users = (List<SpringUser>) objectFacade.getObjects(new SpringUser(), userFilter);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + "SpringUsers by filter: " + userFilter + " ",
+                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", users));
-        } catch (EntityNotFound e){
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), userFilter));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), userFilter));
         }
     }
