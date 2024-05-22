@@ -87,8 +87,7 @@ public class ChartSymptomController {
         List<ChartSymptom> chartSymptoms = new ArrayList<>();
         try {
             chartSymptoms = (List<ChartSymptom>) objectFacade.getObjects(new ChartSymptomDAO(new ChartSymptom()), id);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "ChartSymptoms for patient id: " + id,
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", chartSymptoms));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

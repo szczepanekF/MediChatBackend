@@ -86,8 +86,7 @@ public class PatientController {
         List<Patient> patients = new ArrayList<>();
         try {
             patients = (List<Patient>) objectFacade.getObjects(new PatientDAO(new Patient()), -1);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Patients ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
 
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patients));
         } catch (EntityNotFound e) {
@@ -118,8 +117,7 @@ public class PatientController {
         List<Patient> patients = new ArrayList<>();
         try {
             patients = (List<Patient>) objectFacade.getObjects(new PatientDAO(new Patient()), patientsFilter);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Patients by doctor id: " + patientsFilter,
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
 
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patients));
         } catch (EntityNotFound e) {
@@ -151,8 +149,7 @@ public class PatientController {
         Patient patient = new Patient();
         try {
             patient = (Patient) objectFacade.getObject(new PatientDAO(new Patient()), patientId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Patient ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", patient));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

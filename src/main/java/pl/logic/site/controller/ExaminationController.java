@@ -87,8 +87,6 @@ public class ExaminationController {
         List<Examination> examinations = new ArrayList<>();
         try {
             examinations = (List<Examination>) objectFacade.getObjects(new ExaminationDAO(new Examination()), examinationFilter);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Examinations for patient id: " + examinationFilter,
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", examinations));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -117,8 +115,7 @@ public class ExaminationController {
         Examination examination = new Examination();
         try {
             examination = (Examination) objectFacade.getObject(new ExaminationDAO(new Examination()), examinationId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Examination ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", examination));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

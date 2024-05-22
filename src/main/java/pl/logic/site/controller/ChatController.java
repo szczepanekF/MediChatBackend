@@ -140,8 +140,7 @@ public class ChatController {
             room = chatRoomService.getChatRoomIdBySenderRecipient(senderId, recipientId);
 
             if (room.isPresent()) {
-                loggingService.createLog(ControllerUtils.combinePaths(request) + "ChatRoom ",
-                        Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
                 return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", room));
             }
             else

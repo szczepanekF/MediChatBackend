@@ -59,8 +59,7 @@ public class DictionaryExaminationController {
         DictionaryExamination dictionaryExamination = new DictionaryExamination();
         try {
             dictionaryExamination = (DictionaryExamination) objectFacade.getObject(new DictionaryExaminationDAO(new DictionaryExamination()), dictionaryExaminationId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "DictionaryExamination",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", dictionaryExamination));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -88,8 +87,7 @@ public class DictionaryExaminationController {
         List<DictionaryExamination> dictionaryExaminations = new ArrayList<>();
         try {
             dictionaryExaminations = (List<DictionaryExamination>) objectFacade.getObjects(new DictionaryExaminationDAO(new DictionaryExamination()), -1);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "DictionaryExaminations ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             ;
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", dictionaryExaminations));
         } catch (EntityNotFound e) {

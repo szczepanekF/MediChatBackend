@@ -86,8 +86,7 @@ public class SpecialisationController {
         List<Specialisation> specialisations = new ArrayList<>();
         try {
             specialisations = (List<Specialisation>) objectFacade.getObjects(new SpecialisationDAO(new Specialisation()), -1);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Splecialisations ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
 
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", specialisations));
         } catch (EntityNotFound e) {
@@ -117,8 +116,7 @@ public class SpecialisationController {
         Specialisation specialisation = new Specialisation();
         try {
             specialisation = (Specialisation) objectFacade.getObject(new SpecialisationDAO(new Specialisation()), specialisationId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Splecialisation ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", specialisation));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
