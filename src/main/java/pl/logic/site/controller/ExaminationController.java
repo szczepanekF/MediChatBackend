@@ -89,7 +89,6 @@ public class ExaminationController {
             examinations = (List<Examination>) objectFacade.getObjects(new ExaminationDAO(new Examination()), examinationFilter);
             loggingService.createLog(ControllerUtils.combinePaths(request) + "Examinations for patient id: " + examinationFilter,
                     Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
-            ;
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", examinations));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
