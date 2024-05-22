@@ -117,8 +117,7 @@ public class DiagnosisRequestController {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.getDiagnosisRequestByChartId(chartId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "DiagnosisRequest by chartId: " + chartId + " ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -147,8 +146,7 @@ public class DiagnosisRequestController {
         DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
         try {
             diagnosisRequest = (DiagnosisRequest) objectFacade.getObject(new DiagnosisRequestDAO(new DiagnosisRequest()), diagnosisRequestId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "DiagnosisRequest ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diagnosisRequest));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

@@ -85,8 +85,7 @@ public class DoctorController {
         List<Doctor> doctors = new ArrayList<>();
         try {
             doctors = (List<Doctor>) objectFacade.getObjects(new DoctorDAO(new Doctor()), doctorFilter);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Doctors for fiter: " + doctorFilter,
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
 
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctors));
         } catch (EntityNotFound e) {
@@ -110,8 +109,7 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             doctor = (Doctor) objectFacade.getObject(new DoctorDAO(new Doctor()), doctorId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Doctor ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -134,8 +132,7 @@ public class DoctorController {
         Doctor doctor = new Doctor();
         try {
             doctor = (Doctor) objectFacade.getDoctorByDiagnosisRequest(diagnosisId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Doctorr by diagnosis id: " + diagnosisId + " ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", doctor));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

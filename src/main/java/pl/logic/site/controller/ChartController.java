@@ -92,8 +92,7 @@ public class ChartController {
         try {
             charts = (List<Chart>) objectFacade.getObjects(new ChartDAO(new Chart()), patientId);
 
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Charts for patient id: " + patientId,
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -125,8 +124,7 @@ public class ChartController {
         List<Chart> charts = new ArrayList<>();
         try {
             charts = objectFacade.getChartsByStateAndPatientId(state, patientId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Charts for patient id: " + patientId + " and state: " + state + " ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -156,8 +154,7 @@ public class ChartController {
         Chart chart = new Chart();
         try {
             chart = (Chart) objectFacade.getObject(new ChartDAO(new Chart()), chartId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Chart ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", chart));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

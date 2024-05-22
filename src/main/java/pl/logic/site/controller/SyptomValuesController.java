@@ -60,8 +60,7 @@ public class SyptomValuesController {
         List<SymptomValues> symptomValues = new ArrayList<>();
         try {
             symptomValues = (List<SymptomValues>) objectFacade.getObjects(new SymptomValuesDAO(new SymptomValues()), -1);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "SymptomValues ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
 
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", symptomValues));
         } catch (EntityNotFound e) {

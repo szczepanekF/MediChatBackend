@@ -123,8 +123,7 @@ public class UserController {
         Object user;
         try {
             user = userService.findUser(id);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "SpringUser ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", user));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -150,8 +149,7 @@ public class UserController {
         try {
             springUser = userService.findSpringUserById(id);
             if (springUser.isPresent()) {
-                loggingService.createLog(ControllerUtils.combinePaths(request) + "SpringUser ",
-                        Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+                
                 return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", springUser.get()));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>("SpringUser not found", 404, "", null));
@@ -199,8 +197,7 @@ public class UserController {
         List<SpringUser> users = new ArrayList<>();
         try {
             users = (List<SpringUser>) objectFacade.getObjects(new SpringUser(), userFilter);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "SpringUsers by filter: " + userFilter + " ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", users));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

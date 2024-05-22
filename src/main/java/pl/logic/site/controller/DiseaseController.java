@@ -59,8 +59,7 @@ public class DiseaseController {
         Disease disease = new Disease();
         try {
             disease = (Disease) objectFacade.getObject(new DiseaseDAO(new Disease()), diseaseId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Disease",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", disease));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -88,8 +87,7 @@ public class DiseaseController {
         List<Disease> diseases = new ArrayList<>();
         try {
             diseases = (List<Disease>) objectFacade.getObjects(new DiseaseDAO(new Disease()), -1);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Diseases",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diseases));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),

@@ -59,8 +59,7 @@ public class SymptomController {
         Symptom symptom = new Symptom();
         try {
             symptom = (Symptom) objectFacade.getObject(new SymptomDAO(new Symptom()), symptomId);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Symptom ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", symptom));
         } catch (EntityNotFound e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -88,8 +87,7 @@ public class SymptomController {
         List<Symptom> symptoms = new ArrayList<>();
         try {
             symptoms = (List<Symptom>) objectFacade.getObjects(new SymptomDAO(new Symptom()), -1);
-            loggingService.createLog(ControllerUtils.combinePaths(request) + "Symptoms ",
-                    Consts.LOG_SUCCESFULLY_RETRIEVED, LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
 
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", symptoms));
         } catch (EntityNotFound e) {
