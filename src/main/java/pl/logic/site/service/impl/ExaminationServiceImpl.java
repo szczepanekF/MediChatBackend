@@ -130,11 +130,6 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Override
     public List<Examination> getExaminations(int patientId) {
         List<Examination> examinations = examinationRepository.findAllByIdPatient(patientId);
-        if (examinations.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404);
-            log.error(err.getMessage());
-            throw err;
-        }
         log.info("All examinations were successfully retrieved");
         return examinations;
     }
