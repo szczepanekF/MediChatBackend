@@ -61,11 +61,16 @@ public class ChartController {
         Chart chart = new Chart();
         try {
             chart = (Chart) objectFacade.createObject(chartDao);
-//            loggingService.addLog(0, new Date(), Consts.LOG_SUCCESFULLY_CREATED)
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "Chart ", chart,
+                    LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", chart));
         } catch (SaveError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), chart));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -87,14 +92,15 @@ public class ChartController {
         try {
             charts = (List<Chart>) objectFacade.getObjects(new ChartDAO(new Chart()), patientId);
 
-            loggingService.createLog(ControllerUtils.combinePaths(request)+"Charts ", Consts.LOG_SUCCESFULLY_RETRIEVED,
-                    LogType.info, AuthorizationHeaderHolder.getAuthorizationHeader());
-            loggingService.createLog(ControllerUtils.combinePaths(request)+Consts.LOG_SUCCESFULLY_CREATED+"Charts ", charts,
-                    LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), charts));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -117,11 +123,16 @@ public class ChartController {
     public ResponseEntity<Response> getChartsByDiagnosis(@Parameter(description = "1 for charts with diagnosis request, 0 otherwise") @PathVariable int state, @Parameter(description = "id of patient for which charts are retrieved") @PathVariable int patientId) {
         List<Chart> charts = new ArrayList<>();
         try {
-            charts = (List<Chart>) objectFacade.getChartsByStateAndPatientId(state, patientId);
+            charts = objectFacade.getChartsByStateAndPatientId(state, patientId);
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", charts));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), charts));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -143,10 +154,15 @@ public class ChartController {
         Chart chart = new Chart();
         try {
             chart = (Chart) objectFacade.getObject(new ChartDAO(new Chart()), chartId);
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", chart));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), chart));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -170,13 +186,22 @@ public class ChartController {
         Chart chart = new Chart();
         try {
             chart = (Chart) objectFacade.updateObject(chartDAO, chartId);
+
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_UPDATED + "Chart ", chart,
+                    LogType.update, AuthorizationHeaderHolder.getAuthorizationHeader());
             // Update chart logic here
             return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", chart));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), chart));
         } catch (SaveError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), chart));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -200,12 +225,21 @@ public class ChartController {
         try {
             objectFacade.deleteObject(new ChartDAO(new Chart()), chartId);
             // Update chart logic here
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_DELETED + "Chart ", chart,
+                    LogType.delete, AuthorizationHeaderHolder.getAuthorizationHeader());
+
             return ResponseEntity.status(210).body(new Response<>(Consts.C210, 210, "", chart));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), chart));
         } catch (DeleteError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), chart));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

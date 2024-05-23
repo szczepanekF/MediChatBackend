@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -14,11 +15,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.logic.site.aspects.AuthorizationHeaderHolder;
+import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.dao.DiseaseDAO;
+import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.response.Response;
+import pl.logic.site.service.LoggingService;
 import pl.logic.site.utils.Consts;
 
 import java.util.ArrayList;
@@ -33,6 +38,10 @@ import java.util.List;
 public class DiseaseController {
     @Autowired
     ObjectFacade objectFacade;
+    @Autowired
+    LoggingService loggingService;
+    @Autowired
+    HttpServletRequest request;
 
     /**
      * An endpoint for getting disease by ID
@@ -50,10 +59,15 @@ public class DiseaseController {
         Disease disease = new Disease();
         try {
             disease = (Disease) objectFacade.getObject(new DiseaseDAO(new Disease()), diseaseId);
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", disease));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), disease));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
@@ -73,10 +87,15 @@ public class DiseaseController {
         List<Disease> diseases = new ArrayList<>();
         try {
             diseases = (List<Disease>) objectFacade.getObjects(new DiseaseDAO(new Disease()), -1);
+            
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diseases));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), diseases));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }

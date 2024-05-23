@@ -2,8 +2,12 @@ package pl.logic.site.utils;
 
 public class Consts {
     public static String INITIALIZED = "Initialized.";
+    public static String LOG_ERROR = " ERROR: ";
+
     public static String LOG_SUCCESFULLY_CREATED = " Succesfully created entity: ";
-    public static String LOG_SUCCESFULLY_RETRIEVED = " Successfully retrieved entity: ";
+    public static String LOG_SUCCESFULLY_RETRIEVED = " Successfully retrieved entity/entities ";
+    public static String LOG_SUCCESFULLY_DELETED = " Successfully deleted entity: ";
+    public static String LOG_SUCCESFULLY_UPDATED = " Successfully updated entity: ";
     public static String C200 = "Succesfully executed.";
     public static String C201 = "The request has been fulfilled, resulting in the creation of a new resource.";
     public static String C209 = "The request has been fulfilled, resulting in the updation of a existing resource.";

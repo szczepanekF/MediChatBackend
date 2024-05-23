@@ -162,8 +162,10 @@ public class ChartServiceImpl implements ChartService {
             if (state == 1) {
                 if (!diagnosisRequestList.isEmpty()) {
                     for (DiagnosisRequest diagnosisRequest : diagnosisRequestList) {
-                        if (!diagnosisRequest.getDiagnosis().isEmpty())
+                        if (!diagnosisRequest.getDiagnosis().isEmpty()) {
                             chartsToRemove.add(chart);
+                            break;
+                        }
                     }
                 }
             } else {
@@ -171,8 +173,10 @@ public class ChartServiceImpl implements ChartService {
                     chartsToRemove.add(chart);
                 else {
                     for (DiagnosisRequest diagnosisRequest : diagnosisRequestList) {
-                        if (diagnosisRequest.getDiagnosis().isEmpty())
+                        if (diagnosisRequest.getDiagnosis().isEmpty()) {
                             chartsToRemove.add(chart);
+                            break;
+                        }
                     }
 
                 }

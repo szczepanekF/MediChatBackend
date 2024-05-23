@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import pl.logic.site.aspects.AuthorizationHeaderHolder;
+import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.model.dao.PatientDAO;
+import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Message;
@@ -33,6 +38,7 @@ import pl.logic.site.model.request.SenderRecipientRequest;
 import pl.logic.site.model.response.Response;
 import pl.logic.site.repository.SpringUserRepository;
 import pl.logic.site.service.ChatRoomService;
+import pl.logic.site.service.LoggingService;
 import pl.logic.site.service.impl.MessageServiceImpl;
 import pl.logic.site.utils.Consts;
 
@@ -53,6 +59,8 @@ public class ChatController {
     private final ChatRoomService chatRoomService;
 
     private final SpringUserRepository springUserRepository;
+    private final LoggingService loggingService;
+    private final HttpServletRequest request;
 
 //    /**
 //     * Endpoint used for sending messages to a specific user using WebSocket.
@@ -78,11 +86,14 @@ public class ChatController {
     public void sendMessage(@Payload Message message) {
         System.out.println(message);
         MessageService.save(message);
+        loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "Message ", message,
+                LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
     }
 
     /**
      * Endpoint used for finding messages by sender and recipient ID
      * (they are user ID of conversing patient and doctor).
+     *
      * @param senderId
      * @param recipientId
      * @return List of messages belonging to the specified sender&recipient ID
@@ -104,13 +115,16 @@ public class ChatController {
             messages = MessageService.findMessages(senderId, recipientId);
             return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", messages));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
 
     }
-
 
     @ResponseBody
     @GetMapping("/chatController/chats/{senderId}/{recipientId}")
@@ -120,22 +134,28 @@ public class ChatController {
             @ApiResponse(responseCode = "455", description = "Error search process")
     })
     public ResponseEntity<Response> findChatsBySenderRecipient(@PathVariable int senderId,
-                                                 @PathVariable int recipientId) {
+                                                               @PathVariable int recipientId) {
         Optional<Room> room;
         try {
             room = chatRoomService.getChatRoomIdBySenderRecipient(senderId, recipientId);
-            if(room.isPresent())
+
+            if (room.isPresent()) {
+
                 return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", room));
+            }
             else
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>("Chat room not found", 404, "", null));
         } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
 
     }
-
 
     @ResponseBody
     @GetMapping(value = "/chatController/chats/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -145,18 +165,23 @@ public class ChatController {
             @ApiResponse(responseCode = "404", description = "Entity not found"),
             @ApiResponse(responseCode = "455", description = "Error search process")
     })
-    public ResponseEntity<Response> getChatsBySpringUserId(@Parameter(description = "id of spring user") @PathVariable int id){
+    public ResponseEntity<Response> getChatsBySpringUserId(@Parameter(description = "id of spring user") @PathVariable int id) {
         List<Room> rooms = new ArrayList<>();
-        try{
-            rooms  = MessageService.findAllUserRooms(id);
+        try {
+            rooms = MessageService.findAllUserRooms(id);
+
             return ResponseEntity.status(200).body(new Response<>(Consts.C200, 200, "", rooms));
         } catch (EntityNotFound e) {
-            e.printStackTrace();
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), rooms));
         } catch (DeleteError e) {
-            e.printStackTrace();
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(455).body(new Response<>(e.getMessage(), 455, Arrays.toString(e.getStackTrace()), rooms));
         } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), rooms));
         }
     }
@@ -168,16 +193,20 @@ public class ChatController {
             @ApiResponse(responseCode = "201", description = "Successfully created chat room"),
             @ApiResponse(responseCode = "453", description = "Error during saving an entity")
     })
-    public ResponseEntity<Response> getChatsBySpringUserId(@RequestBody SenderRecipientRequest senderRecipientRequest){
+    public ResponseEntity<Response> getChatsBySpringUserId(@RequestBody SenderRecipientRequest senderRecipientRequest) {
         List<Room> rooms = new ArrayList<>();
-        try{
+        try {
             rooms = chatRoomService.createChatId(senderRecipientRequest.getSenderId(), senderRecipientRequest.getRecipientId());
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "ChatRooms ", rooms,
+                    LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(201).body(new Response<>(Consts.C201, 201, "", rooms));
-        }  catch (DeleteError e) {
-            e.printStackTrace();
+        } catch (DeleteError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), rooms));
-        }  catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), rooms));
         }
     }
