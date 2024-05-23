@@ -1,6 +1,9 @@
 package pl.logic.site.service;
 
 
+import pl.logic.site.model.dao.SpecialisationDAO;
+import pl.logic.site.model.dao.SpringUserDAO;
+import pl.logic.site.model.mysql.Specialisation;
 import pl.logic.site.model.mysql.SpringUser;
 
 import java.util.List;
@@ -22,6 +25,7 @@ public interface UserService {
 
     public Optional<SpringUser> findSpringUser(int id, boolean patient);
     public Optional<SpringUser> findSpringUserById(int id);
+    SpringUser updateSpringUser(SpringUserDAO springUserDAO, int springUserId);
 
 
 

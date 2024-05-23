@@ -18,12 +18,16 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import pl.logic.site.aspects.AuthorizationHeaderHolder;
 import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.facade.ObjectFacade;
+import pl.logic.site.model.dao.SpringUserDAO;
 import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.EntityNotFound;
+import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.model.response.Response;
@@ -207,6 +211,34 @@ public class UserController {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
                     LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), userFilter));
+        }
+    }
+
+    /**
+     * An endpoint for updating spring user by id
+     * @param springUserId
+     * @param springUserDao
+     * @return
+     */
+    @PutMapping(value = "/users/{springUserId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update spring user", description = "Update specific spring user by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "209", description = "Successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Entity not found"),
+            @ApiResponse(responseCode = "454", description = "Error during update")
+    })
+    public ResponseEntity<Response> updatePatient(@Parameter(description = "id of spring user to be replaced") @PathVariable int springUserId, @RequestBody SpringUserDAO springUserDao) {
+        SpringUser springUser = new SpringUser();
+        try {
+            springUser = (SpringUser) objectFacade.updateObject(springUserDao, springUserId);
+            // Update patient logic here
+            return ResponseEntity.status(209).body(new Response<>(Consts.C209, 209, "", springUser));
+        } catch (EntityNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), springUser));
+        } catch (SaveError e) {
+            return ResponseEntity.status(454).body(new Response<>(e.getMessage(), 454, Arrays.toString(e.getStackTrace()), springUser));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
 

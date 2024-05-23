@@ -149,6 +149,7 @@ public class ObjectFacade {
             case ChartDAO chart -> chartService.updateChart(chart, id);
             case ChartSymptomDAO chartSymptom -> chartSymptomService.updateChartSymptom(chartSymptom, id);
             case SpecialisationDAO specialisation -> specialisationService.updateSpecialisation(specialisation, id);
+            case SpringUserDAO springUser -> userService.updateSpringUser(springUser, id);
             case ExaminationDAO examination -> examinationService.updateExamination(examination, id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
