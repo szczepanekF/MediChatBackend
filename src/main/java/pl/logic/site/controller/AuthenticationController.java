@@ -124,6 +124,7 @@ public class AuthenticationController {
                 put("token", recoveryToken);
                 put("emailAddress", userEmailAddress);
                 put("name", username);
+                put("subject", "RESET PASSWORD");
             }};
             emailService.sendEmail(EmailType.RESET_PASSWORD, emailParameters);
             return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "Mail sent to " + userEmailAddress));

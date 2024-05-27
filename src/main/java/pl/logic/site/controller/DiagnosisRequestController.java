@@ -87,6 +87,7 @@ public class DiagnosisRequestController {
                 put("requestContent", diagnosis);
                 put("thisUserId", String.valueOf(springUser.getId()));
                 put("patientUserId", String.valueOf(patient.getId()));
+                put("subject", "REQUEST DIAGNOSIS");
             }};
             emailService.sendEmail(EmailType.DIAGNOSIS_REQUEST, emailParameters);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", diagnosisRequest));
