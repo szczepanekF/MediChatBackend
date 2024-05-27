@@ -73,7 +73,7 @@ public class AuthenticationServiceImpl {
 
     private boolean isEmailOrUsernameJustExist(String email, String username) {
         return springUserRepository.findByEmail(email).isPresent()
-                && springUserRepository.findByUsername(username).isPresent();
+                || springUserRepository.findByUsername(username).isPresent();
     }
 
     private SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId, Role role) {

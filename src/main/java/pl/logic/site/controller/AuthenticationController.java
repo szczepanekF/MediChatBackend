@@ -8,6 +8,7 @@ import pl.logic.site.aspects.AuthorizationHeaderHolder;
 import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.model.enums.EmailType;
 import pl.logic.site.model.enums.LogType;
+import pl.logic.site.model.exception.EmailOrUsernameJustExist;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.request.NewPasswordRequest;
 import pl.logic.site.model.response.AuthenticationResponse;
@@ -48,6 +49,10 @@ public class AuthenticationController {
             loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_SUCCESFULLY_CREATED + "Token ", authenticationResponse,
                     LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", authenticationResponse));
+        } catch (EmailOrUsernameJustExist e) {
+            loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(422).body(new Response<>("Username or Email address just exists", 422, Arrays.toString(e.getStackTrace()), null));
         } catch (SaveError e) {
             loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_ERROR, e.getStackTrace(),
                     LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
@@ -66,7 +71,18 @@ public class AuthenticationController {
             AuthenticationResponse authenticationResponse = authenticationService.registerPatient(request);
             loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_SUCCESFULLY_CREATED + "Token ", authenticationResponse,
                     LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
+            Map<String, String> emailParameters = new HashMap<>() {{
+                put("username", request.getUsername());
+                put("emailAddress", request.getEmail());
+                put("name", request.getName());
+                put("subject", "GREETING");
+            }};
+            emailService.sendEmail(EmailType.NEW_ACCOUNT, emailParameters);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", authenticationResponse));
+        } catch (EmailOrUsernameJustExist e) {
+            loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(422).body(new Response<>("Username or Email address just exists", 422, Arrays.toString(e.getStackTrace()), null));
         } catch (SaveError e) {
             loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_ERROR, e.getStackTrace(),
                     LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
