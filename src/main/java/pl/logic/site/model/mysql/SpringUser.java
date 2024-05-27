@@ -27,6 +27,7 @@ public class SpringUser implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
+    @Column(unique = true)
     private String email;
     private String password;
 
