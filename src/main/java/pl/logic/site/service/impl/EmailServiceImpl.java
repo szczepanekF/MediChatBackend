@@ -52,12 +52,11 @@ public class EmailServiceImpl {
 
         String htmlContent = getCompletedHtmlContent(params, emailType);
         System.out.print(htmlContent);
-        String subject = "RESET PASSWORD";
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(params.get("emailAddress"));
-        helper.setSubject(subject);
+        helper.setSubject(params.get("subject"));
         helper.setText(htmlContent, true);
         javaMailSender.send(message);
     }
