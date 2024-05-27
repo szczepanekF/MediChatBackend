@@ -71,6 +71,13 @@ public class AuthenticationController {
             AuthenticationResponse authenticationResponse = authenticationService.registerPatient(request);
             loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_SUCCESFULLY_CREATED + "Token ", authenticationResponse,
                     LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
+            Map<String, String> emailParameters = new HashMap<>() {{
+                put("username", request.getUsername());
+                put("emailAddress", request.getEmail());
+                put("name", request.getName());
+                put("subject", "GREETING");
+            }};
+            emailService.sendEmail(EmailType.NEW_ACCOUNT, emailParameters);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", authenticationResponse));
         } catch (EmailOrUsernameJustExist e) {
             loggingService.createLog(ControllerUtils.combinePaths(httpServletRequest) + Consts.LOG_ERROR, e.getStackTrace(),
