@@ -1,14 +1,11 @@
 package pl.logic.site.model.mysql;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.persistence.Id;
 import org.springframework.data.annotation.Immutable;
-
-import jakarta.persistence.Column;
 
 @Slf4j
 @Immutable
@@ -18,6 +15,7 @@ import jakarta.persistence.Column;
 @Entity
 public class DiseaseSymptom {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
