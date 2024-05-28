@@ -33,6 +33,9 @@ public class DiagnosisRequest {
     @Column(name = "diagnosis")
     private String diagnosis;
 
+    @Column(name = "id_disease")
+    private int idDisease;
+
     @Column(name = "voice_diagnosis")
     private String voiceDiagnosis;
 

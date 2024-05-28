@@ -80,17 +80,17 @@ public class DiagnosisRequestController {
             String diagnosis = diagnosisRequest.getDiagnosis();
             SpringUser springUser = objectFacade.getUserIdByDoctorOrPatientId(doctor.getId(), false).orElseThrow();
             if(doctor.getIsBot() == 0) {
-                Map<String, String> emailParameters = new HashMap<>() {{
-                    put("requestUserFullName", patient.getName() + " " + patient.getSurname());
-                    put("emailAddress", springUser.getEmail());
-                    put("name", doctor.getName());
-                    put("date", dateString);
-                    put("requestContent", diagnosis);
-                    put("thisUserId", String.valueOf(springUser.getId()));
-                    put("patientUserId", String.valueOf(patient.getId()));
-                    put("subject", "REQUEST DIAGNOSIS");
-                }};
-                emailService.sendEmail(EmailType.DIAGNOSIS_REQUEST, emailParameters);
+//                Map<String, String> emailParameters = new HashMap<>() {{
+//                    put("requestUserFullName", patient.getName() + " " + patient.getSurname());
+//                    put("emailAddress", springUser.getEmail());
+//                    put("name", doctor.getName());
+//                    put("date", dateString);
+//                    put("requestContent", diagnosis);
+//                    put("thisUserId", String.valueOf(springUser.getId()));
+//                    put("patientUserId", String.valueOf(patient.getId()));
+//                    put("subject", "REQUEST DIAGNOSIS");
+//                }};
+//                emailService.sendEmail(EmailType.DIAGNOSIS_REQUEST, emailParameters);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", diagnosisRequest));
         } catch (SaveError e) {

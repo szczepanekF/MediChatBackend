@@ -48,6 +48,7 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getIdChart(),
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
                 diagnosisRequest.diagnosisRequest().getDiagnosis(),
+                diagnosisRequest.diagnosisRequest().getIdDisease(),
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
                 diagnosisRequest.diagnosisRequest().getCreationDate(),
                 diagnosisRequest.diagnosisRequest().getModificationDate()
@@ -126,6 +127,7 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
                 diagnosisRequest.diagnosisRequest().getIdChart(),
                 diagnosisRequest.diagnosisRequest().getIdDoctor(),
                 diagnosisRequest.diagnosisRequest().getDiagnosis(),
+                diagnosisRequest.diagnosisRequest().getIdDisease(),
                 diagnosisRequest.diagnosisRequest().getVoiceDiagnosis(),
                 diagnosisRequest.diagnosisRequest().getCreationDate(),
                 diagnosisRequest.diagnosisRequest().getModificationDate()
