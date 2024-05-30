@@ -46,9 +46,9 @@ public class DiagnosisRequestImplTest {
 
     @BeforeEach
     public void setUp() {
-        diagnosisRequestWithId0 = new DiagnosisRequest(0, 1, 0, "", "", new Date(), new Date());
-        diagnosisRequest2 = new DiagnosisRequest(1, 2, 0, "", "", new Date(), new Date());
-        diagnosisRequest3 = new DiagnosisRequest(2, 1, 0, "", "", new Date(), new Date());
+        diagnosisRequestWithId0 = new DiagnosisRequest(0, 1, 0, "", 1, "", new Date(), new Date());
+        diagnosisRequest2 = new DiagnosisRequest(1, 2, 0, "", 1,"", new Date(), new Date());
+        diagnosisRequest3 = new DiagnosisRequest(2, 1, 0, "", 1,"", new Date(), new Date());
 
     }
 
