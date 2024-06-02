@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface DiseaseSymptomRepository extends JpaRepository<DiseaseSymptom, Integer> {
-    List<DiseaseSymptom> findByIdSymtpom(int id);
+    List<DiseaseSymptom> findByIdSymptom(int id);
     List<DiseaseSymptom> findByIdDisease(int id);
 }

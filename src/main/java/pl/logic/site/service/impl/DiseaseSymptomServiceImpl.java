@@ -40,7 +40,7 @@ public class DiseaseSymptomServiceImpl implements DiseaseSymptomService {
      */
     @Override
     public List<DiseaseSymptom> getDiseaseSymptomsForSymptom(int symptomId) {
-        List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomRepository.findByIdSymtpom(symptomId);
+        List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomRepository.findByIdSymptom(symptomId);
         if (diseaseSymptoms.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());
