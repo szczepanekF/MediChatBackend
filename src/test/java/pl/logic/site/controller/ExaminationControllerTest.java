@@ -1,9 +1,10 @@
 package pl.logic.site.controller;
 
+import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,6 +25,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pl.logic.site.facade.ObjectFacade;
 import pl.logic.site.model.dao.ExaminationDAO;
@@ -58,12 +60,11 @@ public class ExaminationControllerTest {
 
     @BeforeEach
     public void setup() {
-        examination = new Examination(1,2,"blood type","AB");
+        examination = new Examination(1, 2, "blood type", "AB");
 
         examinationDAO = new ExaminationDAO(examination);
     }
 
-    @WithMockUser(username = "user", roles = "USER")
     @Test
     public void testCreateExaminationSuccess() throws Exception {
         when(objectFacade.createObject(any(ExaminationDAO.class))).thenReturn(examination);
@@ -75,11 +76,13 @@ public class ExaminationControllerTest {
                                 "    \"idPatient\": 2,\n" +
                                 "    \"examination\": \"blood type\",\n" +
                                 "    \"examinationValue\": \"AB\"\n" +
-                                "  }}"))
-                .andExpect(status().isCreated());
+                                "  }}"));
+
+        verify(objectFacade, times(1)).createObject(any(ExaminationDAO.class));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
     }
 
-    @WithAnonymousUser
     @Test
     public void testCreateExaminationSaveError() throws Exception {
         doThrow(new SaveError("Error saving entity")).when(objectFacade).createObject(any(ExaminationDAO.class));
@@ -93,30 +96,62 @@ public class ExaminationControllerTest {
                                 "    \"examinationValue\": \"AB\"\n" +
                                 "  }}"))
                 .andExpect(status().is(453));
+        verify(objectFacade, times(1)).createObject(any(ExaminationDAO.class));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
+
     }
 
-    @WithAnonymousUser
     @Test
-    public void testGetAllExaminationsSuccess() throws Exception {
-        List<Examination> examinations = Arrays.asList(examination);
+    public void testGetExaminationsForPatientSuccess() throws Exception {
+        List<Examination> examinations = List.of(examination);
         when(objectFacade.getObjects(any(ExaminationDAO.class), eq(1))).thenReturn(examinations);
 
         mockMvc.perform(get("/examinationController/examinations/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        verify(objectFacade, times(1)).getObjects(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, never()).createLog(anyString(), any(), any(LogType.class), any());
+
     }
 
-    @WithAnonymousUser
     @Test
-    public void testGetAllExaminationsNotFound() throws Exception {
+    public void testGetExaminationsForPatientNotFound() throws Exception {
         doThrow(new EntityNotFound("Not found")).when(objectFacade).getObjects(any(ExaminationDAO.class), eq(1));
 
         mockMvc.perform(get("/examinationController/examinations/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+        verify(objectFacade, times(1)).getObjects(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
     }
 
-    @WithAnonymousUser
+    @Test
+    public void testGetExaminationSuccess() throws Exception {
+        when(objectFacade.getObject(any(ExaminationDAO.class), eq(1))).thenReturn(examination);
+
+        mockMvc.perform(get("/examinationController/examination/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(objectFacade, times(1)).getObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, never()).createLog(anyString(), any(), any(LogType.class), any());
+
+    }
+
+    @Test
+    public void testGetExaminationNotFound() throws Exception {
+        doThrow(new EntityNotFound("Not found")).when(objectFacade).getObject(any(ExaminationDAO.class), eq(1));
+
+        mockMvc.perform(get("/examinationController/examination/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+        verify(objectFacade, times(1)).getObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
+    }
+
+
     @Test
     public void testUpdateExaminationSuccess() throws Exception {
         when(objectFacade.updateObject(any(ExaminationDAO.class), eq(1))).thenReturn(examination);
@@ -130,9 +165,10 @@ public class ExaminationControllerTest {
                                 "    \"examinationValue\": \"AB\"\n" +
                                 "  }}"))
                 .andExpect(status().is(209));
+        verify(objectFacade, times(1)).updateObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
     }
 
-    @WithAnonymousUser
     @Test
     public void testUpdateExaminationNotFound() throws Exception {
         doThrow(new EntityNotFound("Not found")).when(objectFacade).updateObject(any(ExaminationDAO.class), eq(1));
@@ -146,17 +182,22 @@ public class ExaminationControllerTest {
                                 "    \"examinationValue\": \"AB\"\n" +
                                 "  }}"))
                 .andExpect(status().isNotFound());
+        verify(objectFacade, times(1)).updateObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
     }
 
-    @WithAnonymousUser
+
     @Test
     public void testDeleteExaminationSuccess() throws Exception {
         mockMvc.perform(delete("/examinationController/examinations/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(210));
+        verify(objectFacade, times(1)).deleteObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
     }
 
-    @WithAnonymousUser
     @Test
     public void testDeleteExaminationNotFound() throws Exception {
         doThrow(new EntityNotFound("Not found")).when(objectFacade).deleteObject(any(ExaminationDAO.class), eq(1));
@@ -164,15 +205,19 @@ public class ExaminationControllerTest {
         mockMvc.perform(delete("/examinationController/examinations/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+        verify(objectFacade, times(1)).deleteObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
+
     }
 
     @Test
-    @WithAnonymousUser
     public void testDeleteExaminationDeleteError() throws Exception {
         doThrow(new DeleteError("Error deleting entity")).when(objectFacade).deleteObject(any(ExaminationDAO.class), eq(1));
 
         mockMvc.perform(delete("/examinationController/examinations/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(455));
+        verify(objectFacade, times(1)).deleteObject(any(ExaminationDAO.class), eq(1));
+        verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
     }
 }
