@@ -76,21 +76,21 @@ public  class DiseaseSymptomServiceImplTest {
     @Test
     void shouldGetAllDiseaseSymptomsForSymptom() {
         List<DiseaseSymptom> testDiseaseSymptomList = List.of(diseaseSymptom1, diseaseSymptom2, diseaseSymptom3);
-        when(diseaseSymptomRepository.findByIdSymtpom(anyInt())).thenReturn(List.of(diseaseSymptom1, diseaseSymptom3));
+        when(diseaseSymptomRepository.findByIdSymptom(anyInt())).thenReturn(List.of(diseaseSymptom1, diseaseSymptom3));
 
         List<DiseaseSymptom> diseaseSymptoms = diseaseSymptomService.getDiseaseSymptomsForSymptom(1);
 
         Assertions.assertNotEquals(testDiseaseSymptomList, diseaseSymptoms);
         Assertions.assertEquals(List.of(diseaseSymptom1, diseaseSymptom3), diseaseSymptoms);
-        verify(diseaseSymptomRepository, times(1)).findByIdSymtpom(anyInt());
+        verify(diseaseSymptomRepository, times(1)).findByIdSymptom(anyInt());
     }
 
     @Test
     void shouldThrowWhenNoDiseaseSymptomsForGivenSymptomInRepository() {
-        when(diseaseSymptomRepository.findByIdSymtpom(anyInt())).thenReturn(List.of());
+        when(diseaseSymptomRepository.findByIdSymptom(anyInt())).thenReturn(List.of());
         Assertions.assertThrows(EntityNotFound.class, () -> diseaseSymptomService.getDiseaseSymptomsForSymptom(1));
 
-        verify(diseaseSymptomRepository, times(1)).findByIdSymtpom(anyInt());
+        verify(diseaseSymptomRepository, times(1)).findByIdSymptom(anyInt());
     }
 
     @Test

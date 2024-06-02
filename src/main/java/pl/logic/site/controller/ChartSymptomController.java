@@ -75,6 +75,7 @@ public class ChartSymptomController {
     /**
      * An endpoint for getting all chartSymptom entities
      *
+     * @param id - the id of the chart
      * @return HTTP response
      */
     @GetMapping(value = "/chartSymptoms/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

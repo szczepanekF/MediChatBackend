@@ -23,5 +23,5 @@ public class DiseaseSymptom {
     private int idDisease;
 
     @Column(name = "id_symptom")
-    private int idSymtpom;
+    private int idSymptom;
 }
