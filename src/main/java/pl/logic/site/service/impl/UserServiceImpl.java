@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    public List<Optional<SpringUser>> getAllUsers(int userFilter){
+    public List<SpringUser> getAllUsers(int userFilter){
         return switch (userFilter) {
             case 0 -> springUserRepository.retrieveAll();
             case 1 -> springUserRepository.findAllByPatientIdNotNull();

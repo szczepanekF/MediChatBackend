@@ -21,7 +21,7 @@ public interface UserService {
 
     public String createChatId(int senderId, int recipientId);
 
-    public List<Optional<SpringUser>> getAllUsers(int userFilter);
+    public List<SpringUser> getAllUsers(int userFilter);
 
     public Optional<SpringUser> findSpringUser(int id, boolean patient);
     public Optional<SpringUser> findSpringUserById(int id);
