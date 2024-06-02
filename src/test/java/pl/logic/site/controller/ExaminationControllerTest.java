@@ -1,5 +1,6 @@
 package pl.logic.site.controller;
 
+import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -67,6 +68,7 @@ public class ExaminationControllerTest {
                 .andExpect(jsonPath("$.containedObject.idPatient").value(examination.getIdPatient()))
                 .andExpect(jsonPath("$.containedObject.examination").value(examination.getExamination()))
                 .andExpect(jsonPath("$.containedObject.examinationValue").value(examination.getExaminationValue()));
+
         verify(objectFacade, times(1)).createObject(any(ExaminationDAO.class));
         verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
 
@@ -164,6 +166,7 @@ public class ExaminationControllerTest {
                                     "examination": "blood type",
                                     "examinationValue": "AB"
                                   }}"""))
+                .andExpect(status().is(209))
                 .andExpect(jsonPath("$.containedObject.id").value("1"))
                 .andExpect(jsonPath("$.containedObject.idPatient").value(examination.getIdPatient()))
                 .andExpect(jsonPath("$.containedObject.examination").value(examination.getExamination()))
@@ -199,7 +202,6 @@ public class ExaminationControllerTest {
         mockMvc.perform(delete("/examinationController/examinations/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(210));
-
         verify(objectFacade, times(1)).deleteObject(any(ExaminationDAO.class), eq(1));
         verify(loggingService, times(1)).createLog(anyString(), any(), any(LogType.class), any());
 

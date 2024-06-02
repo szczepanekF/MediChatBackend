@@ -251,6 +251,7 @@ public class PatientControllerTest {
                                     "weightUnit": "kg"
                                   }
                                 }"""))
+                .andExpect(status().is(209))
                 .andExpect(jsonPath("$.containedObject.id").value("1"))
                 .andExpect(jsonPath("$.containedObject.name").value(patient.getName()))
                 .andExpect(jsonPath("$.containedObject.surname").value(patient.getSurname()))
