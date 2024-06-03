@@ -34,7 +34,7 @@ public class DiagnosisRequest {
     private String diagnosis;
 
     @Column(name = "id_disease")
-    private int idDisease;
+    private int idDisease = -1;
 
     @Column(name = "voice_diagnosis")
     private String voiceDiagnosis;

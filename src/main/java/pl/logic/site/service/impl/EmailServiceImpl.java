@@ -31,7 +31,7 @@ public class EmailServiceImpl {
             case DIAGNOSIS_REQUEST -> template_name = "_diagnosis_request_info_template.html";
             case NEW_ACCOUNT -> template_name = "_new_account_template.html";
         }
-        String template_path = "C:\\Users\\jkowa\\Desktop\\Studia\\Semestr VI\\Project\\ZZJPBackend\\src\\main\\java\\pl\\logic\\site\\mails\\" + template_name;
+        String template_path = "src\\main\\resources\\static\\mails\\" + template_name;
         return new String(Files.readAllBytes(Paths.get(template_path)));
     }
 
