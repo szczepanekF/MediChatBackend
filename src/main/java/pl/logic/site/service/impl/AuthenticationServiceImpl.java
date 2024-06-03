@@ -71,12 +71,12 @@ public class AuthenticationServiceImpl {
         return createAuthenticationResponse(springUser);
     }
 
-    private boolean isEmailOrUsernameJustExist(String email, String username) {
+    public boolean isEmailOrUsernameJustExist(String email, String username) {
         return springUserRepository.findByEmail(email).isPresent()
                 || springUserRepository.findByUsername(username).isPresent();
     }
 
-    private SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId, Role role) {
+    public SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId, Role role) {
         SpringUser springUser = SpringUser.builder()
                 .email(email)
                 .username(username)
@@ -89,7 +89,7 @@ public class AuthenticationServiceImpl {
         return springUserRepository.save(springUser);
     }
 
-    private AuthenticationResponse createAuthenticationResponse(SpringUser springUser) {
+    AuthenticationResponse createAuthenticationResponse(SpringUser springUser) {
         Map<String, Object> extraClaims = getExtraClaims(springUser);
         extraClaims.put("emailAddress", springUser.getEmail());
         extraClaims.put("role", springUser.getRole());
