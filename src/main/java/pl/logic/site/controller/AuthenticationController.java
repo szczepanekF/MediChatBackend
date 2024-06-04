@@ -174,4 +174,10 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C454_UPDATING_ERROR, 454, "", "Reset password operation failed"));
         }
     }
+
+    @GetMapping("/register/google/patient")
+    public ResponseEntity<Response> registerWithGoogle() {
+        return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", "hello"));
+
+    }
 }
