@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.logic.site.model.enums.Status;
 import pl.logic.site.model.exception.EmailOrUsernameJustExist;
 import pl.logic.site.model.exception.InvalidPassword;
+import pl.logic.site.model.mysql.Log;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Role;
 import pl.logic.site.model.mysql.SpringUser;
@@ -23,9 +24,7 @@ import pl.logic.site.repository.PasswordRecoveryTokenRepository;
 import pl.logic.site.repository.PatientRepository;
 import pl.logic.site.repository.SpringUserRepository;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,6 +50,7 @@ public class AuthenticationServiceImplTest {
     RegisterPatientRequest patientWithExistingEmail;
     SpringUser springUser;
     NewPasswordRequest newPasswordRequest;
+    Patient testPatient;
 
 
 
@@ -58,7 +58,27 @@ public class AuthenticationServiceImplTest {
     public void setUp() {
         patient = new RegisterPatientRequest("Testname", "Surname", new Date(), 180, 98, "male", Status.ONLINE, "testMail", "username", "password", "cm", "kg");
         patientWithExistingEmail = new RegisterPatientRequest("Testname", "Surname", new Date(), 180, 98, "male", Status.ONLINE, "nowekonto@wp.pl", "username", "password", "cm", "kg");
-        springUser = new SpringUser(1, "username", "email", "password", null, 10, new Date(), Role.DOCTOR);
+        springUser = SpringUser.builder()
+                .email("test@mail.com")
+                .username("testUser")
+                .password("encodedPassword")
+                .doctorId(null)
+                .patientId(1)
+                .role(Role.PATIENT)
+                .creationDate(new Date())
+                .build();
+        testPatient = Patient.builder()
+                .id(1)
+                .name("John")
+                .surname("Doe")
+                .birth_date(new Date())
+                .height(180)
+                .weight(75)
+                .gender("Male")
+                .status(Status.ONLINE)
+                .heightUnit("cm")
+                .weightUnit("kg")
+                .build();
         newPasswordRequest = new NewPasswordRequest(1, "newPassword");
     }
     static Stream<Arguments> provideStateAndDiagnosis() {
@@ -90,11 +110,10 @@ public class AuthenticationServiceImplTest {
         when(springUserRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         when(patientRepository.save(any(Patient.class))).thenReturn(new Patient());
 
-        SpringUser mockSpringUser = new SpringUser();
         when(authenticationService.createSpringUser(anyString(), anyString(), anyString(), anyInt(), anyInt(), any(Role.class)))
-                .thenReturn(mockSpringUser);
+                .thenReturn(springUser);
         AuthenticationResponse expectedResponse = new AuthenticationResponse();
-        when(authenticationService.createAuthenticationResponse(mockSpringUser)).thenReturn(expectedResponse);
+        when(authenticationService.createAuthenticationResponse(springUser)).thenReturn(expectedResponse);
         AuthenticationResponse response = authenticationService.registerPatient(patient);
         assertEquals(expectedResponse, response);
     }
@@ -124,8 +143,9 @@ public class AuthenticationServiceImplTest {
 
         when(springUserRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.of(springUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(patientRepository.findById(springUser.getPatientId())).thenReturn(Optional.of(testPatient));
         AuthenticationResponse expectedResponse = new AuthenticationResponse();
-        when(authenticationService.createAuthenticationResponse(any(SpringUser.class))).thenReturn(expectedResponse);
+        when(authenticationService.createAuthenticationResponse(springUser)).thenReturn(expectedResponse);
         AuthenticationResponse response = authenticationService.login(request);
         assertEquals(expectedResponse, response);
     }
@@ -136,8 +156,33 @@ public class AuthenticationServiceImplTest {
         when(springUserRepository.findById(1)).thenReturn(Optional.of(springUser));
         when(passwordEncoder.encode(newPasswordRequest.getNewPassword())).thenReturn("newPassword");
         authenticationService.resetUserPassword(newPasswordRequest);
-        verify(springUserRepository, times(1)).save(springUser); // Verify that the user is saved
+        verify(springUserRepository, times(1)).save(springUser);
         assertEquals("newPassword", springUser.getPassword());
+    }
+
+
+    @Test
+    void doesTokenExistAfterLogin() {
+        LoginRequest loginPatient = LoginRequest.builder()
+                .usernameOrEmail("test@mail.com")
+                .password("password")
+                .build();
+
+        when(springUserRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.of(springUser));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(patientRepository.findById(springUser.getPatientId())).thenReturn(Optional.of(testPatient));
+        when(jwtService.generateToken(anyMap(), any(SpringUser.class))).thenReturn("mockToken");
+
+        AuthenticationResponse response = authenticationService.login(loginPatient);
+
+        assertNotNull(response);
+        assertNotNull(response.getToken());
+        assertEquals("mockToken", response.getToken());
+    }
+
+
+    @Test
+    void doesTokenContainProperEmail() {
 
     }
 }
