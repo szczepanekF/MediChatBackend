@@ -51,6 +51,7 @@ public class AuthenticationServiceImpl {
         patientRepository.save(patient);
 
         SpringUser springUser = createSpringUser(request.getEmail(), request.getUsername(), request.getPassword(), null, patient.getId(), Role.PATIENT);
+        System.out.println(springUser);
         return createAuthenticationResponse(springUser);
     }
 
@@ -76,7 +77,7 @@ public class AuthenticationServiceImpl {
                 || springUserRepository.findByUsername(username).isPresent();
     }
 
-    public SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId, Role role) {
+    private SpringUser createSpringUser(String email, String username, String password, Integer doctorId, Integer patientId, Role role) {
         SpringUser springUser = SpringUser.builder()
                 .email(email)
                 .username(username)
@@ -89,7 +90,7 @@ public class AuthenticationServiceImpl {
         return springUserRepository.save(springUser);
     }
 
-    AuthenticationResponse createAuthenticationResponse(SpringUser springUser) {
+    private AuthenticationResponse createAuthenticationResponse(SpringUser springUser) {
         Map<String, Object> extraClaims = getExtraClaims(springUser);
         extraClaims.put("emailAddress", springUser.getEmail());
         extraClaims.put("role", springUser.getRole());

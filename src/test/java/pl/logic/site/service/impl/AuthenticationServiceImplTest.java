@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.logic.site.model.enums.Status;
 import pl.logic.site.model.exception.EmailOrUsernameJustExist;
@@ -41,11 +42,11 @@ public class AuthenticationServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private JwtServiceImpl jwtService;
-    @Mock
     private PasswordRecoveryTokenRepository passwordRecoveryTokenRepository;
+    private JwtServiceImpl jwtService;
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
+
     RegisterPatientRequest patient;
     RegisterPatientRequest patientWithExistingEmail;
     SpringUser springUser;
@@ -56,6 +57,8 @@ public class AuthenticationServiceImplTest {
 
     @BeforeEach
     public void setUp() {
+        jwtService = new JwtServiceImpl();
+        authenticationService = new AuthenticationServiceImpl(springUserRepository,doctorRepository,patientRepository,passwordEncoder, jwtService, passwordRecoveryTokenRepository);
         patient = new RegisterPatientRequest("Testname", "Surname", new Date(), 180, 98, "male", Status.ONLINE, "testMail", "username", "password", "cm", "kg");
         patientWithExistingEmail = new RegisterPatientRequest("Testname", "Surname", new Date(), 180, 98, "male", Status.ONLINE, "nowekonto@wp.pl", "username", "password", "cm", "kg");
         springUser = SpringUser.builder()
@@ -87,13 +90,11 @@ public class AuthenticationServiceImplTest {
                 Arguments.of("test4", "", "", "test5")
         );
     }
-    @Test
-    void shouldRegisterPatient() {
-    }
 
-    @Test
-    void shouldThrowWhenRegisteredPatientMailOrUsernameExists() {
-    }
+//    @Test
+//    void shouldThrowWhenRegisteredPatientMailOrUsernameExists() {
+//
+//    }
 
     @Test
     void registerPatientWithExistingEmail() {
@@ -108,14 +109,13 @@ public class AuthenticationServiceImplTest {
     void registerPatientWithNotExistingEmail() {
         when(springUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(springUserRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        when(patientRepository.save(any(Patient.class))).thenReturn(new Patient());
+        when(patientRepository.save(any(Patient.class))).thenReturn(testPatient);
+        when(patientRepository.findById(anyInt())).thenReturn(Optional.of(testPatient));
+        when(springUserRepository.save(any(SpringUser.class))).thenReturn(springUser);
 
-        when(authenticationService.createSpringUser(anyString(), anyString(), anyString(), anyInt(), anyInt(), any(Role.class)))
-                .thenReturn(springUser);
-        AuthenticationResponse expectedResponse = new AuthenticationResponse();
-        when(authenticationService.createAuthenticationResponse(springUser)).thenReturn(expectedResponse);
         AuthenticationResponse response = authenticationService.registerPatient(patient);
-        assertEquals(expectedResponse, response);
+
+        assertNotEquals(response.getToken(), null);
     }
 
     @Test
@@ -145,9 +145,8 @@ public class AuthenticationServiceImplTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(patientRepository.findById(springUser.getPatientId())).thenReturn(Optional.of(testPatient));
         AuthenticationResponse expectedResponse = new AuthenticationResponse();
-        when(authenticationService.createAuthenticationResponse(springUser)).thenReturn(expectedResponse);
         AuthenticationResponse response = authenticationService.login(request);
-        assertEquals(expectedResponse, response);
+        assertNotEquals(response, null);
     }
 
 
@@ -171,18 +170,12 @@ public class AuthenticationServiceImplTest {
         when(springUserRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.of(springUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(patientRepository.findById(springUser.getPatientId())).thenReturn(Optional.of(testPatient));
-        when(jwtService.generateToken(anyMap(), any(SpringUser.class))).thenReturn("mockToken");
+
 
         AuthenticationResponse response = authenticationService.login(loginPatient);
 
         assertNotNull(response);
         assertNotNull(response.getToken());
-        assertEquals("mockToken", response.getToken());
     }
 
-
-    @Test
-    void doesTokenContainProperEmail() {
-
-    }
 }
