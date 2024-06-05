@@ -65,7 +65,7 @@ public class SecurityConfig {
                 )
 
 //                .formLogin(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
@@ -100,8 +100,8 @@ class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessH
                     .weight(80)
                     .gender("male")
                     .status(Status.ONLINE)
-                    .heightUnit("cm")
-                    .weightUnit("kg")
+                    .heightUnit("centimeter")
+                    .weightUnit("kilograms")
                     .build();
             patientRepository.save(patient);
             springUser = SpringUser.builder()
