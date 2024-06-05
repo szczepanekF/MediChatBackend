@@ -3,6 +3,7 @@ package pl.logic.site.config;
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.context.annotation.Bean;
@@ -21,8 +22,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
+import pl.logic.site.model.enums.Status;
+import pl.logic.site.model.exception.UserNotFound;
+import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.mysql.Role;
+import pl.logic.site.model.mysql.SpringUser;
+import pl.logic.site.model.request.LoginRequest;
+import pl.logic.site.repository.PatientRepository;
+import pl.logic.site.repository.SpringUserRepository;
+import pl.logic.site.service.impl.AuthenticationServiceImpl;
+import pl.logic.site.service.impl.JwtServiceImpl;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
@@ -31,6 +44,8 @@ import java.util.Map;
 public class SecurityConfig {
     private final Filter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
     private static final String[] WHITE_LIST_URL = {"**"};
 
     @Bean
@@ -46,34 +61,27 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfoEndpoint ->
                                 userInfoEndpoint.oidcUserService(this.oidcUserService())
                         )
-                        .successHandler(new CustomAuthenticationSuccessHandler())
+                        .successHandler(customAuthenticationSuccessHandler)
                 )
 
 //                .formLogin(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
     private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
-        OidcUserService delegate = new OidcUserService();
-
-        return (userRequest) -> {
-            OidcUser oidcUser = delegate.loadUser(userRequest);
-
-            Map<String, Object> attributes = oidcUser.getAttributes();
-            String email = (String) attributes.get("email");
-            String firstName = (String) attributes.get("given_name");
-            String lastName = (String) attributes.get("family_name");
-            return oidcUser;
-        };
+        return new OidcUserService();
     }
 }
 
 @Component
+@RequiredArgsConstructor
 class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
+    private final AuthenticationServiceImpl authenticationService;
+    private final SpringUserRepository springUserRepository;
+    private final PatientRepository patientRepository;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                          Authentication authentication) throws IOException {
@@ -82,10 +90,37 @@ class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessH
         String firstName = oidcUser.getGivenName();
         String lastName = oidcUser.getFamilyName();
 
-        // Build the redirect URL with user information as query parameters
-        String targetUrl = String.format("http://localhost:3000/home?email=%s&firstName=%s&lastName=%s",
-                email, firstName, lastName);
-
+        SpringUser springUser;
+        if(springUserRepository.findByEmail(email).isEmpty()) {
+            Patient patient = Patient.builder()
+                    .name(firstName)
+                    .surname(lastName)
+                    .birth_date(new Date())
+                    .height(180)
+                    .weight(80)
+                    .gender("male")
+                    .status(Status.ONLINE)
+                    .heightUnit("cm")
+                    .weightUnit("kg")
+                    .build();
+            patientRepository.save(patient);
+            springUser = SpringUser.builder()
+                    .email(email)
+                    .username(email.split("@")[0])
+                    .password("")
+                    .doctorId(null)
+                    .patientId(patient.getId())
+                    .role(Role.PATIENT)
+                    .creationDate(new Date())
+                    .build();
+            springUserRepository.save(springUser);
+        } else {
+            springUser = springUserRepository
+                    .findByEmail(email)
+                    .orElseThrow(() -> new UserNotFound("User with this username or email address does not exist"));
+        }
+        String token = authenticationService.loginWithGoogle(springUser);
+        String targetUrl = String.format("http://localhost:3000/login?token=%s", token);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

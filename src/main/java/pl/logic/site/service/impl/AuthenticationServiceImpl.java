@@ -1,6 +1,8 @@
 package pl.logic.site.service.impl;
 
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import pl.logic.site.model.exception.EmailOrUsernameJustExist;
 import pl.logic.site.model.exception.InvalidPassword;
 import pl.logic.site.model.exception.InvalidRecoveryTokenEmailPairException;
@@ -54,6 +56,7 @@ public class AuthenticationServiceImpl {
         return createAuthenticationResponse(springUser);
     }
 
+
     public AuthenticationResponse registerDoctor(RegisterDoctorRequest request) {
         if (isEmailOrUsernameJustExist(request.getEmail(), request.getUsername())) {
             throw new EmailOrUsernameJustExist("Email or username just exist");
@@ -99,6 +102,14 @@ public class AuthenticationServiceImpl {
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
 
+    public String loginWithGoogle(SpringUser springUser) {
+        Map<String, Object> extraClaims = getExtraClaims(springUser);
+        extraClaims.put("emailAddress", springUser.getEmail());
+        extraClaims.put("role", springUser.getRole());
+        extraClaims.put("SpringUserId", springUser.getId());
+
+        return jwtService.generateToken(extraClaims, springUser);
+    }
 
     public AuthenticationResponse login(LoginRequest request) {
         SpringUser springUser = springUserRepository
