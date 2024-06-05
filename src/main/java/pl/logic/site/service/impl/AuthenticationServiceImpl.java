@@ -51,6 +51,7 @@ public class AuthenticationServiceImpl {
         patientRepository.save(patient);
 
         SpringUser springUser = createSpringUser(request.getEmail(), request.getUsername(), request.getPassword(), null, patient.getId(), Role.PATIENT);
+        System.out.println(springUser);
         return createAuthenticationResponse(springUser);
     }
 
@@ -71,7 +72,7 @@ public class AuthenticationServiceImpl {
         return createAuthenticationResponse(springUser);
     }
 
-    private boolean isEmailOrUsernameJustExist(String email, String username) {
+    public boolean isEmailOrUsernameJustExist(String email, String username) {
         return springUserRepository.findByEmail(email).isPresent()
                 || springUserRepository.findByUsername(username).isPresent();
     }
