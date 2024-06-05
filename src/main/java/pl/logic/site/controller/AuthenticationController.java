@@ -2,6 +2,7 @@ package pl.logic.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import pl.logic.site.aspects.AuthorizationHeaderHolder;
@@ -174,4 +175,12 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response<>(Consts.C454_UPDATING_ERROR, 454, "", "Reset password operation failed"));
         }
     }
+
+//    @GetMapping("/google/info")
+//    public ResponseEntity<Response> registerWithGoogle(HttpSession session) {
+//        Map<String, Map<String, String>> containedObject = (Map<String, Map<String, String>>) session.getAttribute("containedObject");
+//        System.out.println(session.getAttribute("containedObject"));
+//        System.out.println(session.getId());
+//        return ResponseEntity.status(HttpStatus.OK).body(new Response<>(Consts.C200, 200, "", containedObject));
+//    }
 }
