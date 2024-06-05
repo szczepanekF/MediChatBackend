@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import pl.logic.site.aspects.AuthorizationHeaderHolder;
 import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.model.dao.PatientDAO;
@@ -82,13 +84,38 @@ public class ChatController {
 //    }
 
 
-    @MessageMapping("/chat.send") // Message mapping for sending messages
+    @MessageMapping("/chat")
     public void sendMessage(@Payload Message message) {
-        System.out.println(message);
-        MessageService.save(message);
-        loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "Message ", message,
-                LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
+        MessageService.send(message);
+
+//        loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "Message ", message, LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
     }
+
+    @ResponseBody
+    @PostMapping(value = "/chatController/createMessage", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Creates message", description = "Creates message")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created chat room"),
+            @ApiResponse(responseCode = "453", description = "Error during saving an entity")
+    })
+    public ResponseEntity<Response> createMessage(@RequestBody Message message) {
+        Message returnedMessage = new Message();
+        try {
+            returnedMessage = MessageService.save(message);
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "ChatRooms ", returnedMessage,
+                    LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(201).body(new Response<>(Consts.C201, 201, "", returnedMessage));
+        } catch (DeleteError e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(453).body(new Response<>(e.getMessage(), 453, Arrays.toString(e.getStackTrace()), returnedMessage));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), returnedMessage));
+        }
+    }
+
 
     /**
      * Endpoint used for finding messages by sender and recipient ID
