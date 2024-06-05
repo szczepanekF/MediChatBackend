@@ -20,7 +20,7 @@ import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
-class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final AuthenticationServiceImpl authenticationService;
     private final SpringUserRepository springUserRepository;
     private final PatientRepository patientRepository;

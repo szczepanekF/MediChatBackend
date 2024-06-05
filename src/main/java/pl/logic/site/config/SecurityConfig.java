@@ -1,15 +1,11 @@
 package pl.logic.site.config;
 
 import jakarta.servlet.Filter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,24 +15,9 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
-import pl.logic.site.model.enums.Status;
-import pl.logic.site.model.exception.UserNotFound;
-import pl.logic.site.model.mysql.Patient;
-import pl.logic.site.model.mysql.Role;
-import pl.logic.site.model.mysql.SpringUser;
-import pl.logic.site.model.request.LoginRequest;
-import pl.logic.site.repository.PatientRepository;
-import pl.logic.site.repository.SpringUserRepository;
-import pl.logic.site.service.impl.AuthenticationServiceImpl;
-import pl.logic.site.service.impl.JwtServiceImpl;
+import pl.logic.site.service.impl.CustomAuthenticationSuccessHandler;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -63,8 +44,6 @@ public class SecurityConfig {
                         )
                         .successHandler(customAuthenticationSuccessHandler)
                 )
-
-//                .formLogin(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
