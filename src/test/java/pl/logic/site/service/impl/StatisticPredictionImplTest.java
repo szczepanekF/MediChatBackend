@@ -2,6 +2,7 @@ package pl.logic.site.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.DiagnosisRequest;
@@ -18,6 +19,7 @@ import static pl.logic.site.model.predictions.statictic.StatisticPrediction.getD
 import static pl.logic.site.model.predictions.statictic.StatisticPrediction.getIntegerDoubleHashMap;
 import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDICTIONS;
 
+@SpringBootTest
 public class StatisticPredictionImplTest {
     List<DiagnosisRequest> allDiagnosisRequests;
     List<Doctor> doctors;
