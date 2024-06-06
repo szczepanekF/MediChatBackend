@@ -13,6 +13,7 @@ import pl.logic.site.model.predictions.features.DiseaseVector;
 import pl.logic.site.model.predictions.metric.EuclideanMetric;
 import pl.logic.site.model.predictions.parser.SymptomParser;
 import pl.logic.site.model.predictions.quality.Result;
+import pl.logic.site.service.ChartService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +33,9 @@ class KNNTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ChartService chartService;
 
     @BeforeEach
     void setUp() throws ParseException {
@@ -55,7 +59,7 @@ class KNNTest {
         diseases.add(new Disease(17, "restless legs syndrome"));
         diseases.add(new Disease(18, "colitis"));
 
-        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate);
+        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate, chartService);
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date birth_date_1 = formatter.parse("2002-03-01 02:00:00");

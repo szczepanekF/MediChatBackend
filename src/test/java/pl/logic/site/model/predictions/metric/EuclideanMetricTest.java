@@ -11,6 +11,7 @@ import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Symptom;
 import pl.logic.site.model.predictions.features.DiseaseVector;
 import pl.logic.site.model.predictions.parser.SymptomParser;
+import pl.logic.site.service.ChartService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,11 +31,14 @@ class EuclideanMetricTest {
     private EuclideanMetric euclideanMetric;
 
     @Autowired
+    private ChartService chartService;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() throws ParseException {
-        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate);
+        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate, chartService);
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date birth_date_1 = formatter.parse("2002-03-01 02:00:00");

@@ -10,6 +10,7 @@ import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Symptom;
 import pl.logic.site.model.predictions.parser.SymptomParser;
+import pl.logic.site.service.ChartService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +28,9 @@ class DiseaseVectorTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private ChartService chartService;
+
     @BeforeEach
     void setUp() throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -35,7 +39,7 @@ class DiseaseVectorTest {
         Disease disease = new Disease(1, "pneumonia");
         Patient patient = new Patient(1, "John", "Smith", birth_date, 180, 80, "male", status, "cm", "kg");
 
-        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate);
+        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate, chartService);
         int id_chart = 1;
         ArrayList<Symptom> symptoms = new ArrayList<>();
         symptoms.add(new Symptom(1, "headache"));

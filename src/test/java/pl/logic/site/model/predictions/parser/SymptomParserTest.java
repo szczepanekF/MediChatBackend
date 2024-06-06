@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.junit4.SpringRunner;
 import pl.logic.site.model.mysql.Symptom;
+import pl.logic.site.service.ChartService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +26,12 @@ class SymptomParserTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private ChartService chartService;
+
     @BeforeEach
     void setUp() {;
-        this.symptomParser = new SymptomParser(this.jdbcTemplate);
+        this.symptomParser = new SymptomParser(this.jdbcTemplate, chartService);
     }
 
     @Test

@@ -5,7 +5,9 @@ import pl.logic.site.facade.ObjectFacade;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import pl.logic.site.model.dao.SymptomDAO;
+import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.Symptom;
+import pl.logic.site.service.ChartService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +23,7 @@ public class SymptomParser {
     private final JdbcTemplate jdbcTemplate;
     private HashMap<String, String> patientSymptoms;
     private List<String> allSymptoms;
-
+    private ChartService chartService;
 
 
     /**
@@ -29,8 +31,9 @@ public class SymptomParser {
      *
      * @param jdbcTemplate the JDBC template used to query the database
      */
-    public SymptomParser(JdbcTemplate jdbcTemplate) {
+    public SymptomParser(JdbcTemplate jdbcTemplate, ChartService chartService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.chartService = chartService;
     }
 
     /**
@@ -83,12 +86,13 @@ public class SymptomParser {
     }
 
     public List<Integer> searchChartIdByPatientId(int patientId) {
-        String sql = "SELECT id FROM chart WHERE id_patient = ?";
-        List<Integer> results = jdbcTemplate.query(sql, new Object[]{patientId}, (rs, rowNum) -> rs.getInt("id"));
+//        String sql = "SELECT id FROM chart WHERE id_patient = ?";
+//        List<Integer> results = jdbcTemplate.query(sql, new Object[]{patientId}, (rs, rowNum) -> rs.getInt("id"));
+        List<Integer> results = chartService.getChartsForPatient(patientId).stream().map(Chart::getId).toList();
         return results.isEmpty() ? null : results;
     }
 
-    public  HashMap<String, String> madeZeroSymptoms(List<Symptom> symptoms) {
+    public HashMap<String, String> madeZeroSymptoms(List<Symptom> symptoms) {
         HashMap<String, String> result = new HashMap<>();
         for (Symptom symptom : symptoms) {
             result.put(symptom.getName(), "null");

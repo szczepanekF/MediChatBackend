@@ -79,7 +79,7 @@ public class PredictionServiceImpl implements PredictionService {
      */
 //    @PostConstruct
     public void init() {
-        this.symptomParser = new SymptomParser(this.jdbcTemplate);
+        this.symptomParser = new SymptomParser(this.jdbcTemplate, chartService);
         this.diseases = diseaseService.getDiseases();
         this.patients = patientService.getPatients();
         this.symptoms = symptomService.getSymptoms();
@@ -98,7 +98,6 @@ public class PredictionServiceImpl implements PredictionService {
                 continue;
             }
             List<Integer> chartIds = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
-//            Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
             if (chartIds.isEmpty()) {
                 continue;
             }
