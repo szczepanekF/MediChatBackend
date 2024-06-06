@@ -23,19 +23,19 @@ public class DiagnosisRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private int id;
 
     @Column(name = "id_chart")
-    private Integer idChart;
+    private int idChart;
 
     @Column(name = "id_doctor")
-    private Integer idDoctor;
+    private int idDoctor;
 
     @Column(name = "diagnosis")
     private String diagnosis;
 
     @Column(name = "id_disease")
-    private Integer idDisease = -1;
+    private int idDisease = -1;
 
     @Column(name = "voice_diagnosis")
     private String voiceDiagnosis;
