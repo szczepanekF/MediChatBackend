@@ -197,4 +197,21 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
         log.info("All diagnosis requests were successfully retrieved");
         return diagnosisRequests;
     }
+
+    /**
+     * Get all diagnosis requests
+     *
+     * @return list of all diagnosis requests
+     */
+    @Override
+    public List<DiagnosisRequest> getAllDiagnosisRequests() {
+        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAll();
+        if (diagnosisRequests.isEmpty()) {
+            EntityNotFound err = new EntityNotFound(Consts.C404);
+            log.error(err.getMessage());
+            throw err;
+        }
+        log.info("All diagnosis requests were successfully retrieved");
+        return diagnosisRequests;
+    }
 }

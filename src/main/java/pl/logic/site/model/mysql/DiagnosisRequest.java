@@ -18,23 +18,24 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "diagnosis_request")
 public class DiagnosisRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    @Column(name = "id", nullable = false)
+    private Integer id;
 
     @Column(name = "id_chart")
-    private int idChart;
+    private Integer idChart;
 
     @Column(name = "id_doctor")
-    private int idDoctor;
+    private Integer idDoctor;
 
     @Column(name = "diagnosis")
     private String diagnosis;
 
     @Column(name = "id_disease")
-    private int idDisease = -1;
+    private Integer idDisease = -1;
 
     @Column(name = "voice_diagnosis")
     private String voiceDiagnosis;
