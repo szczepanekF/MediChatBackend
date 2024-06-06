@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Immutable;
+import pl.logic.site.model.enums.ReportFiletype;
 import pl.logic.site.model.enums.Status;
 
 import java.util.Date;
@@ -30,4 +31,8 @@ public class Report {
 
     @Column(name = "file_path")
     private String filePath;
+
+    @Column(name = "filetype", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReportFiletype filetype;
 }
