@@ -10,6 +10,9 @@ import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Symptom;
 import pl.logic.site.model.predictions.parser.SymptomParser;
+import pl.logic.site.repository.RecognitionRepository;
+import pl.logic.site.service.ChartService;
+import pl.logic.site.service.SymptomService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,7 +28,13 @@ class DiseaseVectorTest {
     private DiseaseVector diseaseVector;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ChartService chartService;
+
+    @Autowired
+    private RecognitionRepository recognitionRepository;
+
+    @Autowired
+    private SymptomService symptomService;
 
     @BeforeEach
     void setUp() throws ParseException {
@@ -35,7 +44,7 @@ class DiseaseVectorTest {
         Disease disease = new Disease(1, "pneumonia");
         Patient patient = new Patient(1, "John", "Smith", birth_date, 180, 80, "male", status, "cm", "kg");
 
-        SymptomParser symptomParser = new SymptomParser(this.jdbcTemplate);
+        SymptomParser symptomParser = new SymptomParser(chartService, recognitionRepository, symptomService);
         int id_chart = 1;
         ArrayList<Symptom> symptoms = new ArrayList<>();
         symptoms.add(new Symptom(1, "headache"));

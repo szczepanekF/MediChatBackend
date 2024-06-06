@@ -16,6 +16,7 @@ import pl.logic.site.model.predictions.quality.Quality;
 import pl.logic.site.model.predictions.quality.Result;
 import pl.logic.site.model.predictions.statictic.DiseasePrediction;
 import pl.logic.site.model.predictions.statictic.Prediction;
+import pl.logic.site.repository.RecognitionRepository;
 import pl.logic.site.service.*;
 
 import java.time.LocalDate;
@@ -46,7 +47,9 @@ public class PredictionServiceImpl implements PredictionService {
     @Autowired
     private ChartService chartService;
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private RecognitionRepository recognitionRepository;
+
+
 
     private List<DiseaseVector> dataset;
     private List<DiseaseVector> learningSet;
@@ -77,9 +80,9 @@ public class PredictionServiceImpl implements PredictionService {
      * from at least one disease.
      * Such DiseaseVectors are added to the dataset
      */
-//    @PostConstruct
+    @PostConstruct
     public void init() {
-        this.symptomParser = new SymptomParser(this.jdbcTemplate);
+        this.symptomParser = new SymptomParser(chartService, recognitionRepository, symptomService);
         this.diseases = diseaseService.getDiseases();
         this.patients = patientService.getPatients();
         this.symptoms = symptomService.getSymptoms();
@@ -98,7 +101,6 @@ public class PredictionServiceImpl implements PredictionService {
                 continue;
             }
             List<Integer> chartIds = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
-//            Integer chartId = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
             if (chartIds.isEmpty()) {
                 continue;
             }
@@ -225,7 +227,7 @@ public class PredictionServiceImpl implements PredictionService {
         LocalDate currentDate = LocalDate.now();
         for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
             results.add(getDiagnosisRequestsSizeByDaysInterval(
-                    this.jdbcTemplate, daysInterval, currentDate) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
+                    diagnosisRequestService, daysInterval, currentDate) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
             currentDate = currentDate.minusDays(daysInterval);
         }
         int denominator = 0;
@@ -252,7 +254,7 @@ public class PredictionServiceImpl implements PredictionService {
         LocalDate currentDate = LocalDate.now();
         List<Doctor> doctors = this.doctorService.getDoctors(2); // because filter == 2 returns all doctors
         for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
-            doctorsCounter.add(getDoctorsInInterval(this.jdbcTemplate, doctors, daysInterval, currentDate));
+            doctorsCounter.add(getDoctorsInInterval(diagnosisRequestService, doctors, daysInterval, currentDate));
             currentDate = currentDate.minusDays(daysInterval);
         }
 
