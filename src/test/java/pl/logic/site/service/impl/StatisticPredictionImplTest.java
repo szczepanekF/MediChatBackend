@@ -32,11 +32,11 @@ public class StatisticPredictionImplTest {
         Date diagnosisDate3 = formatter.parse("2024-05-03 11:30:01");
         Date diagnosisDate4 = formatter.parse("2024-05-15 11:30:01");
         Date diagnosisDate5 = formatter.parse("2024-05-16 11:30:01");
-        DiagnosisRequest diagnosisRequest1 = new DiagnosisRequest(1, 1, 1, "Example diagnosis", "Voice diagnosis", diagnosisDate1);
-        DiagnosisRequest diagnosisRequest2 = new DiagnosisRequest(2, 2, 2, "Example diagnosis", "Voice diagnosis", diagnosisDate2);
-        DiagnosisRequest diagnosisRequest3 = new DiagnosisRequest(3, 3, 3, "Example diagnosis", "Voice diagnosis", diagnosisDate3);
-        DiagnosisRequest diagnosisRequest4 = new DiagnosisRequest(4, 1, 1, "Example diagnosis", "Voice diagnosis", diagnosisDate4);
-        DiagnosisRequest diagnosisRequest5 = new DiagnosisRequest(5, 2, 3, "Example diagnosis", "Voice diagnosis", diagnosisDate5);
+        DiagnosisRequest diagnosisRequest1 = new DiagnosisRequest(1, 1, 1, "Example diagnosis", -1, "Voice diagnosis", diagnosisDate1, diagnosisDate1);
+        DiagnosisRequest diagnosisRequest2 = new DiagnosisRequest(2, 2, 2, "Example diagnosis", -1, "Voice diagnosis", diagnosisDate2, diagnosisDate2);
+        DiagnosisRequest diagnosisRequest3 = new DiagnosisRequest(3, 3, 3, "Example diagnosis", -1, "Voice diagnosis", diagnosisDate3, diagnosisDate3);
+        DiagnosisRequest diagnosisRequest4 = new DiagnosisRequest(4, 1, 1, "Example diagnosis", -1, "Voice diagnosis", diagnosisDate4, diagnosisDate4);
+        DiagnosisRequest diagnosisRequest5 = new DiagnosisRequest(5, 2, 3, "Example diagnosis", -1, "Voice diagnosis", diagnosisDate5, diagnosisDate5);
         allDiagnosisRequests = new ArrayList<>(Arrays.asList(diagnosisRequest1, diagnosisRequest2, diagnosisRequest3, diagnosisRequest4, diagnosisRequest5));
 
         Date birth_date_1 = formatter.parse("2002-03-01 02:00:00");

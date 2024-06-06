@@ -22,6 +22,8 @@ public class SymptomParser {
     private HashMap<String, String> patientSymptoms;
     private List<String> allSymptoms;
 
+
+
     /**
      * Constructs a new SymptomParser instance.
      *

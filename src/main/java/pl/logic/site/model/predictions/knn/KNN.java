@@ -77,7 +77,7 @@ public class KNN {
 
         int max = Collections.max(labels.values());
         Disease classifiedLabel = labels.entrySet().stream().filter(l -> l.getValue() == max).limit(1)
-                .map(Map.Entry::getKey).collect(Collectors.toList()).get(0);
+                .map(Map.Entry::getKey).toList().getFirst();
 
         return new Result(diseaseVector, classifiedLabel);
     }
