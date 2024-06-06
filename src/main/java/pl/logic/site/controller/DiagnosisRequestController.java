@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.logic.site.aspects.AuthorizationHeaderHolder;
 import pl.logic.site.aspects.ControllerUtils;
 import pl.logic.site.facade.ObjectFacade;
-import pl.logic.site.model.dao.ChartDAO;
-import pl.logic.site.model.dao.DiagnosisRequestDAO;
-import pl.logic.site.model.dao.PatientDAO;
+import pl.logic.site.model.dao.*;
 import pl.logic.site.model.enums.EmailType;
 import pl.logic.site.model.enums.LogType;
 import pl.logic.site.model.exception.DeleteError;
@@ -79,13 +77,21 @@ public class DiagnosisRequestController {
             String dateString = diagnosisRequest.getCreationDate().toString();
             String diagnosis = diagnosisRequest.getDiagnosis();
             SpringUser springUser = objectFacade.getUserIdByDoctorOrPatientId(doctor.getId(), false).orElseThrow();
+
+            StringBuilder patientSymptomsInfo = new StringBuilder();
+            List<ChartSymptom> chartSymptoms = objectFacade.getAllSymptomsByChartId(chart.getId());
+            for(var chartSymptom: chartSymptoms) {
+                Symptom symptom = (Symptom) objectFacade.getObject(new SymptomDAO(new Symptom()), chartSymptom.getIdSymptom());
+                String singleSymptomInfo = "- " + chartSymptom.getSymptomValueLevel() + " " + symptom.getName() + "<br>";
+                patientSymptomsInfo.append(singleSymptomInfo).append("\n");
+            }
             if(doctor.getIsBot() == 0) {
                 Map<String, String> emailParameters = new HashMap<>() {{
                     put("requestUserFullName", patient.getName() + " " + patient.getSurname());
                     put("emailAddress", springUser.getEmail());
                     put("name", doctor.getName());
                     put("date", dateString);
-                    put("requestContent", diagnosis);
+                    put("requestContent", String.valueOf(patientSymptomsInfo));
                     put("thisUserId", String.valueOf(springUser.getId()));
                     put("patientUserId", String.valueOf(patient.getId()));
                     put("subject", "REQUEST DIAGNOSIS");
