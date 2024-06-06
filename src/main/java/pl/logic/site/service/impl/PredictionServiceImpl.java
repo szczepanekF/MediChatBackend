@@ -20,6 +20,9 @@ import pl.logic.site.repository.RecognitionRepository;
 import pl.logic.site.service.*;
 
 import java.time.LocalDate;
+import java.time.Period;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static pl.logic.site.model.predictions.statictic.StatisticPrediction.*;
@@ -46,6 +49,8 @@ public class PredictionServiceImpl implements PredictionService {
     private SymptomService symptomService;
     @Autowired
     private ChartService chartService;
+    @Autowired
+    private ChartSymptomService chartSymptomService;
     @Autowired
     private RecognitionRepository recognitionRepository;
 
@@ -270,5 +275,77 @@ public class PredictionServiceImpl implements PredictionService {
         } else {
             throw new EntityNotFound("No doctor found");
         }
+    }
+
+    @Override
+    public List<Double> getSymptomsCountInIntervals (LocalDate startDate, LocalDate endDate, int symptomId) {
+        List<Integer> intervalList = getIntervalList(startDate, endDate);
+        List<Double> results = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        for (int i = 0; i < intervalList.size(); i++) {
+            int intervalSum = (int) ChronoUnit.DAYS.between(startDate, currentDate);;
+            for (int j = 0; j <= i; j++) {
+                intervalSum += intervalList.get(j);
+            }
+            results.add(getSymptomCountInInterval(intervalSum, symptomId));
+        }
+        return results;
+    }
+
+    private Double getSymptomCountInInterval(int daysInterval, int symptomId) {
+        List<Integer> symptomCounter = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            symptomCounter.add(getSymptomCountInDaysInterval(diagnosisRequestService, chartSymptomService, daysInterval, currentDate, symptomId) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
+            currentDate = currentDate.minusDays(daysInterval);
+        }
+        int denominator = 0;
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            denominator += i;
+        }
+        int meter = symptomCounter.stream().mapToInt(Integer::intValue).sum();
+
+        return (double) meter / denominator;
+    }
+
+    private List<Integer> getIntervalList(LocalDate startDate, LocalDate endDate) {
+        List<Integer> intervalList = new ArrayList<>();
+        YearMonth yearMonth = YearMonth.from(startDate);
+
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
+        int interval = 1;
+        if (days >= 365*3) {
+            interval = yearMonth.lengthOfYear();
+            intervalList.add(interval);
+
+            Period period = Period.between(startDate, endDate);
+            int yearsBetween = period.getYears();
+
+            for (int i = 1; i < yearsBetween; i++) {
+                yearMonth = yearMonth.plusYears(1);
+                interval = yearMonth.lengthOfYear();
+                intervalList.add(interval);
+            }
+        } else if (days >= 31*3) {
+            interval = yearMonth.lengthOfMonth();
+            intervalList.add(interval);
+
+            long months = ChronoUnit.MONTHS.between(startDate, endDate);
+
+            for (int i = 1; i < months; i++) {
+                yearMonth = yearMonth.plusMonths(1);
+                interval = yearMonth.lengthOfMonth();
+                intervalList.add(interval);
+            }
+        } else {
+            for (int i = 0; i < days; i++) {
+                intervalList.add(interval);
+            }
+        }
+
+//        System.out.println(intervalList);
+        return intervalList;
     }
 }

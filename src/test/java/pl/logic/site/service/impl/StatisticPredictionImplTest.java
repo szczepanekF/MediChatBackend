@@ -97,6 +97,7 @@ public class StatisticPredictionImplTest {
         }
     }
 
+
     private Doctor findDoctorById(List<Doctor> doctors, int id) {
         return doctors.stream()
                 .filter(doctor -> doctor.getId() == id)

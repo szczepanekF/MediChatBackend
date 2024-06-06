@@ -2,13 +2,15 @@ package pl.logic.site.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.service.PredictionService;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootTest
 class PredictionServiceImplTest {
@@ -53,5 +55,16 @@ class PredictionServiceImplTest {
         } catch (NullPointerException e) {
             System.out.println("No doctor found");
         }
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(ints = {1,2,3})
+    void getSymptomCountInInterval(int symptomId) {
+        LocalDate startDate = LocalDate.of(2024, 6, 8); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 30); // przykładowa data końcowa
+
+        List<Double> results = this.predictionService.getSymptomsCountInIntervals(startDate, endDate, symptomId);
+        System.out.println(results);
     }
 }

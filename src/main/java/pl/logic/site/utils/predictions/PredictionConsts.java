@@ -33,6 +33,6 @@ public class PredictionConsts {
     /**
      * Defines how deeply some prediction functions should check the data.
      */
-    public static final int MAX_DEEP_OF_PREDICTIONS = 3;
+    public static final int MAX_DEEP_OF_PREDICTIONS = 5;
 
 }

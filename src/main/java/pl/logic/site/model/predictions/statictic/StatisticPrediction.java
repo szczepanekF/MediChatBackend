@@ -1,8 +1,10 @@
 package pl.logic.site.model.predictions.statictic;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import pl.logic.site.model.mysql.ChartSymptom;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Doctor;
+import pl.logic.site.service.ChartSymptomService;
 import pl.logic.site.service.DiagnosisRequestService;
 
 import java.time.LocalDate;
@@ -54,6 +56,44 @@ public class StatisticPrediction {
         return doctorsInInterval;
     }
 
+
+    public static int getSymptomCountInDaysInterval(DiagnosisRequestService diagnosisRequestService, ChartSymptomService chartSymptomService, int daysInterval, LocalDate currentDate, int symptomId) {
+        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysInterval(diagnosisRequestService, daysInterval, currentDate);
+        int counter = 0;
+        Iterator<DiagnosisRequest> iterator = diagnosis.iterator();
+        while (iterator.hasNext()) {
+            DiagnosisRequest diagnosisRequest = iterator.next();
+            int idChart = diagnosisRequest.getIdChart();
+            List<ChartSymptom> chartSymptoms = chartSymptomService.getChartSymptoms(idChart);
+            for (ChartSymptom chartSymptom : chartSymptoms) {
+                if (chartSymptom.getIdSymptom() == symptomId) {
+                    counter++;
+                }
+            }
+        }
+        return counter;
+    }
+
+
+
+
+    private static List<DiagnosisRequest> getDiagnosisRequestsByDaysInterval(DiagnosisRequestService diagnosisRequestService, int daysInterval, LocalDate currentDate) {
+        List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
+        LocalDate dateThreshold = currentDate.minusDays(daysInterval);
+
+        Iterator<DiagnosisRequest> iterator = allDiagnosisRequests.iterator();
+        while (iterator.hasNext()) {
+            DiagnosisRequest diagnosisRequest = iterator.next();
+            LocalDate creationDate = diagnosisRequest.getCreationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            if (!(creationDate.isAfter(dateThreshold) && creationDate.isBefore(currentDate))) {
+                iterator.remove();
+            }
+        }
+        return allDiagnosisRequests;
+    }
+
+
+
     public static HashMap<Integer, Double> getIntegerDoubleHashMap(List<HashMap<Integer, Integer>> doctorsCounter) {
         HashMap<Integer, Integer> meter = getIntegerIntegerHashMap(doctorsCounter);
 
@@ -87,32 +127,5 @@ public class StatisticPrediction {
             }
         }
         return meter;
-    }
-
-    private static List<DiagnosisRequest> getDiagnosisRequestsByDaysInterval(DiagnosisRequestService diagnosisRequestService, int daysInterval, LocalDate currentDate) {
-        List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
-//        String sql = "Select * from diagnosis_request;";
-//
-//        allDiagnosisRequests = jdbcTemplate.query(sql, (rs, rowNum) -> {
-//            DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
-//            diagnosisRequest.setId(rs.getInt("id"));
-//            diagnosisRequest.setIdDoctor(rs.getInt("id_doctor"));
-//            diagnosisRequest.setCreationDate(rs.getTimestamp("creation_date"));
-//            // Uzupełnij pozostałe pola obiektu DiagnosisRequest, na przykład:
-//            // diagnosisRequest.setSomeField(rs.getString("some_column"));
-//            return diagnosisRequest;
-//        });
-
-        LocalDate dateThreshold = currentDate.minusDays(daysInterval);
-
-        Iterator<DiagnosisRequest> iterator = allDiagnosisRequests.iterator();
-        while (iterator.hasNext()) {
-            DiagnosisRequest diagnosisRequest = iterator.next();
-            LocalDate creationDate = diagnosisRequest.getCreationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            if (!(creationDate.isAfter(dateThreshold) && creationDate.isBefore(currentDate))) {
-                iterator.remove();
-            }
-        }
-        return allDiagnosisRequests;
     }
 }
