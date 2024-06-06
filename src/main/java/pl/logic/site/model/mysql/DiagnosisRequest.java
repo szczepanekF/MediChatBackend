@@ -1,26 +1,26 @@
 package pl.logic.site.model.mysql;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.persistence.Id;
 import org.springframework.data.annotation.Immutable;
 
-
-import jakarta.persistence.Column;
 
 import java.util.Date;
 
 @Slf4j
 @Immutable
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 public class DiagnosisRequest {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -33,9 +33,15 @@ public class DiagnosisRequest {
     @Column(name = "diagnosis")
     private String diagnosis;
 
+    @Column(name = "id_disease")
+    private int idDisease = -1;
+
     @Column(name = "voice_diagnosis")
     private String voiceDiagnosis;
 
     @Column(name = "creation_date")
     private Date creationDate;
+
+    @Column(name = "modification_date")
+    private Date modificationDate;
 }

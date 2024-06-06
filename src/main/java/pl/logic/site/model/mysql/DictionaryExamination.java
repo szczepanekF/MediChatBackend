@@ -1,8 +1,6 @@
 package pl.logic.site.model.mysql;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +15,7 @@ import org.springframework.data.annotation.Immutable;
 @Entity
 public class DictionaryExamination {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -24,7 +23,7 @@ public class DictionaryExamination {
     private String examinationName;
 
     @Column(name = "id_disease")
-    private String idDisease;
+    private int idDisease;
 
     @Column(name = "examination_required_value")
     private String examinationRequiredValue;

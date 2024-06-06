@@ -15,5 +15,7 @@ public interface DiagnosisRequestService {
 
     DiagnosisRequest getDiagnosisRequest(int id);
 
-    List<DiagnosisRequest> getDiagnosisRequests(int filter);
+    DiagnosisRequest getDiagnosisRequestByChart(int id);
+
+    List<DiagnosisRequest> getAllDiagnosisRequestsByChart(int filter);
 }

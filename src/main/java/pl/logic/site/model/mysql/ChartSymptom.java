@@ -1,16 +1,11 @@
 package pl.logic.site.model.mysql;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.persistence.Id;
 import org.springframework.data.annotation.Immutable;
-
-
-import jakarta.persistence.Column;
-import java.util.Date;
 
 @Slf4j
 @Immutable
@@ -18,8 +13,9 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Recognition {
+public class ChartSymptom {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 

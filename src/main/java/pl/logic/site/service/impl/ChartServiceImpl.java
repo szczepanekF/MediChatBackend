@@ -12,17 +12,22 @@ import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.repository.ChartRepository;
+import pl.logic.site.repository.DiagnosisRequestRepository;
 import pl.logic.site.service.ChartService;
 import pl.logic.site.utils.Consts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ChartServiceImpl implements ChartService {
     @Autowired
     private ChartRepository chartRepository;
+    @Autowired
+    private DiagnosisRequestRepository diagnosisRequestRepository;
 
 
     /**
@@ -34,7 +39,7 @@ public class ChartServiceImpl implements ChartService {
     @Override
     @Transactional
     public Chart createChart(ChartDAO chart) {
-        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient());
+        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient(), chart.chart().getDate());
 
         if (chartEntity.getId() != 0) {
             SaveError err = new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + chartEntity);
@@ -56,13 +61,13 @@ public class ChartServiceImpl implements ChartService {
     /**
      * Delete chart with given id
      *
-     * @param id - id of the chart
+     * @param chartId - id of the chart
      */
     @Override
-    public void deleteChart(int id) {
-        Optional<Chart> chart = chartRepository.findById(id);
+    public void deleteChart(int chartId) {
+        Optional<Chart> chart = chartRepository.findById(chartId);
         if (chart.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + chartId + " Type: " + this.getClass());
             log.error(err.getMessage());
             throw err;
         }
@@ -73,22 +78,22 @@ public class ChartServiceImpl implements ChartService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Chart with id: {} was successfully deleted", id);
+        log.info("Chart with id: {} was successfully deleted", chartId);
 
     }
 
     /**
      * Update chart based on chart data access object and chart id
      *
-     * @param chart - data access object
-     * @param id - id of the chart
+     * @param chart   - data access object
+     * @param chartId - id of the chart
      * @return updated chart
      */
 
     @Override
-    public Chart updateChart(ChartDAO chart, int id) {
-        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient());
-        Optional<Chart> diagnosisRequestFromDatabase = chartRepository.findById(id);
+    public Chart updateChart(ChartDAO chart, int chartId) {
+        Chart chartEntity = new Chart(chart.chart().getId(), chart.chart().getIdPatient(), chart.chart().getDate());
+        Optional<Chart> diagnosisRequestFromDatabase = chartRepository.findById(chartId);
         if (diagnosisRequestFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + chartEntity);
             log.error(err.getMessage());
@@ -102,20 +107,20 @@ public class ChartServiceImpl implements ChartService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Chart with id: {} was successfully updated: {}", id, returned);
+        log.info("Chart with id: {} was successfully updated: {}", chartId, returned);
         return returned;
     }
 
     /**
      * Get chart entity by id
      *
-     * @param id - id of the chart
+     * @param chartId - id of the chart
      * @return chart with given id
      */
     @Override
-    public Chart getChart(int id) {
-        return chartRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public Chart getChart(int chartId) {
+        return chartRepository.findById(chartId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + chartId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });
@@ -123,36 +128,62 @@ public class ChartServiceImpl implements ChartService {
 
     /**
      * Get all charts for patient with given id
-     * @param id - id of patient
+     *
+     * @param patientId - id of patient
      * @return list of all charts for given patientId
      */
 
     @Override
-    public List<Chart> getChartsForPatient(int id) {
-        List<Chart> charts = chartRepository.findByIdPatient(id);
+    public List<Chart> getChartsForPatient(int patientId) {
+        List<Chart> charts = chartRepository.findByIdPatient(patientId);
         if (charts.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404);
             log.error(err.getMessage());
             throw err;
         }
-        log.info("All charts for patient with ID: {} were successfully retrieved", id);
+        log.info("All charts for patient with ID: {} were successfully retrieved", patientId);
         return charts;
     }
 
     /**
-     * Get all charts
+     * Get all charts for patient with given id
      *
-     * @return list of all charts
-     */
+     * @param state     - state which specifies if the returned charts are with diagnosis requested (1) or not (0)
+     * @param patientId - id of patient
+     * @return list of all charts for given patientId
+     **/
     @Override
-    public List<Chart> getCharts() {
-        List<Chart> charts = chartRepository.findAll();
-        if (charts.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404);
-            log.error(err.getMessage());
-            throw err;
+    public List<Chart> getChartsByStateAndPatientId(int state, int patientId) {
+        List<Chart> charts = new ArrayList<>(getChartsForPatient(patientId));
+        List<Chart> chartsToRemove = new ArrayList<>();
+
+        for (Chart chart : charts) {
+            List<DiagnosisRequest> diagnosisRequestList = diagnosisRequestRepository.findAllByIdChart(chart.getId());
+            if (state == 1) {
+                if (!diagnosisRequestList.isEmpty()) {
+                    for (DiagnosisRequest diagnosisRequest : diagnosisRequestList) {
+                        if (!diagnosisRequest.getDiagnosis().isEmpty()) {
+                            chartsToRemove.add(chart);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                if (diagnosisRequestList.isEmpty())
+                    chartsToRemove.add(chart);
+                else {
+                    for (DiagnosisRequest diagnosisRequest : diagnosisRequestList) {
+                        if (diagnosisRequest.getDiagnosis().isEmpty()) {
+                            chartsToRemove.add(chart);
+                            break;
+                        }
+                    }
+
+                }
+            }
         }
         log.info("All charts were successfully retrieved");
-        return charts;
+        return chartsToRemove;
     }
+
 }

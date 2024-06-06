@@ -11,8 +11,14 @@ import java.util.List;
  */
 public interface DoctorService {
     Doctor createDoctor(DoctorDAO doctor);
-    void deleteDoctor(int id);
-    Doctor updateDoctor(DoctorDAO doctor, int id);
-    Doctor getDoctor(int id);
+
+    void deleteDoctor(int doctorId);
+
+    Doctor updateDoctor(DoctorDAO doctor, int doctorId);
+
+    Doctor getDoctor(int doctorId);
+
     List<Doctor> getDoctors(int doctorFilter);
+
+    Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId);
 }

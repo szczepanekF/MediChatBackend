@@ -4,13 +4,18 @@ package pl.logic.site.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pl.logic.site.model.dao.SpringUserDAO;
 import pl.logic.site.model.enums.Status;
+import pl.logic.site.model.exception.EntityNotFound;
+import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.mysql.Specialisation;
 import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.repository.DoctorRepository;
 import pl.logic.site.repository.PatientRepository;
 import pl.logic.site.repository.SpringUserRepository;
 import pl.logic.site.service.UserService;
+import pl.logic.site.utils.Consts;
 
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +71,11 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    public Optional<SpringUser> findSpringUserById(int id) {
+            return  springUserRepository.findById(id);
+
+    }
+
     @Override
     public Optional<String> getChatRoomId(final int senderId, final int recipientId, final boolean createNewRoomIfNotExists) {
         return Optional.empty();
@@ -76,11 +86,43 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    public List<Optional<SpringUser>> getAllUsers(int userFilter){
+    public List<SpringUser> getAllUsers(int userFilter){
         return switch (userFilter) {
             case 0 -> springUserRepository.retrieveAll();
             case 1 -> springUserRepository.findAllByPatientIdNotNull();
             default -> springUserRepository.findAllByDoctorIdNotNull();
         };
     }
+
+
+    @Override
+    public SpringUser updateSpringUser(SpringUserDAO springUserDAO, int springUserId) {
+        SpringUser springUser = new SpringUser(springUserDAO.springUser().getId(),
+                springUserDAO.springUser().getUsername(),
+                springUserDAO.springUser().getEmail(),
+                springUserDAO.springUser().getPassword(),
+                springUserDAO.springUser().getPatientId(),
+                springUserDAO.springUser().getDoctorId(),
+                springUserDAO.springUser().getCreationDate(),
+                springUserDAO.springUser().getRole()
+        );
+
+        Optional<SpringUser> springUserOptional = springUserRepository.findById(springUserId);
+        if (springUserOptional.isEmpty()) {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " " + springUser);
+            log.error(err.getMessage());
+            throw err;
+        }
+        SpringUser returned;
+        try {
+            returned = springUserRepository.saveAndFlush(springUser);
+        } catch (Exception e) {
+            SaveError err = new SaveError(Consts.C454_UPDATING_ERROR + " " + springUser);
+            log.error(err.getMessage());
+            throw err;
+        }
+        log.info("Specialisation with id: {} was successfully updated: {}", springUserId, returned);
+        return returned;
+    }
+
 }

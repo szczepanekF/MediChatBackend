@@ -54,13 +54,13 @@ public class SpecialisationServiceImpl implements SpecialisationService {
     /**
      * Delete specialisation with given id
      *
-     * @param id - id of the specialisation
+     * @param specialisationId - id of the specialisation
      */
     @Override
-    public void deleteSpecialisation(int id) {
-        Optional<Specialisation> specialisation = specialisationRepository.findById(id);
+    public void deleteSpecialisation(int specialisationId) {
+        Optional<Specialisation> specialisation = specialisationRepository.findById(specialisationId);
         if (specialisation.isEmpty()) {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + specialisationId + " Type: " + this.getClass());
             log.error(err.getMessage());
             throw err;
         }
@@ -71,22 +71,22 @@ public class SpecialisationServiceImpl implements SpecialisationService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Specialisation with id: {} was successfully deleted", id);
+        log.info("Specialisation with id: {} was successfully deleted", specialisationId);
     }
 
     /**
      * Update specialisation based on specialisation data access object and specialisations id
      *
-     * @param specialisation - data access object
-     * @param id             - id of the specialisation
+     * @param specialisation   - data access object
+     * @param specialisationId - id of the specialisation
      * @return updated specialisation
      */
     @Override
-    public Specialisation updateSpecialisation(SpecialisationDAO specialisation, int id) {
+    public Specialisation updateSpecialisation(SpecialisationDAO specialisation, int specialisationId) {
         Specialisation specialisationEntity = new Specialisation(specialisation.specialisation().getId(),
                 specialisation.specialisation().getSpecialisation());
 
-        Optional<Specialisation> specialisationFromDatabase = specialisationRepository.findById(id);
+        Optional<Specialisation> specialisationFromDatabase = specialisationRepository.findById(specialisationId);
         if (specialisationFromDatabase.isEmpty()) {
             EntityNotFound err = new EntityNotFound(Consts.C404 + " " + specialisationEntity);
             log.error(err.getMessage());
@@ -100,20 +100,20 @@ public class SpecialisationServiceImpl implements SpecialisationService {
             log.error(err.getMessage());
             throw err;
         }
-        log.info("Specialisation with id: {} was successfully updated: {}", id, returned);
+        log.info("Specialisation with id: {} was successfully updated: {}", specialisationId, returned);
         return returned;
     }
 
     /**
      * Get specialisation entity by id
      *
-     * @param id - id of the specialisation
+     * @param specialisationId - id of the specialisation
      * @return specialisation entity with given id
      */
     @Override
-    public Specialisation getSpecialisation(int id) {
-        return specialisationRepository.findById(id).orElseThrow(() -> {
-            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + id + " Type: " + this.getClass());
+    public Specialisation getSpecialisation(int specialisationId) {
+        return specialisationRepository.findById(specialisationId).orElseThrow(() -> {
+            EntityNotFound err = new EntityNotFound(Consts.C404 + " ID: " + specialisationId + " Type: " + this.getClass());
             log.error(err.getMessage());
             return err;
         });

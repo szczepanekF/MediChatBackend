@@ -26,12 +26,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .map(Room::getChatId)
                 .or(() -> {
                     if(createNewRoomIfNotExists) {
-                        var chatId = createChatId(senderId, recipientId);
-//                        return Optional.of(chatId);
+                        List<Room> chatId = createChatId(senderId, recipientId);
+                        return Optional.of(chatId.getFirst().getChatId());
                     }
 
                     return  Optional.empty();
                 });
+    }
+
+    @Override
+    public Optional<Room> getChatRoomIdBySenderRecipient(final int senderId, final int recipientId) {
+        return chatRoomRepository.findBySenderIdAndRecipientId(senderId, recipientId);
     }
 
     public List<Room> createChatId(int senderId, int recipientId) {

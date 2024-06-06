@@ -1,5 +1,6 @@
 package pl.logic.site.model.mysql;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlType;
 import lombok.AllArgsConstructor;
@@ -20,11 +21,13 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SpringUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
+    @Column(unique = true)
     private String email;
     private String password;
 

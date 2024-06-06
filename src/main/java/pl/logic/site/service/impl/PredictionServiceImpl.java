@@ -16,7 +16,6 @@ import pl.logic.site.model.predictions.quality.Quality;
 import pl.logic.site.model.predictions.quality.Result;
 import pl.logic.site.model.predictions.statictic.DiseasePrediction;
 import pl.logic.site.model.predictions.statictic.Prediction;
-import pl.logic.site.model.predictions.statictic.StatisticPrediction;
 import pl.logic.site.service.*;
 
 import java.time.LocalDate;
@@ -78,7 +77,7 @@ public class PredictionServiceImpl implements PredictionService {
      * from at least one disease.
      * Such DiseaseVectors are added to the dataset
      */
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         this.symptomParser = new SymptomParser(this.jdbcTemplate);
         this.diseases = diseaseService.getDiseases();
@@ -90,7 +89,7 @@ public class PredictionServiceImpl implements PredictionService {
             try {
                 List<Integer> chartIds = symptomParser.searchChartIdByPatientId(patients.get(i).getId());
                 for (Integer chartId : chartIds) {
-                    List<DiagnosisRequest> newDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(chartId);
+                    List<DiagnosisRequest> newDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequestsByChart(chartId);
                     patientDiagnosisRequests.addAll(newDiagnosisRequests);
                 }
 //                patientDiagnosisRequests = diagnosisRequestService.getDiagnosisRequests(symptomParser.searchChartIdByPatientId(patients.get(i).getId()));

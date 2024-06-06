@@ -14,9 +14,9 @@ public interface SpringUserRepository extends JpaRepository<SpringUser, Integer>
     Optional<SpringUser> findByPatientId(int patientId);
     Optional<SpringUser> findByDoctorId(int doctorId);
 
-    List<Optional<SpringUser>> findAllByPatientIdNotNull();
-    List<Optional<SpringUser>> findAllByDoctorIdNotNull();
+    List<SpringUser> findAllByPatientIdNotNull();
+    List<SpringUser> findAllByDoctorIdNotNull();
     @Query(value = "SELECT k FROm SpringUser k")
-    List<Optional<SpringUser>> retrieveAll();
+    List<SpringUser> retrieveAll();
 
 }
