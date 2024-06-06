@@ -6,8 +6,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import pl.logic.site.model.dao.SymptomDAO;
 import pl.logic.site.model.mysql.Chart;
+import pl.logic.site.model.mysql.Recognition;
 import pl.logic.site.model.mysql.Symptom;
+import pl.logic.site.repository.RecognitionRepository;
 import pl.logic.site.service.ChartService;
+import pl.logic.site.service.SymptomService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,20 +23,22 @@ import java.util.stream.Collectors;
  * @author Kacper
  */
 public class SymptomParser {
-    private final JdbcTemplate jdbcTemplate;
     private HashMap<String, String> patientSymptoms;
     private List<String> allSymptoms;
     private ChartService chartService;
+    private RecognitionRepository recognitionRepository;
+    private SymptomService symptomService;
 
 
     /**
      * Constructs a new SymptomParser instance.
      *
-     * @param jdbcTemplate the JDBC template used to query the database
+     * @param
      */
-    public SymptomParser(JdbcTemplate jdbcTemplate, ChartService chartService) {
-        this.jdbcTemplate = jdbcTemplate;
+    public SymptomParser(ChartService chartService, RecognitionRepository recognitionRepository, SymptomService symptomService) {
         this.chartService = chartService;
+        this.recognitionRepository = recognitionRepository;
+        this.symptomService = symptomService;
     }
 
     /**
@@ -70,24 +75,17 @@ public class SymptomParser {
      * @return a map of the patient's symptoms (symptoms name, symptoms severity level)
      */
     public HashMap<String, String> searchForSymptoms(int id_chart) {
-//        String sql = "SELECT s.name, r.symptom_value FROM recognition r INNER JOIN symptom s ON r.id_symptom = s.id WHERE r.id_chart = ?";
-        String sql = "SELECT s.name, r.symptom_value_level FROM recognition r INNER JOIN symptom s ON r.id_symptom = s.id WHERE r.id_chart = ? and r.symptom_value_level is not null";
+        HashMap<String, String> results = new HashMap<String, String>();
+        List<Recognition> recognitions = recognitionRepository.findByIdChart(id_chart);
+        for (Recognition recognition : recognitions) {
+            Symptom symptom = symptomService.getSymptom(recognition.getIdSymptom());
+            results.put(symptom.getName(), recognition.getSymptomValueLevel());
+        }
 
-        RowMapper<HashMap<String, String>> mapper = (rs, rowNum) -> {
-            HashMap<String, String> results = new HashMap<>();
-            results.put(rs.getString("name"), rs.getString("symptom_value_level"));
-            return results;
-        };
-
-        Map<String, String> result = jdbcTemplate.query(sql, new Object[]{id_chart}, mapper).stream().
-                flatMap(map -> map.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1));
-        return new HashMap<>(result);
+        return results;
     }
 
     public List<Integer> searchChartIdByPatientId(int patientId) {
-//        String sql = "SELECT id FROM chart WHERE id_patient = ?";
-//        List<Integer> results = jdbcTemplate.query(sql, new Object[]{patientId}, (rs, rowNum) -> rs.getInt("id"));
         List<Integer> results = chartService.getChartsForPatient(patientId).stream().map(Chart::getId).toList();
         return results.isEmpty() ? null : results;
     }

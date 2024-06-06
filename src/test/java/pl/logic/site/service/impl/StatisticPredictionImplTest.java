@@ -50,7 +50,7 @@ public class StatisticPredictionImplTest {
 
 
     @Test
-    void etFutureDiagnosisRequest() throws ParseException {
+    void getFutureDiagnosisRequest() throws ParseException {
         int daysInterval = 10;
         List<Integer> results = new ArrayList<>();
         LocalDate currentDate = LocalDate.now();

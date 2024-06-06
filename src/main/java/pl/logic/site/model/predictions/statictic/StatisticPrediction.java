@@ -3,6 +3,7 @@ package pl.logic.site.model.predictions.statictic;
 import org.springframework.jdbc.core.JdbcTemplate;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Doctor;
+import pl.logic.site.service.DiagnosisRequestService;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -15,22 +16,23 @@ import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDI
 
 public class StatisticPrediction {
 
+
     /**
      * Returns the number of future diagnosis requests in the next daysInterval.
      *
-     * @param jdbcTemplate - connection to the database
+     * @param diagnosisRequestService - connection to the diagnosis request service
      * @param daysInterval - number of days interval
      * @param currentDate  - current date
      * @return - number of diagnosis requests in the given days interval
      */
-    public static int getDiagnosisRequestsSizeByDaysInterval(JdbcTemplate jdbcTemplate, int daysInterval, LocalDate currentDate) {
-        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysInterval(jdbcTemplate, daysInterval, currentDate);
+    public static int getDiagnosisRequestsSizeByDaysInterval(DiagnosisRequestService diagnosisRequestService, int daysInterval, LocalDate currentDate) {
+        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysInterval(diagnosisRequestService, daysInterval, currentDate);
 //        System.out.println(diagnosis.size());
         return diagnosis.size();
     }
 
-    public static HashMap<Integer, Integer> getDoctorsInInterval(JdbcTemplate jdbcTemplate, List<Doctor> doctors, int daysInterval, LocalDate currentDate) {
-        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysInterval(jdbcTemplate, daysInterval, currentDate);
+    public static HashMap<Integer, Integer> getDoctorsInInterval(DiagnosisRequestService diagnosisRequestService, List<Doctor> doctors, int daysInterval, LocalDate currentDate) {
+        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysInterval(diagnosisRequestService, daysInterval, currentDate);
         HashMap<Integer, Integer> doctorsInInterval = new HashMap<>();
 
         for (Doctor doctor : doctors) {
@@ -87,19 +89,19 @@ public class StatisticPrediction {
         return meter;
     }
 
-    private static List<DiagnosisRequest> getDiagnosisRequestsByDaysInterval(JdbcTemplate jdbcTemplate, int daysInterval, LocalDate currentDate) {
-        List<DiagnosisRequest> allDiagnosisRequests;
-        String sql = "Select * from diagnosis_request;";
-
-        allDiagnosisRequests = jdbcTemplate.query(sql, (rs, rowNum) -> {
-            DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
-            diagnosisRequest.setId(rs.getInt("id"));
-            diagnosisRequest.setIdDoctor(rs.getInt("id_doctor"));
-            diagnosisRequest.setCreationDate(rs.getTimestamp("creation_date"));
-            // Uzupełnij pozostałe pola obiektu DiagnosisRequest, na przykład:
-            // diagnosisRequest.setSomeField(rs.getString("some_column"));
-            return diagnosisRequest;
-        });
+    private static List<DiagnosisRequest> getDiagnosisRequestsByDaysInterval(DiagnosisRequestService diagnosisRequestService, int daysInterval, LocalDate currentDate) {
+        List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
+//        String sql = "Select * from diagnosis_request;";
+//
+//        allDiagnosisRequests = jdbcTemplate.query(sql, (rs, rowNum) -> {
+//            DiagnosisRequest diagnosisRequest = new DiagnosisRequest();
+//            diagnosisRequest.setId(rs.getInt("id"));
+//            diagnosisRequest.setIdDoctor(rs.getInt("id_doctor"));
+//            diagnosisRequest.setCreationDate(rs.getTimestamp("creation_date"));
+//            // Uzupełnij pozostałe pola obiektu DiagnosisRequest, na przykład:
+//            // diagnosisRequest.setSomeField(rs.getString("some_column"));
+//            return diagnosisRequest;
+//        });
 
         LocalDate dateThreshold = currentDate.minusDays(daysInterval);
 

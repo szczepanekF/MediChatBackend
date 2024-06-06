@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.JpaRepository;
 import pl.logic.site.model.mysql.Recognition;
 import pl.logic.site.repository.RecognitionRepository;
 
@@ -18,18 +17,19 @@ public class RecognitionTest {
     public void testRecognition() {
         Recognition recognition = new Recognition();
         recognition.setId(1);
-        recognition.setId_chart(2);
-        recognition.setId_symptom(3);
-        recognition.setSymptom_value_level("High");
+        recognition.setIdChart(2);
+        recognition.setIdSymptom(3);
+        recognition.setSymptomValueLevel("High");
 
         assertEquals(1, recognition.getId());
-        assertEquals(2, recognition.getId_chart());
-        assertEquals(3, recognition.getId_symptom());
-        assertEquals("High", recognition.getSymptom_value_level());
+        assertEquals(2, recognition.getIdChart());
+        assertEquals(3, recognition.getIdSymptom());
+        assertEquals("High", recognition.getSymptomValueLevel());
     }
 
     @Test
     public void testRecognitionRepository() {
-        System.out.println(recognitionRepository.findAll());
+//        System.out.println(recognitionRepository.findAll());
+        System.out.println(recognitionRepository.findByIdChart(31));
     }
 }

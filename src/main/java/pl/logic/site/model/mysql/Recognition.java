@@ -23,11 +23,11 @@ public class Recognition {
     private int id;
 
     @Column(name = "id_chart")
-    private int id_chart;
+    private int idChart;
 
     @Column(name = "id_symptom")
-    private int id_symptom;
+    private int idSymptom;
 
     @Column(name = "symptom_value_level")
-    private String symptom_value_level;
+    private String symptomValueLevel;
 }
