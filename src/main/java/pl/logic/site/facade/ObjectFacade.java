@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import pl.logic.site.model.dao.*;
 import pl.logic.site.model.exception.UnknownObjectType;
 import pl.logic.site.model.mysql.Chart;
+import pl.logic.site.model.mysql.ChartSymptom;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Report;
 import pl.logic.site.model.mysql.SpringUser;
@@ -109,6 +110,9 @@ public class ObjectFacade {
         return chartService.getChartsByStateAndPatientId(state, patientId);
     }
 
+    public List<ChartSymptom> getAllSymptomsByChartId(int chartId) {
+        return chartSymptomService.getChartSymptoms(chartId);
+    }
 
 
     /**
