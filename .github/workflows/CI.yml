@@ -1,5 +1,4 @@
-name: CI
-
+name: Commit_Tests_CI
 on:
   push:
     branches: [main]
@@ -7,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  Tests:
 
     runs-on: ubuntu-latest
 
