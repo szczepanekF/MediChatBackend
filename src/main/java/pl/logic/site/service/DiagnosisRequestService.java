@@ -18,4 +18,6 @@ public interface DiagnosisRequestService {
     DiagnosisRequest getDiagnosisRequestByChart(int id);
 
     List<DiagnosisRequest> getAllDiagnosisRequestsByChart(int filter);
+
+    List<DiagnosisRequest> getAllDiagnosisRequests();
 }
