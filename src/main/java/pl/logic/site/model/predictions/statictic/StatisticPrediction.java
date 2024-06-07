@@ -9,10 +9,7 @@ import pl.logic.site.service.DiagnosisRequestService;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDICTIONS;
 
@@ -57,15 +54,20 @@ public class StatisticPrediction {
     }
 
 
-    public static int getSymptomCountInDaysInterval(DiagnosisRequestService diagnosisRequestService, ChartSymptomService chartSymptomService, int daysInterval, LocalDate currentDate, int symptomId) {
-        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysInterval(diagnosisRequestService, daysInterval, currentDate);
+    public static int getSymptomCountInDaysInterval(List<DiagnosisRequest> allDiagnosisRequests, List<ChartSymptom> chartSymptoms, int daysInterval, LocalDate currentDate, int symptomId) {
+        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysIntervalOptimalized(allDiagnosisRequests, daysInterval, currentDate);
         int counter = 0;
         Iterator<DiagnosisRequest> iterator = diagnosis.iterator();
         while (iterator.hasNext()) {
             DiagnosisRequest diagnosisRequest = iterator.next();
             int idChart = diagnosisRequest.getIdChart();
-            List<ChartSymptom> chartSymptoms = chartSymptomService.getChartSymptoms(idChart);
+            List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
             for (ChartSymptom chartSymptom : chartSymptoms) {
+                if (chartSymptom.getIdChart() == idChart) {
+                    chartSymptomsCopy.add(chartSymptom);
+                }
+            }
+            for (ChartSymptom chartSymptom : chartSymptomsCopy) {
                 if (chartSymptom.getIdSymptom() == symptomId) {
                     counter++;
                 }
@@ -74,7 +76,42 @@ public class StatisticPrediction {
         return counter;
     }
 
+    public static int getDiseaseCountInDaysInterval(List<DiagnosisRequest> allDiagnosisRequests, int daysInterval, LocalDate currentDate, int diseaseId) {
+        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysIntervalOptimalized(allDiagnosisRequests, daysInterval, currentDate);
+        int counter = 0;
+        Iterator<DiagnosisRequest> iterator = diagnosis.iterator();
+        while (iterator.hasNext()) {
+            DiagnosisRequest diagnosisRequest = iterator.next();
+//            int idChart = diagnosisRequest.getIdChart();
+//            List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
+//            for (ChartSymptom chartSymptom : chartSymptoms) {
+//                if (chartSymptom.getIdChart() == idChart) {
+//                    chartSymptomsCopy.add(chartSymptom);
+//                }
+//            }
+//            for (ChartSymptom chartSymptom : chartSymptomsCopy) {
+//                if (chartSymptom.getIdSymptom() == symptomId) {
+//                    counter++;
+//                }
+//            }
+        }
+        return counter;
+    }
 
+
+    private static List<DiagnosisRequest> getDiagnosisRequestsByDaysIntervalOptimalized(List<DiagnosisRequest> allDiagnosisRequests, int daysInterval, LocalDate currentDate) {
+        List<DiagnosisRequest> allDiagnosisRequestsCopy = new ArrayList<>(allDiagnosisRequests);
+        LocalDate dateThreshold = currentDate.minusDays(daysInterval);
+        Iterator<DiagnosisRequest> iterator = allDiagnosisRequestsCopy.iterator();
+        while (iterator.hasNext()) {
+            DiagnosisRequest diagnosisRequest = iterator.next();
+            LocalDate creationDate = diagnosisRequest.getCreationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            if (!(creationDate.isAfter(dateThreshold) && creationDate.isBefore(currentDate))) {
+                iterator.remove();
+            }
+        }
+        return allDiagnosisRequestsCopy;
+    }
 
 
     private static List<DiagnosisRequest> getDiagnosisRequestsByDaysInterval(DiagnosisRequestService diagnosisRequestService, int daysInterval, LocalDate currentDate) {
@@ -91,8 +128,6 @@ public class StatisticPrediction {
         }
         return allDiagnosisRequests;
     }
-
-
 
     public static HashMap<Integer, Double> getIntegerDoubleHashMap(List<HashMap<Integer, Integer>> doctorsCounter) {
         HashMap<Integer, Integer> meter = getIntegerIntegerHashMap(doctorsCounter);

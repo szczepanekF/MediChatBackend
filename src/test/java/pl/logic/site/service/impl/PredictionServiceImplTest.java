@@ -70,8 +70,8 @@ class PredictionServiceImplTest {
     @ParameterizedTest
     @ValueSource(ints = {1})
     void getSymptomCountInInterval(int symptomId) {
-        LocalDate startDate = LocalDate.of(2024, 6, 20); // przykładowa data początkowa
-        LocalDate endDate = LocalDate.of(2024, 6, 30); // przykładowa data końcowa
+        LocalDate startDate = LocalDate.of(2024, 7, 1); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 7, 30); // przykładowa data końcowa
 
         List<Double> results = this.predictionService.getSymptomCountInIntervals(startDate, endDate, symptomId);
         System.out.println(results);
@@ -79,10 +79,19 @@ class PredictionServiceImplTest {
 
     @Test
     void getSymptomsCountInIntervals() {
-        LocalDate startDate = LocalDate.of(2024, 6, 20); // przykładowa data początkowa
-        LocalDate endDate = LocalDate.of(2024, 6, 30); // przykładowa data końcowa
+        LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
 
         List<List<Double>> results = this.predictionService.getSymptomsCountInIntervals(startDate, endDate);
+        System.out.println(results);
+    }
+
+    @Test
+    void getDiseaseCountInIntervals() {
+        LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
+
+        List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, 1);
         System.out.println(results);
     }
 }

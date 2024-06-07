@@ -56,4 +56,6 @@ public interface PredictionService {
     public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate);
 
     public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId);
+
+    public List<Double> getDiseaseCountInIntervals(LocalDate startDate, LocalDate endDate, int diseaseId);
 }
