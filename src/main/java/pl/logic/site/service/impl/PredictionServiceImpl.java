@@ -278,7 +278,19 @@ public class PredictionServiceImpl implements PredictionService {
     }
 
     @Override
-    public List<Double> getSymptomsCountInIntervals (LocalDate startDate, LocalDate endDate, int symptomId) {
+    public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate) {
+        List<List<Double>> results = new ArrayList<>();
+        for (Symptom symptom : symptoms) {
+            log.info("Symptom: " + symptom.getName() + " id: " + symptom.getId() + " is being processed");
+            List<Double> symptomCountInIntervals = getSymptomCountInIntervals(startDate, endDate, symptom.getId());
+            results.add(symptomCountInIntervals);
+        }
+        return results;
+    }
+
+
+    @Override
+    public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId) {
         List<Integer> intervalList = getIntervalList(startDate, endDate);
         List<Double> results = new ArrayList<>();
         LocalDate currentDate = LocalDate.now();

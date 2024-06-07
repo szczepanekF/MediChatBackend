@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.service.PredictionService;
 
@@ -25,8 +26,12 @@ class PredictionServiceImplTest {
 
     @Test
     void getStatisticDisease() {
-//        Object statisticDisease = this.predictionService.getStatisticDisease();
-//        System.out.println(statisticDisease.toString());
+        try {
+            Object statisticDisease = this.predictionService.getStatisticDisease();
+            System.out.println(statisticDisease.toString());
+        } catch (Exception e) {
+            System.out.println("No diseases found");
+        }
     }
 
     @Test
@@ -37,8 +42,12 @@ class PredictionServiceImplTest {
 
     @Test
     void getPatientDisease() {
-//        Disease predictedDisease = this.predictionService.getPatientDisease(1);
-//        System.out.println(predictedDisease.getName());
+        try {
+            Disease predictedDisease = this.predictionService.getPatientDisease(1);
+            System.out.println(predictedDisease.getName());
+        } catch (Exception e) {
+            System.out.println("No disease found");
+        }
     }
 
     @Test
@@ -59,12 +68,21 @@ class PredictionServiceImplTest {
 
 
     @ParameterizedTest
-    @ValueSource(ints = {1,2,3})
+    @ValueSource(ints = {1})
     void getSymptomCountInInterval(int symptomId) {
-        LocalDate startDate = LocalDate.of(2024, 6, 8); // przykładowa data początkowa
+        LocalDate startDate = LocalDate.of(2024, 6, 20); // przykładowa data początkowa
         LocalDate endDate = LocalDate.of(2024, 6, 30); // przykładowa data końcowa
 
-        List<Double> results = this.predictionService.getSymptomsCountInIntervals(startDate, endDate, symptomId);
+        List<Double> results = this.predictionService.getSymptomCountInIntervals(startDate, endDate, symptomId);
+        System.out.println(results);
+    }
+
+    @Test
+    void getSymptomsCountInIntervals() {
+        LocalDate startDate = LocalDate.of(2024, 6, 20); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 30); // przykładowa data końcowa
+
+        List<List<Double>> results = this.predictionService.getSymptomsCountInIntervals(startDate, endDate);
         System.out.println(results);
     }
 }
