@@ -16,4 +16,5 @@ public interface ChartSymptomService {
 
     List<ChartSymptom> getChartSymptoms(int id);
 
+    List<ChartSymptom> getAllChartSymptoms();
 }

@@ -135,4 +135,21 @@ public class ChartSymptomServiceImpl implements ChartSymptomService {
         log.info("All chartSymptoms, for chard ID: {}, were successfully retrieved", chartId);
         return chartSymptoms;
     }
+
+    /**
+     * Get all chartSymptoms
+     *
+     * @return list of all chartSymptoms
+     */
+    @Override
+    public List<ChartSymptom> getAllChartSymptoms() {
+        List<ChartSymptom> chartSymptoms = chartSymptomRepository.findAll();
+        if (chartSymptoms.isEmpty()) {
+            EntityNotFound err = new EntityNotFound(Consts.C404);
+            log.error(err.getMessage());
+            throw err;
+        }
+        log.info("All chartSymptoms were successfully retrieved");
+        return chartSymptoms;
+    }
 }

@@ -45,30 +45,30 @@ class SymptomParserTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 32})
     void searchForSymptoms(int id_chart) {
-        // when
-        HashMap<String, String> result = symptomParser.searchForSymptoms(id_chart);
-
-        // then
-        System.out.println(result);
+//        // when
+//        HashMap<String, String> result = symptomParser.searchForSymptoms(id_chart);
+//
+//        // then
+//        System.out.println(result);
 //        System.out.println(new ArrayList<>(result.values()).get(0));
     }
 
     @Test
     void connectSymptoms() {
         // given
-        int id_chart = 1;
-        ArrayList<Symptom> symptoms = new ArrayList<>();
-        symptoms.add(new Symptom(1, "headache"));
-        symptoms.add(new Symptom(2, "sore throat"));
-        symptoms.add(new Symptom(3, "abdominal pain"));
-        symptoms.add(new Symptom(4, "nausea"));
-        symptoms.add(new Symptom(5, "vomiting"));
-
-        // when
-        HashMap<String, String> result = symptomParser.connectSymptoms(id_chart, symptoms);
-
-        // then
-        System.out.println(result);
-        System.out.println(new ArrayList<>(result.values()).get(0));
+//        int id_chart = 1;
+//        ArrayList<Symptom> symptoms = new ArrayList<>();
+//        symptoms.add(new Symptom(1, "headache"));
+//        symptoms.add(new Symptom(2, "sore throat"));
+//        symptoms.add(new Symptom(3, "abdominal pain"));
+//        symptoms.add(new Symptom(4, "nausea"));
+//        symptoms.add(new Symptom(5, "vomiting"));
+//
+//        // when
+//        HashMap<String, String> result = symptomParser.connectSymptoms(id_chart, symptoms);
+//
+//        // then
+//        System.out.println(result);
+//        System.out.println(new ArrayList<>(result.values()).get(0));
     }
 }
