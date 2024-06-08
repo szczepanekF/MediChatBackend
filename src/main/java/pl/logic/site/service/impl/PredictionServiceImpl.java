@@ -19,7 +19,11 @@ import pl.logic.site.model.predictions.statictic.Prediction;
 import pl.logic.site.repository.RecognitionRepository;
 import pl.logic.site.service.*;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.Period;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static pl.logic.site.model.predictions.statictic.StatisticPrediction.*;
@@ -47,8 +51,11 @@ public class PredictionServiceImpl implements PredictionService {
     @Autowired
     private ChartService chartService;
     @Autowired
+    private ChartSymptomService chartSymptomService;
+    @Autowired
     private RecognitionRepository recognitionRepository;
-
+    @Autowired
+    private StatisticsService statisticsService;
 
 
     private List<DiseaseVector> dataset;
@@ -230,13 +237,7 @@ public class PredictionServiceImpl implements PredictionService {
                     diagnosisRequestService, daysInterval, currentDate) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
             currentDate = currentDate.minusDays(daysInterval);
         }
-        int denominator = 0;
-        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
-            denominator += i;
-        }
-        int meter = results.stream().mapToInt(Integer::intValue).sum();
-
-        return (double) meter / denominator;
+        return calculateFraction(results);
     }
 
     /**
@@ -246,7 +247,6 @@ public class PredictionServiceImpl implements PredictionService {
      *
      * @param daysInterval - how many days have the single interval
      * @return - the most wanted doctor in the next daysInterval
-     *
      */
     @Override
     public Doctor getMostWantedDoctor(int daysInterval) {
@@ -270,5 +270,197 @@ public class PredictionServiceImpl implements PredictionService {
         } else {
             throw new EntityNotFound("No doctor found");
         }
+    }
+
+    @Override
+    public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate) {
+        List<Object> results = new ArrayList<>();
+        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
+        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
+
+//        List<Integer> intervalList = getIntervalList(startDate, endDate);
+//        System.out.println(intervalList);
+//        System.out.println(getDatesInIntervals(startDate, endDate));
+//        System.out.println(statisticsService.generateDateRange(fromDate, toDate));
+
+        List<String> symptomsNames = getSymptomsNames();
+        List<String> dates = statisticsService.generateDateRange(fromDate, toDate);
+        List<List<Double>> symptomsCountInIntervals = getSymptomsCountInIntervals(startDate, endDate);
+
+        results.add(symptomsNames);
+        results.add(dates);
+        results.add(symptomsCountInIntervals);
+
+        return results;
+    }
+
+    @Override
+    public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate) {
+        List<Object> results = new ArrayList<>();
+        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
+        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
+
+        List<String> diseasesNames = getDiseasesNames();
+        List<String> dates = statisticsService.generateDateRange(fromDate, toDate);
+        List<List<Double>> diseasesCountInIntervals = getDiseasesCountInIntervals(startDate, endDate);
+
+        results.add(diseasesNames);
+        results.add(dates);
+        results.add(diseasesCountInIntervals);
+
+        return results;
+    }
+
+    @Override
+    public List<String> getSymptomsNames() {
+        List<String> symptomsNames = new ArrayList<>();
+        for (Symptom symptom : symptoms) {
+            symptomsNames.add(symptom.getName());
+        }
+        return symptomsNames;
+    }
+
+    @Override
+    public List<String> getDiseasesNames() {
+        List<String> diseasesNames = new ArrayList<>();
+        for (Disease disease : diseases) {
+            diseasesNames.add(disease.getName());
+        }
+        return diseasesNames;
+    }
+
+    @Override
+    public List<LocalDate> getDatesInIntervals(LocalDate startDate, LocalDate endDate) {
+        List<LocalDate> dates = new ArrayList<>();
+        List<Integer> intervalList = getIntervalList(startDate, endDate);
+//        System.out.println(intervalList);
+//        System.out.println(symptoms);
+
+        dates.add(startDate);
+        for (int i = 0; i < intervalList.size(); i++) {
+            startDate = startDate.plusDays(intervalList.get(i));
+            dates.add(startDate);
+        }
+        return dates;
+    }
+
+    @Override
+    public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate) {
+        List<List<Double>> results = new ArrayList<>();
+        for (Symptom symptom : symptoms) {
+            log.info("Symptom: " + symptom.getName() + " id: " + symptom.getId() + " is being processed");
+            List<Double> symptomCountInIntervals = getSymptomCountInIntervals(startDate, endDate, symptom.getId());
+            results.add(symptomCountInIntervals);
+        }
+        return results;
+    }
+
+
+    @Override
+    public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId) {
+        List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
+        List<ChartSymptom> chartSymptoms = chartSymptomService.getAllChartSymptoms();
+        List<Integer> intervalList = getIntervalList(startDate, endDate);
+        List<Double> results = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        for (int i = 0; i < intervalList.size(); i++) {
+            int intervalSum = (int) ChronoUnit.DAYS.between(currentDate, startDate);
+            ;
+            for (int j = 0; j <= i; j++) {
+                intervalSum += intervalList.get(j);
+            }
+            results.add(getSymptomCountInInterval(allDiagnosisRequests, chartSymptoms, intervalSum, symptomId));
+        }
+        return results;
+    }
+
+    @Override
+    public List<List<Double>> getDiseasesCountInIntervals(LocalDate startDate, LocalDate endDate) {
+        List<List<Double>> results = new ArrayList<>();
+        for (Disease disease : diseases) {
+            log.info("Disease: " + disease.getName() + " id: " + disease.getId() + " is being processed");
+            List<Double> diseaseCountInIntervals = getDiseaseCountInIntervals(startDate, endDate, disease.getId());
+            results.add(diseaseCountInIntervals);
+        }
+        return results;
+    }
+
+    @Override
+    public List<Double> getDiseaseCountInIntervals(LocalDate startDate, LocalDate endDate, int diseaseId) {
+        List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
+        List<Disease> diseases = this.diseases;
+        List<Integer> intervalList = getIntervalList(startDate, endDate);
+        List<Double> results = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        for (int i = 0; i < intervalList.size(); i++) {
+            int intervalSum = (int) ChronoUnit.DAYS.between(currentDate, startDate);
+            ;
+            for (int j = 0; j <= i; j++) {
+                intervalSum += intervalList.get(j);
+            }
+            results.add(getDiseaseCountInInterval(allDiagnosisRequests, diseases, intervalSum, diseaseId));
+        }
+        return results;
+    }
+
+    private Double getDiseaseCountInInterval(List<DiagnosisRequest> allDiagnosisRequests, List<Disease> diseases, int daysInterval, int diseaseId) {
+        List<Integer> diseaseCounter = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            diseaseCounter.add(getDiseaseCountInDaysInterval(allDiagnosisRequests, diseases, daysInterval, currentDate, diseaseId) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
+            currentDate = currentDate.minusDays(daysInterval);
+        }
+        return calculateFraction(diseaseCounter);
+    }
+
+    private Double getSymptomCountInInterval(List<DiagnosisRequest> allDiagnosisRequests, List<ChartSymptom> chartSymptoms, int daysInterval, int symptomId) {
+        List<Integer> symptomCounter = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            symptomCounter.add(getSymptomCountInDaysInterval(allDiagnosisRequests, chartSymptoms, daysInterval, currentDate, symptomId) * (MAX_DEEP_OF_PREDICTIONS - i + 1));
+            currentDate = currentDate.minusDays(daysInterval);
+        }
+        return calculateFraction(symptomCounter);
+    }
+
+    private List<Integer> getIntervalList(LocalDate startDate, LocalDate endDate) {
+        List<Integer> intervalList = new ArrayList<>();
+        YearMonth yearMonth = YearMonth.from(startDate);
+
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
+        int interval = 1;
+        if (days >= 31 * 2 + 1) {
+            interval = yearMonth.lengthOfMonth();
+            intervalList.add(interval);
+
+            long months = ChronoUnit.MONTHS.between(startDate, endDate);
+
+            for (int i = 1; i < months+1; i++) {
+                yearMonth = yearMonth.plusMonths(1);
+                interval = yearMonth.lengthOfMonth();
+                intervalList.add(interval);
+            }
+        } else {
+            for (int i = 0; i < days; i++) {
+                intervalList.add(interval);
+            }
+        }
+
+//        System.out.println(intervalList);
+        return intervalList;
+    }
+
+    private Double calculateFraction(List<Integer> counter) {
+        int denominator = 0;
+        for (int i = 1; i <= MAX_DEEP_OF_PREDICTIONS; i++) {
+            denominator += i;
+        }
+        int meter = counter.stream().mapToInt(Integer::intValue).sum();
+
+        return roundToTwoDecimalPlaces((double) meter / denominator);
     }
 }

@@ -3,6 +3,10 @@ package pl.logic.site.service;
 import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
 
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+
 /**
  * This interface provides methods for predicting the disease of a patient based on various factors.
  *
@@ -49,4 +53,22 @@ public interface PredictionService {
      * @return the doctor who is most wanted by patients in the next daysInterval
      */
     Doctor getMostWantedDoctor(int daysInterval);
+
+    public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate);
+
+    public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate);
+
+    public List<String> getSymptomsNames();
+
+    public List<String> getDiseasesNames();
+
+    public List<LocalDate> getDatesInIntervals(LocalDate startDate, LocalDate endDate);
+
+    public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate);
+
+    public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId);
+
+    public List<Double> getDiseaseCountInIntervals(LocalDate startDate, LocalDate endDate, int diseaseId);
+
+    public List<List<Double>> getDiseasesCountInIntervals(LocalDate startDate, LocalDate endDate);
 }

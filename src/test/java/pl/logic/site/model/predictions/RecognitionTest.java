@@ -30,6 +30,6 @@ public class RecognitionTest {
     @Test
     public void testRecognitionRepository() {
 //        System.out.println(recognitionRepository.findAll());
-        System.out.println(recognitionRepository.findByIdChart(31));
+//        System.out.println(recognitionRepository.findByIdChart(31));
     }
 }
