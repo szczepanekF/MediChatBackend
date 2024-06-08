@@ -13,7 +13,10 @@ import org.springframework.data.annotation.Immutable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -41,4 +44,10 @@ public class Doctor {
 
     @Column(name = "is_bot")
     private int isBot;
+
+    public List<Patient> getMyPatients(){
+        List<Patient> patients = new ArrayList<Patient>();
+        //get all patients for doctor
+        return patients;
+    }
 }

@@ -6,8 +6,11 @@ import org.springframework.stereotype.Component;
 import pl.logic.site.model.dao.*;
 import pl.logic.site.model.exception.UnknownObjectType;
 import pl.logic.site.model.mysql.Chart;
+import pl.logic.site.model.mysql.ChartSymptom;
 import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.mysql.Report;
 import pl.logic.site.model.mysql.SpringUser;
+import pl.logic.site.model.reportsForms.ReportCreateForm;
 import pl.logic.site.service.*;
 import pl.logic.site.utils.Consts;
 
@@ -43,6 +46,8 @@ public class ObjectFacade {
     private final ExaminationService examinationService;
     @Autowired
     private final DiseaseService diseaseService;
+    @Autowired
+    private final StatisticsService statisticsService;
 
     /**
      * Create object of given data access object class using suitable service
@@ -105,6 +110,9 @@ public class ObjectFacade {
         return chartService.getChartsByStateAndPatientId(state, patientId);
     }
 
+    public List<ChartSymptom> getAllSymptomsByChartId(int chartId) {
+        return chartSymptomService.getChartSymptoms(chartId);
+    }
 
 
     /**
@@ -172,5 +180,9 @@ public class ObjectFacade {
             case ExaminationDAO examination -> examinationService.deleteExamination(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         }
+    }
+
+    public Report createReport(ReportCreateForm reportCreateForm) {
+        return statisticsService.createReport(reportCreateForm);
     }
 }

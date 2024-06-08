@@ -7,8 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Immutable;
+import pl.logic.site.model.enums.ReportFiletype;
 import pl.logic.site.model.enums.Status;
 
+import java.sql.Blob;
+import java.util.Base64;
 import java.util.Date;
 
 @Data
@@ -28,6 +31,13 @@ public class Report {
     @Column(name = "id_doctor", nullable = false)
     private String idDoctor;
 
-    @Column(name = "file_path")
-    private String filePath;
+    @Column(name = "file")
+    private Blob file; //file encoded as base64
+
+    @Column(name = "filetype", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReportFiletype filetype;
+
+    @Column(name = "title", nullable = false)
+    private String title;
 }
