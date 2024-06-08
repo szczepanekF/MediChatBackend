@@ -6,8 +6,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
+import pl.logic.site.service.DiagnosisRequestService;
 import pl.logic.site.service.PredictionService;
 
 import java.time.LocalDate;
@@ -19,7 +21,7 @@ import java.util.List;
 class PredictionServiceImplTest {
     @Autowired
     private PredictionService predictionService;
-
+    private DiagnosisRequestService diagnosisRequestService;
 
     @BeforeEach
     void setUp() {
@@ -83,11 +85,12 @@ class PredictionServiceImplTest {
         try {
             LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
             LocalDate endDate = LocalDate.of(2024, 6, 15); // przykładowa data końcowa
+            List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
-            List<Double> results = this.predictionService.getSymptomCountInIntervals(startDate, endDate, symptomId);
+            List<Double> results = this.predictionService.getSymptomCountInIntervals(startDate, endDate, symptomId, allDiagnosisRequests);
             System.out.println(results);
         } catch (Exception e) {
-            System.out.println("No symptoms found");
+            System.out.println("No symptoms found" + e.getMessage());
         }
     }
 
@@ -96,11 +99,12 @@ class PredictionServiceImplTest {
         try {
             LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
             LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
+            List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
-            List<List<Double>> results = this.predictionService.getSymptomsCountInIntervals(startDate, endDate);
+            List<List<Double>> results = this.predictionService.getSymptomsCountInIntervals(startDate, endDate, allDiagnosisRequests);
             System.out.println(results);
         } catch (Exception e) {
-            System.out.println("No symptoms found");
+            System.out.println("No symptoms found\n" + e.getMessage());
         }
     }
 
@@ -110,11 +114,12 @@ class PredictionServiceImplTest {
         try {
             LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
             LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
+            List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
-            List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, diseaseId);
+            List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, diseaseId, allDiagnosisRequests);
             System.out.println(results);
         } catch (Exception e) {
-            System.out.println("No diseases found");
+            System.out.println("No diseases found\n" + e.getMessage());
         }
     }
 
@@ -123,11 +128,12 @@ class PredictionServiceImplTest {
         try {
             LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
             LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
+            List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
-            List<List<Double>> results = this.predictionService.getDiseasesCountInIntervals(startDate, endDate);
+            List<List<Double>> results = this.predictionService.getDiseasesCountInIntervals(startDate, endDate, allDiagnosisRequests);
             System.out.println(results);
         } catch (Exception e) {
-            System.out.println("No diseases found");
+            System.out.println("No diseases found\n" + e.getMessage());
         }
 //        System.out.println(results.size());
     }
@@ -141,7 +147,7 @@ class PredictionServiceImplTest {
             List<LocalDate> results = this.predictionService.getDatesInIntervals(startDate, endDate);
             System.out.println(results);
         } catch (Exception e) {
-            System.out.println("No dates found");
+            System.out.println("No dates found\n" + e.getMessage());
         }
     }
 
@@ -151,7 +157,7 @@ class PredictionServiceImplTest {
             List<String> symptomsNames = this.predictionService.getSymptomsNames();
             System.out.println(symptomsNames);
         } catch (Exception e) {
-            System.out.println("No symptoms found");
+            System.out.println("No symptoms found\n" + e.getMessage());
         }
     }
 
@@ -161,7 +167,7 @@ class PredictionServiceImplTest {
             List<String> diseasesNames = this.predictionService.getDiseasesNames();
             System.out.println(diseasesNames);
         } catch (Exception e) {
-            System.out.println("No diseases found");
+            System.out.println("No diseases found\n" + e.getMessage());
         }
 //        System.out.println(diseasesNames.size());
     }
@@ -182,7 +188,7 @@ class PredictionServiceImplTest {
                 System.out.println(symptomsPredictionInInterval.get(i));
             }
         } catch (Exception e) {
-            System.out.println("No symptoms found");
+            System.out.println("No symptoms found\n" + e.getMessage());
         }
     }
 
@@ -202,7 +208,51 @@ class PredictionServiceImplTest {
                 System.out.println(diseasesPredictionInInterval.get(i));
             }
         } catch (Exception e) {
-            System.out.println("No diseases found");
+            System.out.println("No diseases found\n" + e.getMessage());
+        }
+    }
+
+    @Test
+    void getAgeGroupSymptomsPredictionInInterval() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
+            Date fromDate = calendar.getTime();
+
+            calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
+            Date toDate = calendar.getTime();
+
+            String ageGroup = "0-18";
+
+            List<Object> ageGroupSymptomsPredictionInInterval = this.predictionService.getAgeGroupSymptomsPredictionInInterval(fromDate, toDate, ageGroup);
+            for (int i = 0; i < 3; i++) {
+                System.out.println(ageGroupSymptomsPredictionInInterval.get(i));
+            }
+        } catch (Exception e) {
+            System.out.println("No symptoms found\n" + e.getMessage());
+        }
+    }
+
+    @Test
+    void getAgeGroupDiseasesPredictionInInterval() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
+            Date fromDate = calendar.getTime();
+
+            calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
+            Date toDate = calendar.getTime();
+
+            String ageGroup = "0-18";
+
+            List<Object> ageGroupDiseasesPredictionInInterval = this.predictionService.getAgeGroupDiseasesPredictionInInterval(fromDate, toDate, ageGroup);
+            for (int i = 0; i < 3; i++) {
+                System.out.println(ageGroupDiseasesPredictionInInterval.get(i));
+            }
+        } catch (Exception e) {
+            System.out.println("No diseases found\n" + e.getMessage());
         }
     }
 

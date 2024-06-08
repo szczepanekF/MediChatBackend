@@ -186,4 +186,8 @@ public class ChartServiceImpl implements ChartService {
         return chartsToRemove;
     }
 
+    @Override
+    public List<Chart> getAllCharts() {
+        return chartRepository.findAll();
+    }
 }
