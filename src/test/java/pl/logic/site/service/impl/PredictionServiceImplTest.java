@@ -70,8 +70,8 @@ class PredictionServiceImplTest {
     @ParameterizedTest
     @ValueSource(ints = {1})
     void getSymptomCountInInterval(int symptomId) {
-        LocalDate startDate = LocalDate.of(2024, 7, 1); // przykładowa data początkowa
-        LocalDate endDate = LocalDate.of(2024, 7, 30); // przykładowa data końcowa
+        LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 15); // przykładowa data końcowa
 
         List<Double> results = this.predictionService.getSymptomCountInIntervals(startDate, endDate, symptomId);
         System.out.println(results);
@@ -86,12 +86,46 @@ class PredictionServiceImplTest {
         System.out.println(results);
     }
 
-    @Test
-    void getDiseaseCountInIntervals() {
-        LocalDate startDate = LocalDate.of(2024, 6, 10); // przykładowa data początkowa
-        LocalDate endDate = LocalDate.of(2024, 6, 12); // przykładowa data końcowa
+    @ParameterizedTest
+    @ValueSource(ints = {8})
+    void getDiseaseCountInIntervals(int diseaseId) {
+        LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
 
-        List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, 8);
+        List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, diseaseId);
         System.out.println(results);
     }
+
+    @Test
+    void getDiseasesCountInIntervals() {
+        LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
+
+        List<List<Double>> results = this.predictionService.getDiseasesCountInIntervals(startDate, endDate);
+        System.out.println(results);
+//        System.out.println(results.size());
+    }
+
+    @Test
+    void getDatesInIntervals() {
+        LocalDate startDate = LocalDate.of(2024, 7, 1); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 11, 1); // przykładowa data końcowa
+
+        List<LocalDate> results = this.predictionService.getDatesInIntervals(startDate, endDate);
+        System.out.println(results);
+    }
+
+    @Test
+    void getSymptomsNames() {
+        List<String> symptomsNames = this.predictionService.getSymptomsNames();
+        System.out.println(symptomsNames);
+    }
+
+    @Test
+    void getDiseasesNames() {
+        List<String> diseasesNames = this.predictionService.getDiseasesNames();
+        System.out.println(diseasesNames);
+//        System.out.println(diseasesNames.size());
+    }
+
 }

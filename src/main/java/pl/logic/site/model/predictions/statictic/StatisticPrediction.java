@@ -3,10 +3,13 @@ package pl.logic.site.model.predictions.statictic;
 import org.springframework.jdbc.core.JdbcTemplate;
 import pl.logic.site.model.mysql.ChartSymptom;
 import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
+import pl.logic.site.model.predictions.parser.DiseaseParser;
 import pl.logic.site.service.ChartSymptomService;
 import pl.logic.site.service.DiagnosisRequestService;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -75,27 +78,38 @@ public class StatisticPrediction {
         return counter;
     }
 
-    public static int getDiseaseCountInDaysInterval(List<DiagnosisRequest> allDiagnosisRequests, int daysInterval, LocalDate currentDate, int diseaseId) {
+    public static int getDiseaseCountInDaysIntervalFaster(List<DiagnosisRequest> allDiagnosisRequests, List<Disease> diseases, int daysInterval, LocalDate currentDate, int diseaseId) {
         List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysIntervalOptimalized(allDiagnosisRequests, daysInterval, currentDate);
         int counter = 0;
-        Iterator<DiagnosisRequest> iterator = diagnosis.iterator();
-        while (iterator.hasNext()) {
-            DiagnosisRequest diagnosisRequest = iterator.next();
-            if (diagnosisRequest.getIdDisease() == diseaseId) {
+        for (DiagnosisRequest diagnosisRequest : diagnosis) {
+            if (diagnosisRequest.getIdDisease() > 0 && diagnosisRequest.getIdDisease() == diseaseId) {
                 counter++;
             }
-//            int idChart = diagnosisRequest.getIdChart();
-//            List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
-//            for (ChartSymptom chartSymptom : chartSymptoms) {
-//                if (chartSymptom.getIdChart() == idChart) {
-//                    chartSymptomsCopy.add(chartSymptom);
-//                }
-//            }
-//            for (ChartSymptom chartSymptom : chartSymptomsCopy) {
-//                if (chartSymptom.getIdSymptom() == symptomId) {
-//                    counter++;
-//                }
-//            }
+        }
+        return counter;
+    }
+
+    public static int getDiseaseCountInDaysInterval(List<DiagnosisRequest> allDiagnosisRequests, List<Disease> diseases, int daysInterval, LocalDate currentDate, int diseaseId) {
+        List<DiagnosisRequest> diagnosis = getDiagnosisRequestsByDaysIntervalOptimalized(allDiagnosisRequests, daysInterval, currentDate);
+        int counter = 0;
+        for (DiagnosisRequest diagnosisRequest : diagnosis) {
+            if (diagnosisRequest.getIdDisease() > 0) {
+                if (diagnosisRequest.getIdDisease() == diseaseId) {
+                    counter++;
+                }
+            } else {
+                if (diagnosisRequest.getDiagnosis() == null || diagnosisRequest.getDiagnosis().isEmpty()) {
+                    continue;
+                }
+                DiseaseParser diseaseParser = new DiseaseParser(diagnosisRequest.getDiagnosis(), diseases);
+                List<Disease> results = diseaseParser.getDiseases();
+                for (Disease disease : results) {
+                    if (disease.getId() == diseaseId) {
+                        counter++;
+                        break;
+                    }
+                }
+            }
         }
         return counter;
     }
@@ -164,5 +178,10 @@ public class StatisticPrediction {
             }
         }
         return meter;
+    }
+
+    public static double roundToTwoDecimalPlaces(double number) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return Double.parseDouble(df.format(number).replace(',', '.'));
     }
 }

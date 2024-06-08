@@ -53,9 +53,17 @@ public interface PredictionService {
      */
     Doctor getMostWantedDoctor(int daysInterval);
 
+    public List<String> getSymptomsNames();
+
+    public List<String> getDiseasesNames();
+
+    public List<LocalDate> getDatesInIntervals(LocalDate startDate, LocalDate endDate);
+
     public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate);
 
     public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId);
 
     public List<Double> getDiseaseCountInIntervals(LocalDate startDate, LocalDate endDate, int diseaseId);
+
+    public List<List<Double>> getDiseasesCountInIntervals(LocalDate startDate, LocalDate endDate);
 }
