@@ -3,7 +3,9 @@ package pl.logic.site.service;
 
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.mysql.Doctor;
+import pl.logic.site.model.mysql.Patient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,4 +23,6 @@ public interface DoctorService {
     List<Doctor> getDoctors(int doctorFilter);
 
     Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId);
+
+    public List<Patient> getMyPatients(int doctorId);
 }

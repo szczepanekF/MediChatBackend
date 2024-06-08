@@ -6,7 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.views.DoctorPatientsFromChats;
 import pl.logic.site.repository.DiagnosisRequestRepository;
+import pl.logic.site.repository.DoctorPatientsFromChatsRepository;
+import pl.logic.site.repository.PatientRepository;
 import pl.logic.site.service.DoctorService;
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.exception.SaveError;
@@ -17,7 +21,9 @@ import pl.logic.site.utils.Consts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +33,10 @@ public class DoctorServiceImpl implements DoctorService {
     private DoctorRepository doctorRepository;
     @Autowired
     private DiagnosisRequestRepository diagnosisRequestRepository;
+    @Autowired
+    private DoctorPatientsFromChatsRepository doctorPatientsFromChatsRepository;
+    @Autowired
+    private PatientRepository patientRepository;
 
 
     @Override
@@ -40,6 +50,8 @@ public class DoctorServiceImpl implements DoctorService {
                 doctor.doctor().getIsBot());
         if (doctorEntity.getId() != 0)
             throw new SaveError(Consts.C453_SAVING_ERROR + " Explicitly stated entity ID, entity: " + doctorEntity);
+
+
 
         Doctor returned;
         try {
@@ -109,6 +121,30 @@ public class DoctorServiceImpl implements DoctorService {
     public Doctor getDoctorByDiagnosisRequest(int diagnosisRequestId) {
         return doctorRepository.findAllById(diagnosisRequestRepository.findById(diagnosisRequestId).get().getIdDoctor());
 
+    }
+
+    @Override
+    public List<Patient> getMyPatients(final int doctorId) {
+        try {
+
+            List<DoctorPatientsFromChats> doctorPatientsFromChatsList = doctorPatientsFromChatsRepository.findAllByDoctorID(doctorId);
+
+            List<Long> patientIds = doctorPatientsFromChatsList.stream()
+                    .filter(Objects::nonNull) // Ensure no null values in the list
+                    .map(DoctorPatientsFromChats::getPatientID)
+                    .filter(Objects::nonNull) // Ensure no null patient IDs
+                    .collect(Collectors.toList());
+
+            List<Integer> patientIdsAsIntegers = patientIds.stream()
+                    .map(Long::intValue)
+                    .collect(Collectors.toList());
+
+            List<Patient> patients = patientRepository.findAllById(patientIdsAsIntegers);
+            return patients;
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 }
