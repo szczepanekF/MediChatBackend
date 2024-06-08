@@ -88,10 +88,10 @@ class PredictionServiceImplTest {
 
     @Test
     void getDiseaseCountInIntervals() {
-        LocalDate startDate = LocalDate.of(2024, 6, 9); // przykładowa data początkowa
-        LocalDate endDate = LocalDate.of(2024, 6, 20); // przykładowa data końcowa
+        LocalDate startDate = LocalDate.of(2024, 6, 10); // przykładowa data początkowa
+        LocalDate endDate = LocalDate.of(2024, 6, 12); // przykładowa data końcowa
 
-        List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, 1);
+        List<Double> results = this.predictionService.getDiseaseCountInIntervals(startDate, endDate, 8);
         System.out.println(results);
     }
 }

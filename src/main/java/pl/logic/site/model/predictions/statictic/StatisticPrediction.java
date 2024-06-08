@@ -15,7 +15,6 @@ import static pl.logic.site.utils.predictions.PredictionConsts.MAX_DEEP_OF_PREDI
 
 public class StatisticPrediction {
 
-
     /**
      * Returns the number of future diagnosis requests in the next daysInterval.
      *
@@ -82,6 +81,9 @@ public class StatisticPrediction {
         Iterator<DiagnosisRequest> iterator = diagnosis.iterator();
         while (iterator.hasNext()) {
             DiagnosisRequest diagnosisRequest = iterator.next();
+            if (diagnosisRequest.getIdDisease() == diseaseId) {
+                counter++;
+            }
 //            int idChart = diagnosisRequest.getIdChart();
 //            List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
 //            for (ChartSymptom chartSymptom : chartSymptoms) {
