@@ -34,6 +34,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
+    public String[] getAgeGroups() {
+        return ageGroups;
+    }
+
+    @Override
     @Transactional
     public Report createReport(ReportCreateForm reportCreateForm) {
         Report report = new Report();
@@ -241,7 +246,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
 
-    public static int findSymptomIndex(List<Symptom> symptomsList, Symptom symptom) {
+    @Override
+    public int findSymptomIndex(List<Symptom> symptomsList, Symptom symptom) {
         for (int i = 0; i < symptomsList.size(); i++) {
             if (symptomsList.get(i).getId() == symptom.getId()) {
                 return i;
@@ -250,7 +256,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         return -1; // Symptom not found in the list
     }
 
-    public static int findDiseaseIndex(List<Disease> diseasesList, Disease disease) {
+    @Override
+    public int findDiseaseIndex(List<Disease> diseasesList, Disease disease) {
         for (int i = 0; i < diseasesList.size(); i++) {
             if (diseasesList.get(i).getId() == disease.getId()) {
                 return i;
@@ -259,6 +266,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return -1; // Disease not found in the list
     }
 
+    @Override
     public int findAgeGroupIndex(int age) {
         for (int i = 0; i < ageGroups.length; i++) {
             String ageGroup = ageGroups[i];
@@ -291,7 +299,8 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return List<String>
      * @throws IllegalArgumentException - invalid dates configuration
      * */
-    public static List<String> generateDateRange(Date fromDate, Date toDate) {
+    @Override
+    public List<String> generateDateRange(Date fromDate, Date toDate) {
         LocalDate from = convertToLocalDate(fromDate);
         LocalDate to = convertToLocalDate(toDate);
 
@@ -331,7 +340,8 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return List<String>
      * @throws IllegalArgumentException - date not on the list, doesn't fit any section
      * */
-    public static int findIndexForDate(Date searchDate, List<String> timeList) {
+    @Override
+    public int findIndexForDate(Date searchDate, List<String> timeList) {
         LocalDate date = convertToLocalDate(searchDate);
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -354,7 +364,8 @@ public class StatisticsServiceImpl implements StatisticsService {
      *
      * @return LocalDate
      * */
-    private static LocalDate convertToLocalDate(Date date) {
+    @Override
+    public LocalDate convertToLocalDate(Date date) {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
