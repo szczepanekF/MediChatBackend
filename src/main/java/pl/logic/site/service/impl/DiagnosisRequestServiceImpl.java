@@ -12,6 +12,7 @@ import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Message;
+import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.SpringUser;
 import pl.logic.site.repository.DiagnosisRequestRepository;
 import pl.logic.site.service.ChartService;
@@ -213,5 +214,10 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
         }
         log.info("All diagnosis requests were successfully retrieved");
         return diagnosisRequests;
+    }
+
+    @Override
+    public Patient getPatient(int id) {
+        return null;
     }
 }

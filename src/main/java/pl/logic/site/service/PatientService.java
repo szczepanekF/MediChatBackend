@@ -19,5 +19,6 @@ public interface PatientService {
 
     List<Patient> getPatients();
     List<Patient> getPatients(int patientsFilter);
+    int getAge(int id);
 
 }

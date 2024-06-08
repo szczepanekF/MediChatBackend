@@ -2,6 +2,7 @@ package pl.logic.site.service;
 
 import pl.logic.site.model.dao.DiagnosisRequestDAO;
 import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.mysql.Patient;
 
 
 import java.util.List;
@@ -20,4 +21,6 @@ public interface DiagnosisRequestService {
     List<DiagnosisRequest> getAllDiagnosisRequestsByChart(int filter);
 
     List<DiagnosisRequest> getAllDiagnosisRequests();
+
+    public Patient getPatient(int id);
 }

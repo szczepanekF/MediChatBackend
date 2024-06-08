@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Immutable;
 
 import java.util.Date;
-
 @Entity
 @Data
 @Table(name = "doctorpatientsfromchats")
@@ -36,17 +35,16 @@ public class DoctorPatientsFromChats {
     @Column(name = "patientid")
     private Long patientID;
 
-    // Constructors, getters, and setters
-    public DoctorPatientsFromChats() {
-    }
+    @Column(name = "patientname")
+    private String patientname;
 
-    DoctorPatientsFromChats(final String id, final Long doctorID, final Long springUserID, final Long roomID, final Long patientID) {
-        this.id = id;
-        this.doctorID = doctorID;
-        this.springUserID = springUserID;
-        this.roomID = roomID;
-        this.patientID = patientID;
-    }
+    @Column(name = "patientsurname")
+    private String patientsurname;
 
+    @Column(name = "isdiagnosisrequest")
+    private String isDiagnosisRequest;
+
+    @Column(name = "dateofcontact")
+    private Date dateofcontact;
 
 }

@@ -55,36 +55,4 @@ public class Patient {
     @Column(name = "weight_unit")
     private String weightUnit;
 
-    public int getAge() {
-        LocalDate birthLocalDate = this.birth_date.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        LocalDate currentDate = LocalDate.now();
-
-        // Check if the birthdate is not in the future
-        if (birthLocalDate.isAfter(currentDate)) {
-            throw new IllegalArgumentException("Birth date cannot be in the future");
-        }
-        Period age = Period.between(birthLocalDate, currentDate);
-
-        return age.getYears();
-    }
-
-    public int calculateAgeOnDate(Date onDate) {
-        LocalDate birthLocalDate = this.birth_date.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-        LocalDate onLocalDate = onDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        // Check if the birthdate is not after the given date
-        if (birthLocalDate.isAfter(onLocalDate)) {
-            throw new IllegalArgumentException("Birth date cannot be after the date on which age is calculated");
-        }
-        Period age = Period.between(birthLocalDate, onLocalDate);
-
-        return age.getYears();
-    }
 }

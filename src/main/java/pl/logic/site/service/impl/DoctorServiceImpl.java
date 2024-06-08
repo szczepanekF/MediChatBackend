@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.logic.site.model.exception.DeleteError;
+import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.views.DoctorPatientsFromChats;
@@ -18,11 +19,9 @@ import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.repository.DoctorRepository;
 import pl.logic.site.utils.Consts;
+import pl.logic.site.model.views.DoctorPatientsWithData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -147,4 +146,58 @@ public class DoctorServiceImpl implements DoctorService {
         }
     }
 
+    @Override
+    public List<DoctorPatientsWithData> getMyPatientsByDate(final int doctorId, Date fromDate, Date toDate) {
+        // Fetch the list of DoctorPatientsFromChats entities for the given doctorId
+        List<DoctorPatientsFromChats> doctorPatientsFromChatsList = doctorPatientsFromChatsRepository.findAllByDoctorID(doctorId);
+
+        // Filter records where dateofcontact is between fromDate and toDate
+        List<DoctorPatientsFromChats> filteredList = doctorPatientsFromChatsList.stream()
+                .filter(dpfc -> dpfc.getDateofcontact() != null && !dpfc.getDateofcontact().before(fromDate) && !dpfc.getDateofcontact().after(toDate))
+                .filter(dpfc -> dpfc.getPatientID() != null)
+                .filter(dpfc -> dpfc.getIsDiagnosisRequest() != null)
+                .collect(Collectors.toList());
+
+        // Group DoctorPatientsFromChats by patientId and find the one with the earliest dateofcontact for each group
+        Map<Long, Optional<DoctorPatientsFromChats>> earliestContactMap = filteredList.stream()
+                .collect(Collectors.groupingBy(DoctorPatientsFromChats::getPatientID,
+                        Collectors.minBy(Comparator.comparing(DoctorPatientsFromChats::getDateofcontact))));
+
+        // Fetch Patient entities from the repository using the patient IDs
+        List<Long> patientIds = filteredList.stream()
+                .map(DoctorPatientsFromChats::getPatientID)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Integer> patientIdsAsIntegers = patientIds.stream()
+                .map(Long::intValue)
+                .collect(Collectors.toList());
+
+        List<Patient> patients = patientRepository.findAllById(patientIdsAsIntegers);
+
+        Map<Integer, Patient> patientMap = patients.stream()
+                .collect(Collectors.toMap(Patient::getId, patient -> patient));
+
+        // Create a list of DoctorPatientsWithData objects for the earliest contacts
+        List<DoctorPatientsWithData> doctorPatientsWithDataList = earliestContactMap.values().stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(dpfc -> new DoctorPatientsWithData(
+                        patientMap.get(dpfc.getPatientID().intValue()),
+                        dpfc.getIsDiagnosisRequest(),
+                        dpfc.getDateofcontact()))
+                .collect(Collectors.toList());
+
+        return doctorPatientsWithDataList;
+    }
+
+    @Override
+    public List<DiagnosisRequest> getMyDiagnosisRequests(int doctorId, Date from, Date to) {
+        return List.of();
+    }
+
+    @Override
+    public List<Chart> getMyCharts(int doctorId, Date from, Date to) {
+        return List.of();
+    }
 }

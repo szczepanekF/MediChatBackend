@@ -3,15 +3,18 @@ package pl.logic.site.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.logic.site.model.enums.ReportFiletype;
 import pl.logic.site.model.enums.ReportType;
 import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.reportsForms.ReportCreateForm;
+import pl.logic.site.model.views.DoctorPatientsWithData;
+import pl.logic.site.repository.DiseaseRepository;
 import pl.logic.site.repository.DoctorRepository;
 import pl.logic.site.repository.PatientRepository;
 import pl.logic.site.repository.SymptomRepository;
-import pl.logic.site.service.StatisticsService;
+import pl.logic.site.service.*;
 
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
@@ -23,15 +26,23 @@ import java.util.*;
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
     private final String[] ageGroups = {"0-5", "6-10", "11-18", "19-30", "31-50", "51-70", "71+"};
-    private final DoctorRepository doctorRepository;
-    private final PatientRepository patientRepository;
-    private final SymptomRepository symptomRepository;
+    @Autowired
+    private DoctorRepository doctorRepository;
+    @Autowired
+    private PatientRepository patientRepository;
+    @Autowired
+    private SymptomRepository symptomRepository;
+    @Autowired
+    private DiseaseRepository diseaseRepository;
+    @Autowired
+    private DoctorService doctorService;
+    @Autowired
+    private PatientService patientService;
+    @Autowired
+    private ChartService chartService;
+    @Autowired
+    private DiagnosisRequestService diagnosisRequestService;
 
-    public StatisticsServiceImpl(DoctorRepository doctorRepository, PatientRepository patientRepository, SymptomRepository symptomRepository) {
-        this.doctorRepository = doctorRepository;
-        this.patientRepository = patientRepository;
-        this.symptomRepository = symptomRepository;
-    }
 
     @Override
     public String[] getAgeGroups() {
@@ -45,26 +56,22 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         report.setTitle(reportCreateForm.getTitle());
 
-        String pdf = extractReportPDF(reportCreateForm);
+        String fileEncoded = extractReportFileEncoded(reportCreateForm);
 
 
 
         return report;
     }
 
-    private String extractReportPDF(ReportCreateForm reportCreateForm){
+    private String extractReportFileEncoded(ReportCreateForm reportCreateForm){
         if(reportCreateForm.getFiletype() == ReportFiletype.pdf){
             return switch (reportCreateForm.getReportType()){
                 case ReportType.user -> createUserReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
                 case ReportType.diseases -> createDiseasesReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
                 case symptoms_date -> null;
                 case diseases_date -> null;
-//                case symptoms_doctor -> null;
-//                case diseases_doctor -> null;
                 case symptoms_age_groups -> null;
                 case diseases_age_groups -> null;
-                case age_groups -> null;
-                case new_users -> null;
             };
         } else if(reportCreateForm.getFiletype() == ReportFiletype.csv){
             return switch (reportCreateForm.getReportType()){
@@ -72,12 +79,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                 case diseases -> null;
                 case ReportType.symptoms_date -> createSymptomsDateReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
                 case ReportType.diseases_date -> createDiseasesDateReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
-//                case ReportType.symptoms_doctor -> createSymptomsDoctorReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
-//                case ReportType.diseases_doctor -> createDiseasesDoctorReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
                 case ReportType.symptoms_age_groups -> createSymptomsAgeGroupsReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
                 case ReportType.diseases_age_groups -> createDiseasesAgeGroupsReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
-                case ReportType.age_groups -> createAgeGroupsReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
-                case ReportType.new_users -> createNewUsersReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
             };
         }
         return null;
@@ -89,21 +92,25 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private String createUserReport(int idDoctor, Date fromDate, Date toDate){
         Doctor doctor = doctorRepository.findAllById(idDoctor);
-        List<String> messagesPart = getMessagesPart(doctor, fromDate, toDate);
-        List<String> diagnosisRequestsPart = getDiagnosisRequestsPart(doctor, fromDate, toDate);
-        List<List<String>> newPatientsPart = getNewPatientsPart(doctor, fromDate, toDate);
-        List<List<String>> patientAgeGroups = getPatientAgeGroups(doctor);
+        List<String> messagesPart = getMessagesPart(idDoctor, fromDate, toDate);
+        List<String> diagnosisRequestsPart = getDiagnosisRequestsPart(idDoctor, fromDate, toDate);
+        List<List<String>> newPatientsPart = getNewPatientsPart(idDoctor, fromDate, toDate);
+        List<List<String>> patientAgeGroups = getPatientAgeGroups(idDoctor);
         //create bar chart with 2 series for all patients and my patients: darkblue and blue from front (btn-default but just rgb)
-        List<List<Object>> symptomAgeGroupsPart = createSymptomAgeGroups(idDoctor, fromDate, toDate, "pdf");
+        Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
+        //html table to insert
+        String symptomAgeGroupsPart = getTableForPDF((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[3], "Age groups", "Symptoms reported by age groups");
+
 
         return "";
     }
 
-    private List<String> getMessagesPart(Doctor doctor, Date fromDate, Date toDate){
+    private List<String> getMessagesPart(int idDoctor, Date fromDate, Date toDate){
         List<String> messagesPart = new ArrayList<>();
         int answered = 0;
         int received = 0;
         //get doctor chats
+
         //foreach chat get messages from timespan
         //if message recipient is doctor add to received else to answered
         messagesPart.add(String.valueOf(answered));
@@ -111,26 +118,42 @@ public class StatisticsServiceImpl implements StatisticsService {
         return messagesPart;
     }
 
-    private List<String> getDiagnosisRequestsPart(Doctor doctor, Date fromDate, Date toDate){
+    private List<String> getDiagnosisRequestsPart(int idDoctor, Date fromDate, Date toDate){
         List<String> diagnosisRequestsPart = new ArrayList<>();
         int diagnosed = 0;
         int received = 0;
         //get doctor diagnosis requests for given time
+        List<DiagnosisRequest> diagnosisRequests = doctorService.getMyDiagnosisRequests(idDoctor, fromDate, toDate);
         //count all as received
         //count all having diagnosis as diagnosed
+        for(DiagnosisRequest diagnosisRequest : diagnosisRequests){
+            if(diagnosisRequest.getDiagnosis().isEmpty()){
+                received+=1;
+            } else {
+                diagnosed+=1;
+            }
+        }
         diagnosisRequestsPart.add(String.valueOf(diagnosed));
         diagnosisRequestsPart.add(String.valueOf(received));
         return diagnosisRequestsPart;
     }
 
-    private List<List<String>> getNewPatientsPart(Doctor doctor, Date fromDate, Date toDate){
+    private List<List<String>> getNewPatientsPart(int idDoctor, Date fromDate, Date toDate){
         List<List<String>> newPatients = new ArrayList<>();
         //fetch new patients for doctor in timeframe
+        List<DoctorPatientsWithData> patients = doctorService.getMyPatientsByDate(idDoctor, fromDate, toDate);
         //foreach patient chosen create row with name surname, chat creation date, if started with diagnosis request
+        for (DoctorPatientsWithData patient : patients){
+            List<String> patientData = new ArrayList<>();
+            patientData.add(patient.getPatient().getName()+" "+patient.getPatient().getSurname());
+            patientData.add(patient.getDateofcontact().toString());
+            patientData.add(patient.getIsDiagnosisRequest());
+            newPatients.add(patientData);
+        }
         return newPatients;
     }
 
-    private List<List<String>> getPatientAgeGroups(Doctor doctor){
+    private List<List<String>> getPatientAgeGroups(int idDoctor){
         List<Patient> allPatients = patientRepository.findAll();
         List<Integer> all_patients_age_groups = new ArrayList<>();
         for(int i = 0; i < ageGroups.length; i++){
@@ -142,7 +165,13 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
 
         //foreach patient check its age group + add count there for 1st list
-        //if doctor.getMyPatients().stream().anyMatch(item -> item.equals(patient)) then count it in same age group as my patient
+        for (Patient patient : allPatients){
+            int ageGroup = findAgeGroupIndex(patientService.getAge(patient.getId()));
+            all_patients_age_groups.set(ageGroup, all_patients_age_groups.get(ageGroup) + 1);
+            if(doctorService.getMyPatients(idDoctor).contains(patient)){
+                my_patients_age_groups.set(ageGroup, my_patients_age_groups.get(ageGroup) + 1);
+            }
+        }
 
         List<String> res1 = new ArrayList<>();
         List<String> res2 = new ArrayList<>();
@@ -158,38 +187,129 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         return patientAgeGroups;
     }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createDiseasesReport(int idDoctor, Date fromDate, Date toDate){
+        Doctor doctor = doctorRepository.findAllById(idDoctor);
+        Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
+        //_data_table for symptom date data
+        String symptom_date_table_part = getTableForPDF((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3], "Symptoms reported by date");
+
+        Object[] diseasesDate = createDiseasesDate(idDoctor, fromDate, toDate);
+        //_data_table for diseases date data
+        String diseases_date_table_part = getTableForPDF((List<String>) diseasesDate[0], (List<String>) diseasesDate[1], (List<List<Integer>>) diseasesDate[2], (String) diseasesDate[3], "Diseases diagnosed by date");
+
+        Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
+        //_data_table for symptoms age groups data
+        String symptom_age_groups_table_part = getTableForPDF((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups", "Symptoms reported by age groups");
+
+        Object[] diseasesAgeGroups = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
+        //_data_table for symptoms age groups data
+        String diseases_age_groups_table_part = getTableForPDF((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups", "Diseases diagnosed to age groups");
+
+        //generate pdf file and encode it
+        //create report in db and save
         return "";
     }
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createSymptomsDateReport(int idDoctor, Date fromDate, Date toDate){
+        Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
+        List<List<Object>> csvTable = getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3]);
+        //generate csvfile and encode it
+        //create report in db and save
         return "";
     }
 
-    private String createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate){
-        return "";
-    }
-
-//    private String createSymptomsDoctorReport(int idDoctor, Date fromDate, Date toDate){
-//        return "";
-//    }
-//
-//    private String createDiseasesDoctorReport(int idDoctor, Date fromDate, Date toDate){
-//        return "";
-//    }
-
-    private String createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
-        List<List<Object>> symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate, "csv");
-        //create file
-        return "";
-    }
-
-    private List<List<Object>> createSymptomAgeGroups(int idDoctor, Date fromDate, Date toDate, String filetype){
+    private Object[] createSymptomsDate(int idDoctor, Date fromDate, Date toDate){
         List<Symptom> symptoms = symptomRepository.findAll();
         List<String> symptomNames = new ArrayList<>();
         for(int i = 0; i < symptoms.size(); i++){
             symptomNames.add(symptoms.get(i).getName());
+        }
+        List<String> dateRanges = generateDateRange(fromDate, toDate);
+        List<List<Integer>> data = new ArrayList<>();
+        //init data table
+        for(int i = 0; i < dateRanges.size(); i++){
+            data.add(new ArrayList<>());
+            for(int j = 0; j < symptoms.size(); j++){
+                data.get(i).add(0);
+            }
+        }
+
+        List<Chart> charts = doctorService.getMyCharts(idDoctor, fromDate, toDate);
+        for(Chart chart : charts){
+            int dateIndex = findIndexForDate(chart.getDate(), dateRanges);
+
+            List<Symptom> chartSymptoms = chartService.getSymptoms(chart.getId());
+            for(Symptom symptom : chartSymptoms){
+                int symptomIndex = findSymptomIndex(symptoms, symptom);
+                data.get(dateIndex).set(symptomIndex, data.get(dateIndex).get(symptomIndex) + 1);
+            }
+        }
+
+        Object[] symptomsDate = new Object[4];
+        symptomsDate[0] = symptomNames;
+        symptomsDate[1] = dateRanges;
+        symptomsDate[2] = data;
+        symptomsDate[3] = dateRanges.getFirst().length() == 10 ? "Dates" : "Months";
+        return symptomsDate;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private String createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate){
+        Object[] diseasesDate = createDiseasesDate(idDoctor, fromDate, toDate);
+        List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesDate[0], (List<String>) diseasesDate[1], (List<List<Integer>>) diseasesDate[2], (String) diseasesDate[3]);
+        //generate csvfile and encode it
+        //create report in db and save
+        return "";
+    }
+
+    private Object[] createDiseasesDate(int idDoctor, Date fromDate, Date toDate){
+        List<Disease> diseases = diseaseRepository.findAll();
+        List<String> diseasesNames = new ArrayList<>();
+        for (Disease disease : diseases) {
+            diseasesNames.add(disease.getName());
+        }
+        List<String> dateRanges = generateDateRange(fromDate, toDate);
+        List<List<Integer>> data = new ArrayList<>();
+        //init data table
+        for(int i = 0; i < dateRanges.size(); i++){
+            data.add(new ArrayList<>());
+            for(int j = 0; j < diseases.size(); j++){
+                data.get(i).add(0);
+            }
+        }
+
+
+        List<DiagnosisRequest> diagnosisRequests = doctorService.getMyDiagnosisRequests(idDoctor, fromDate, toDate);
+        for(DiagnosisRequest diagnosisRequest : diagnosisRequests){
+            int dateIndex = findIndexForDate(diagnosisRequest.getModificationDate(), dateRanges);
+
+            int diseaseIndex = findDiseaseIndexById(diseases, diagnosisRequest.getIdDisease());
+            data.get(dateIndex).set(diseaseIndex, data.get(dateIndex).get(diseaseIndex) + 1);
+        }
+
+
+        Object[] diseasesDate = new Object[4];
+        diseasesDate[0] = diseasesNames;
+        diseasesDate[1] = dateRanges;
+        diseasesDate[2] = data;
+        diseasesDate[3] = dateRanges.getFirst().length() == 10 ? "Dates" : "Months";
+        return diseasesDate;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private String createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
+        Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
+        List<List<Object>> table = getTableForCSV((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups");
+        //create file
+        return "";
+    }
+
+    private Object[] createSymptomAgeGroups(int idDoctor, Date fromDate, Date toDate){
+        List<Symptom> symptoms = symptomRepository.findAll();
+        List<String> symptomNames = new ArrayList<>();
+        for (Symptom symptom : symptoms) {
+            symptomNames.add(symptom.getName());
         }
         List<List<Integer>> data = new ArrayList<>();
         //init data table
@@ -200,51 +320,66 @@ public class StatisticsServiceImpl implements StatisticsService {
             }
         }
 
-        List<List<Object>> result = new ArrayList<>();
-        if(Objects.equals(filetype, "pdf")){
-            result.add(new ArrayList<>());
-            result.get(0).add("Age groups");
-            for(int j=0; j < symptomNames.size(); j++){
-                result.get(0).add(symptomNames.get(j));
-            }
-            for(int i=1; i <= ageGroups.length; i++){
-                result.get(i).add(ageGroups[i-1]);
-                for(int j=1; j <= symptomNames.size(); j++){
-                    result.get(i).add(data.get(i).get(j));
-                }
-            }
-            return result;
-        } else if(Objects.equals(filetype, "csv")) {
 
-            List<Object> csvData = new ArrayList<>();
-            csvData.addAll(symptomNames);
-            csvData.addAll(Arrays.asList(ageGroups));
-            for (List<Integer> rowData : data) {
-                csvData.addAll(rowData);
+        List<Chart> charts = doctorService.getMyCharts(idDoctor, fromDate, toDate);
+        for(Chart chart : charts){
+            Patient chartPatient = chartService.getPatient(chart.getId());
+            int ageIndex = findAgeGroupIndex(patientService.getAge(chartPatient.getId()));
+
+            List<Symptom> chartSymptoms = chartService.getSymptoms(chart.getId());
+            for(Symptom symptom : chartSymptoms){
+                int symptomIndex = findSymptomIndex(symptoms, symptom);
+                data.get(ageIndex).set(symptomIndex, data.get(ageIndex).get(symptomIndex) + 1);
             }
-            result.add(csvData);
-            return result;
-//            result.add(symptomNames);
-//            result.add(ageGroups);
-//            result.add(data);
-//            return result;
-        } else {
-            throw new InvalidParameterException("Invalid filetype");
         }
+
+        Object[] ageGroupsData = new Object[3];
+        ageGroupsData[0] = symptomNames;
+        ageGroupsData[1] = Arrays.asList(ageGroups);
+        ageGroupsData[2] = data;
+        return ageGroupsData;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createDiseasesAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
+        Object[] diseasesAgeGroups = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
+        List<List<Object>> table = getTableForCSV((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups");
+        //generate csvfile and encode it
+        //create report in db and save
         return "";
     }
 
-    private String createAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
-        return "";
-    }
+    private Object[] createDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate){
+        List<Disease> diseases = diseaseRepository.findAll();
+        List<String> diseasesNames = new ArrayList<>();
+        for (Disease disease : diseases) {
+            diseasesNames.add(disease.getName());
+        }
+        List<List<Integer>> data = new ArrayList<>();
+        //init data table
+        for(int i = 0; i < ageGroups.length; i++){
+            data.add(new ArrayList<>());
+            for(int j = 0; j < diseases.size(); j++){
+                data.get(i).add(0);
+            }
+        }
 
-    private String createNewUsersReport(int idDoctor, Date fromDate, Date toDate){
-        return "";
-    }
 
+        List<DiagnosisRequest> diagnosisRequests = doctorService.getMyDiagnosisRequests(idDoctor, fromDate, toDate);
+        for(DiagnosisRequest diagnosisRequest : diagnosisRequests){
+            Patient diagnosisRequestPatient = diagnosisRequestService.getPatient(diagnosisRequest.getId());
+            int ageIndex = findAgeGroupIndex(patientService.getAge(diagnosisRequestPatient.getId()));
+
+            int diseaseIndex = findDiseaseIndexById(diseases, diagnosisRequest.getIdDisease());
+            data.get(ageIndex).set(diseaseIndex, data.get(ageIndex).get(diseaseIndex) + 1);
+        }
+
+        Object[] ageGroupsData = new Object[3];
+        ageGroupsData[0] = diseasesNames;
+        ageGroupsData[1] = Arrays.asList(ageGroups);
+        ageGroupsData[2] = data;
+        return ageGroupsData;
+    }
 
     @Override
     public int findSymptomIndex(List<Symptom> symptomsList, Symptom symptom) {
@@ -260,6 +395,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     public int findDiseaseIndex(List<Disease> diseasesList, Disease disease) {
         for (int i = 0; i < diseasesList.size(); i++) {
             if (diseasesList.get(i).getId() == disease.getId()) {
+                return i;
+            }
+        }
+        return -1; // Disease not found in the list
+    }
+
+    private int findDiseaseIndexById(List<Disease> diseasesList, int idDisease) {
+        for (int i = 0; i < diseasesList.size(); i++) {
+            if (diseasesList.get(i).getId() == idDisease) {
                 return i;
             }
         }
@@ -369,5 +513,40 @@ public class StatisticsServiceImpl implements StatisticsService {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
+    }
+
+    private String getTableForPDF(List<String> columns, List<String> rows, List<List<Integer>> data, String rowsName, String tableTitle){
+        List<List<String>> result = new ArrayList<>();
+        result.add(new ArrayList<>());
+        result.getFirst().add(rowsName);
+        for (String column : columns) {
+            result.getFirst().add(column);
+        }
+        for(int i=1; i <= rows.size(); i++){
+            result.get(i).add(rows.get(i-1));
+            for(int j=1; j <= columns.size(); j++){
+                result.get(i).add(data.get(i).get(j).toString());
+            }
+        }
+
+        //generate pdf table part with result List
+        return "";
+    }
+
+
+    private List<List<Object>> getTableForCSV(List<String> columns, List<String> rows, List<List<Integer>> data, String rowsName){
+        List<List<Object>> result = new ArrayList<>();
+        result.add(new ArrayList<>());
+        result.getFirst().add(rowsName);
+        for (String column : columns) {
+            result.getFirst().add(column);
+        }
+        for(int i=1; i <= rows.size(); i++){
+            result.get(i).add(rows.get(i-1));
+            for(int j=1; j <= columns.size(); j++){
+                result.get(i).add(data.get(i).get(j));
+            }
+        }
+        return result;
     }
 }
