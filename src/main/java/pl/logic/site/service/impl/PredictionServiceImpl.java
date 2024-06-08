@@ -54,6 +54,8 @@ public class PredictionServiceImpl implements PredictionService {
     private ChartSymptomService chartSymptomService;
     @Autowired
     private RecognitionRepository recognitionRepository;
+    @Autowired
+    private StatisticsService statisticsService;
 
 
     private List<DiseaseVector> dataset;
@@ -271,6 +273,45 @@ public class PredictionServiceImpl implements PredictionService {
     }
 
     @Override
+    public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate) {
+        List<Object> results = new ArrayList<>();
+        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
+        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
+
+//        List<Integer> intervalList = getIntervalList(startDate, endDate);
+//        System.out.println(intervalList);
+//        System.out.println(getDatesInIntervals(startDate, endDate));
+//        System.out.println(statisticsService.generateDateRange(fromDate, toDate));
+
+        List<String> symptomsNames = getSymptomsNames();
+        List<String> dates = statisticsService.generateDateRange(fromDate, toDate);
+        List<List<Double>> symptomsCountInIntervals = getSymptomsCountInIntervals(startDate, endDate);
+
+        results.add(symptomsNames);
+        results.add(dates);
+        results.add(symptomsCountInIntervals);
+
+        return results;
+    }
+
+    @Override
+    public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate) {
+        List<Object> results = new ArrayList<>();
+        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
+        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
+
+        List<String> diseasesNames = getDiseasesNames();
+        List<String> dates = statisticsService.generateDateRange(fromDate, toDate);
+        List<List<Double>> diseasesCountInIntervals = getDiseasesCountInIntervals(startDate, endDate);
+
+        results.add(diseasesNames);
+        results.add(dates);
+        results.add(diseasesCountInIntervals);
+
+        return results;
+    }
+
+    @Override
     public List<String> getSymptomsNames() {
         List<String> symptomsNames = new ArrayList<>();
         for (Symptom symptom : symptoms) {
@@ -292,8 +333,8 @@ public class PredictionServiceImpl implements PredictionService {
     public List<LocalDate> getDatesInIntervals(LocalDate startDate, LocalDate endDate) {
         List<LocalDate> dates = new ArrayList<>();
         List<Integer> intervalList = getIntervalList(startDate, endDate);
-        System.out.println(intervalList);
-        System.out.println(symptoms);
+//        System.out.println(intervalList);
+//        System.out.println(symptoms);
 
         dates.add(startDate);
         for (int i = 0; i < intervalList.size(); i++) {
@@ -392,25 +433,13 @@ public class PredictionServiceImpl implements PredictionService {
 
         long days = ChronoUnit.DAYS.between(startDate, endDate);
         int interval = 1;
-        if (days >= 365 * 3) {
-            interval = yearMonth.lengthOfYear();
-            intervalList.add(interval);
-
-            Period period = Period.between(startDate, endDate);
-            int yearsBetween = period.getYears();
-
-            for (int i = 1; i < yearsBetween; i++) {
-                yearMonth = yearMonth.plusYears(1);
-                interval = yearMonth.lengthOfYear();
-                intervalList.add(interval);
-            }
-        } else if (days >= 31 * 3) {
+        if (days >= 31 * 2 + 1) {
             interval = yearMonth.lengthOfMonth();
             intervalList.add(interval);
 
             long months = ChronoUnit.MONTHS.between(startDate, endDate);
 
-            for (int i = 1; i < months; i++) {
+            for (int i = 1; i < months+1; i++) {
                 yearMonth = yearMonth.plusMonths(1);
                 interval = yearMonth.lengthOfMonth();
                 intervalList.add(interval);

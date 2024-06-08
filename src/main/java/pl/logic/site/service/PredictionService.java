@@ -4,6 +4,7 @@ import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,6 +53,10 @@ public interface PredictionService {
      * @return the doctor who is most wanted by patients in the next daysInterval
      */
     Doctor getMostWantedDoctor(int daysInterval);
+
+    public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate);
+
+    public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate);
 
     public List<String> getSymptomsNames();
 

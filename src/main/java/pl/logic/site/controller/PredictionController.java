@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,8 @@ import pl.logic.site.service.PredictionService;
 import pl.logic.site.utils.Consts;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * This class provides REST web services for predicting the disease of a patient based on their symptoms.
@@ -203,4 +206,155 @@ public class PredictionController {
             return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
         }
     }
+
+
+
+    /**
+     * This endpoint returns a list of predicted symptoms within a specified date interval.
+     * The returned list contained 3 another list: symptoms' names, dates and data.
+     * The prediction is based on historical data and the interval is defined by the fromDate and toDate parameters.
+     * The date format should be yyyy-MM-dd. The prediction algorithm takes into account the symptom occurrences
+     * in the past intervals defined by the constant MAX_DEEP_OF_PREDICTIONS.
+     * The response includes a list of symptoms and their predicted occurrences in the given interval.
+     * If the interval between dates is up to 2 months, the time interval will be 1 day and
+     * the returned dates will be in the format yyyy-MM-dd However, if the interval is greater than or equal to 3 months,
+     * the interval will be 1 month in the format yyyy-MM.
+     * Accurate characteristics of the returned data.
+     * First list returns symptom names in ascending order by symptom id according to their occurrence in the database.
+     * The second list returns the dates for which the prediction was calculated.
+     * The columns of the third list correspond to the rows of this list and are counted from fromDate to toDate.
+     * the third list is two-dimensional. A row represents a set of calculations for a given symptom,
+     * and the order of the rows corresponds to the symptoms in the first table.
+     * The table columns represent calculations for a given symptom and a specific date in accordance
+     * with the order of dates in the second table.
+     *
+     * Example of the response:
+     *
+     * Symptoms' names:
+     * 0	"headache"
+     * 1	"sore throat"
+     * 2	"abdominal pain"
+     * 	...
+     * Dates:
+     * 0	"2024-07-01"
+     * 1	"2024-07-02"
+     * 2	"2024-07-03"
+     *  ...
+     * Data:
+     * (Results for the first symptom - headache)
+     * 0	0.93 // for date - 2024-07-01
+     * 1	2.4 // for date - 2024-07-02
+     * 2	4 // for date - 2024-07-03
+     * 	...
+     * (Results for the second symptom - sore throat)
+     * 0	0.33 // for date - 2024-07-01
+     * 1	1.33 // for date - 2024-07-02
+     * 2	1.93 // for date - 2024-07-03
+     *  ...
+     * (Results for the third symptom - abdominal pain)
+     * 0	0 // for date - 2024-07-01
+     * 1	1.33 // for date - 2024-07-02
+     * 2	1.53 // for date - 2024-07-03
+     *  ...
+     *
+     * @param fromDate - The start date of the interval in yyyy-MM-dd format
+     * @param toDate - The end date of the interval in yyyy-MM-dd format
+     * @return A ResponseEntity containing a Response object with the predicted symptoms in the given interval
+     */
+    @GetMapping(value = "/symptomsPrediction/{fromDate}/{toDate}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the symptoms prediction in a given interval.",
+            description = "Get the symptoms prediction in a given interval.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully computed"),
+            @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
+    })
+    public ResponseEntity<Response> getSymptomsPredictionInInterval(
+            @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @Parameter(description = "End date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate) {
+        try {
+            List<Object> result = this.predictionService.getSymptomsPredictionInInterval(fromDate, toDate);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", result));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    /**
+     * This endpoint returns a list of predicted diseases within a specified date interval.
+     * The returned list contained 3 another list: diseases' names, dates and data.
+     * The prediction is based on historical data and the interval is defined by the fromDate and toDate parameters.
+     * The date format should be yyyy-MM-dd. The prediction algorithm takes into account the disease occurrences
+     * in the past intervals defined by the constant MAX_DEEP_OF_PREDICTIONS.
+     * The response includes a list of diseases and their predicted occurrences in the given interval.
+     * If the interval between dates is up to 2 months, the time interval will be 1 day and
+     * the returned dates will be in the format yyyy-MM-dd However, if the interval is greater than or equal to 3 months,
+     * the interval will be 1 month in the format yyyy-MM.
+     * Accurate characteristics of the returned data.
+     * First list returns diseases names in ascending order by disease id according to their occurrence in the database.
+     * The second list returns the dates for which the prediction was calculated.
+     * The columns of the third list correspond to the rows of this list and are counted from fromDate to toDate.
+     * the third list is two-dimensional. A row represents a set of calculations for a given disease,
+     * and the order of the rows corresponds to the diseases in the first table.
+     * The table columns represent calculations for a given disease and a specific date in accordance
+     * with the order of dates in the second table.
+     *
+     * Example of the response:
+     *
+     * Diseases' names:
+     * 0	"flu"
+     * 1	"cold"
+     * 2	"stomach ache"
+     * 	...
+     * Dates:
+     * 0	"2024-07-01"
+     * 1	"2024-07-02"
+     * 2	"2024-07-03"
+     *  ...
+     * Data:
+     * (Results for the first disease - flu)
+     * 0	0.93 // for date - 2024-07-01
+     * 1	2.4 // for date - 2024-07-02
+     * 2	4 // for date - 2024-07-03
+     * 	...
+     * (Results for the second disease - cold)
+     * 0	0.33 // for date - 2024-07-01
+     * 1	1.33 // for date - 2024-07-02
+     * 2	1.93 // for date - 2024-07-03
+     *  ...
+     * (Results for the third disease - stomach ache)
+     * 0	0 // for date - 2024-07-01
+     * 1	1.33 // for date - 2024-07-02
+     * 2	1.53 // for date - 2024-07-03
+     *  ...
+     *
+     * @param fromDate - The start date of the interval in yyyy-MM-dd format
+     * @param toDate - The end date of the interval in yyyy-MM-dd format
+     * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
+     */
+    @GetMapping(value = "/diseasesPrediction/{fromDate}/{toDate}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the diseases prediction in a given interval.",
+            description = "Get the diseases prediction in a given interval.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully computed"),
+            @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
+    })
+    public ResponseEntity<Response> getDiseasesPredictionInInterval(
+            @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @Parameter(description = "End date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate) {
+        try {
+            List<Object> result = this.predictionService.getDiseasesPredictionInInterval(fromDate, toDate);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", result));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
 }
