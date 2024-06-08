@@ -11,6 +11,8 @@ import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.service.PredictionService;
 
 import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @SpringBootTest
@@ -126,6 +128,39 @@ class PredictionServiceImplTest {
         List<String> diseasesNames = this.predictionService.getDiseasesNames();
         System.out.println(diseasesNames);
 //        System.out.println(diseasesNames.size());
+    }
+
+    @Test
+    void getSymptomsPredictionInInterval() {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.set(2024, Calendar.JULY, 5); // ustawiamy datę na 1 lipca 2024
+        Date fromDate = calendar.getTime();
+
+        calendar.set(2024, Calendar.DECEMBER, 15); // ustawiamy datę na 1 listopada 2024
+        Date toDate = calendar.getTime();
+
+        List<Object> symptomsPredictionInInterval = this.predictionService.getSymptomsPredictionInInterval(fromDate, toDate);
+//        System.out.println(symptomsPredictionInInterval);
+        for (int i = 0; i < 3; i++) {
+            System.out.println(symptomsPredictionInInterval.get(i));
+        }
+    }
+
+    @Test
+    void getDiseasesPredictionInInterval() {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
+        Date fromDate = calendar.getTime();
+
+        calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
+        Date toDate = calendar.getTime();
+
+        List<Object> diseasesPredictionInInterval = this.predictionService.getDiseasesPredictionInInterval(fromDate, toDate);
+        for (int i = 0; i < 3; i++) {
+            System.out.println(diseasesPredictionInInterval.get(i));
+        }
     }
 
 }
