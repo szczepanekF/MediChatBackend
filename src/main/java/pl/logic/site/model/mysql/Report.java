@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Immutable;
 import pl.logic.site.model.enums.ReportFiletype;
 import pl.logic.site.model.enums.Status;
 
+import java.sql.Blob;
 import java.util.Base64;
 import java.util.Date;
 
@@ -31,7 +32,7 @@ public class Report {
     private String idDoctor;
 
     @Column(name = "file")
-    private String file; //file encoded as base64
+    private Blob file; //file encoded as base64
 
     @Column(name = "filetype", nullable = false)
     @Enumerated(EnumType.STRING)
