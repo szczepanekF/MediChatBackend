@@ -20,6 +20,9 @@ import pl.logic.site.service.ChatRoomService;
 import pl.logic.site.service.PatientService;
 import pl.logic.site.utils.Consts;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -191,4 +194,40 @@ public class PatientServiceImpl implements PatientService {
     public List<Patient> getPatients() {
         return getPatients(0);
     }
+
+    @Override
+    public int getAge(int patientId) {
+        Patient patient = getPatient(patientId);
+        LocalDate birthLocalDate = patient.getBirth_date().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        LocalDate currentDate = LocalDate.now();
+
+        // Check if the birthdate is not in the future
+        if (birthLocalDate.isAfter(currentDate)) {
+            throw new IllegalArgumentException("Birth date cannot be in the future");
+        }
+        Period age = Period.between(birthLocalDate, currentDate);
+
+        return age.getYears();
+    }
+
+
+//public int calculateAgeOnDate(Date onDate) {
+//        LocalDate birthLocalDate = this.birth_date.toInstant()
+//                .atZone(ZoneId.systemDefault())
+//                .toLocalDate();
+//        LocalDate onLocalDate = onDate.toInstant()
+//                .atZone(ZoneId.systemDefault())
+//                .toLocalDate();
+//
+//        // Check if the birthdate is not after the given date
+//        if (birthLocalDate.isAfter(onLocalDate)) {
+//            throw new IllegalArgumentException("Birth date cannot be after the date on which age is calculated");
+//        }
+//        Period age = Period.between(birthLocalDate, onLocalDate);
+//
+//        return age.getYears();
+//    }
 }

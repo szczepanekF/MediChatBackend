@@ -4,6 +4,8 @@ import pl.logic.site.model.dao.ChartDAO;
 import pl.logic.site.model.dao.DiagnosisRequestDAO;
 import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
+import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.mysql.Symptom;
 
 import java.util.List;
 
@@ -21,4 +23,8 @@ public interface ChartService {
     List<Chart> getChartsByStateAndPatientId(int state, int patientId);
 
     List<Chart> getAllCharts();
+  
+    public List<Symptom> getSymptoms(int id);
+
+    public Patient getPatient(int id);
 }
