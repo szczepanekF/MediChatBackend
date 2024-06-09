@@ -494,7 +494,7 @@ public class PredictionServiceImpl implements PredictionService {
                 intervalList.add(interval);
             }
         } else {
-            for (int i = 0; i < days; i++) {
+            for (int i = 0; i < days+1; i++) {
                 intervalList.add(interval);
             }
         }
