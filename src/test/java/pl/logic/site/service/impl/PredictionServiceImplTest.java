@@ -215,7 +215,15 @@ class PredictionServiceImplTest {
     @Test
     void getAgeGroupSymptomsPrediction() {
         try {
-            List<Object> ageGroupSymptomsPredictionInInterval = this.predictionService.getAgeGroupSymptomsPrediction();
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
+            Date fromDate = calendar.getTime();
+
+            calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
+            Date toDate = calendar.getTime();
+
+            List<Object> ageGroupSymptomsPredictionInInterval = this.predictionService.getAgeGroupSymptomsPrediction(fromDate, toDate);
             for (int i = 0; i < 3; i++) {
                 System.out.println(ageGroupSymptomsPredictionInInterval.get(i));
             }
@@ -227,7 +235,15 @@ class PredictionServiceImplTest {
     @Test
     void getAgeGroupDiseasesPrediction() {
         try {
-            List<Object> ageGroupDiseasesPrediction = this.predictionService.getAgeGroupDiseasesPrediction();
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
+            Date fromDate = calendar.getTime();
+
+            calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
+            Date toDate = calendar.getTime();
+
+            List<Object> ageGroupDiseasesPrediction = this.predictionService.getAgeGroupDiseasesPrediction(fromDate, toDate);
             for (int i = 0; i < 3; i++) {
                 System.out.println(ageGroupDiseasesPrediction.get(i));
             }

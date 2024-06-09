@@ -325,8 +325,10 @@ public class PredictionServiceImpl implements PredictionService {
     }
 
     @Override
-    public List<Object> getAgeGroupSymptomsPrediction() {
+    public List<Object> getAgeGroupSymptomsPrediction(Date fromDate, Date toDate) {
         List<Object> results = new ArrayList<>();
+        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
+        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
         List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
         List<String> symptomsNames = getSymptomsNames();
@@ -342,8 +344,10 @@ public class PredictionServiceImpl implements PredictionService {
     }
 
     @Override
-    public List<Object> getAgeGroupDiseasesPrediction() {
+    public List<Object> getAgeGroupDiseasesPrediction(Date fromDate, Date toDate) {
         List<Object> results = new ArrayList<>();
+        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
+        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
         List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
         List<String> diseasesNames = getDiseasesNames();

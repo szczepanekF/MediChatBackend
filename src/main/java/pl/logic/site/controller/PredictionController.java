@@ -389,7 +389,8 @@ public class PredictionController {
 
 
     /**
-     * This endpoint returns the predicted symptoms for a specific age groups given with StatisticService interface.
+     * This endpoint returns a list of predicted symptoms within a specified date interval
+     * and a specific age groups given with StatisticService interface.
      *
      * Example of the response:
      *
@@ -420,6 +421,8 @@ public class PredictionController {
      * 2	1.53 // for age group "11-18"
      *  ...
      *
+     * @param fromDate - The start date of the interval in yyyy-MM-dd format
+     * @param toDate - The end date of the interval in yyyy-MM-dd format
      * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
     @GetMapping(value = "/ageGroupSymptomsPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -429,9 +432,14 @@ public class PredictionController {
             @ApiResponse(responseCode = "200", description = "Successfully computed"),
             @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
     })
-    public ResponseEntity<List<Object>> getAgeGroupSymptomsPredictionInInterval() {
+    public ResponseEntity<List<Object>> getAgeGroupSymptomsPredictionInInterval(
+            @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @Parameter(description = "End date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+    ) {
         try {
-            List<Object> result = this.predictionService.getAgeGroupSymptomsPrediction();
+            List<Object> result = this.predictionService.getAgeGroupSymptomsPrediction(fromDate, toDate);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -441,7 +449,8 @@ public class PredictionController {
     }
 
     /**
-     * This endpoint returns the predicted diseases for a specific age groups given with StatisticService interface.
+     * This endpoint returns a list of predicted diseases within a specified date interval
+     * and a specific age groups given with StatisticService interface.
      *
      * Example of the response:
      *
@@ -472,6 +481,8 @@ public class PredictionController {
      * 2	1.53 // for age group "11-18"
      *  ...
      *
+     * @param fromDate - The start date of the interval in yyyy-MM-dd format
+     * @param toDate - The end date of the interval in yyyy-MM-dd format
      * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
     @GetMapping(value = "/ageGroupDiseasesPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -481,9 +492,14 @@ public class PredictionController {
             @ApiResponse(responseCode = "200", description = "Successfully computed"),
             @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
     })
-    public ResponseEntity<List<Object>> getAgeGroupDiseasesPredictionInInterval() {
+    public ResponseEntity<List<Object>> getAgeGroupDiseasesPredictionInInterval(
+            @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @Parameter(description = "End date of the interval in yyyy-MM-dd format")
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+    ) {
         try {
-            List<Object> result = this.predictionService.getAgeGroupDiseasesPrediction();
+            List<Object> result = this.predictionService.getAgeGroupDiseasesPrediction(fromDate, toDate);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
