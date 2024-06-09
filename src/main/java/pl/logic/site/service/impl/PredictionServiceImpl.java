@@ -563,8 +563,7 @@ public class PredictionServiceImpl implements PredictionService {
             for (Chart chart : this.charts) {
                 if (chart.getId() == request.getIdChart()) {
                     int patientId = chart.getIdPatient();
-                    Patient patient = patientService.getPatient(patientId);
-                    int age = patient.getAge();
+                    int age = patientService.getAge(patientId);
                     if (age >= ageGroup[0] && age <= ageGroup[1]) {
                         allDiagnosisRequestsCopy.add(request);
                     }
