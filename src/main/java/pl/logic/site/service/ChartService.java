@@ -22,6 +22,8 @@ public interface ChartService {
 
     List<Chart> getChartsByStateAndPatientId(int state, int patientId);
 
+    List<Chart> getAllCharts();
+  
     public List<Symptom> getSymptoms(int id);
 
     public Patient getPatient(int id);

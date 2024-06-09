@@ -1,5 +1,6 @@
 package pl.logic.site.service;
 
+import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Disease;
 import pl.logic.site.model.mysql.Doctor;
 
@@ -54,9 +55,15 @@ public interface PredictionService {
      */
     Doctor getMostWantedDoctor(int daysInterval);
 
+    public List<String> getTopNDiseases(int N);
+
     public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate);
 
     public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate);
+
+    public List<Object> getAgeGroupSymptomsPredictionInInterval(Date fromDate, Date toDate, String ageGroup);
+
+    public List<Object> getAgeGroupDiseasesPredictionInInterval(Date fromDate, Date toDate, String ageGroup);
 
     public List<String> getSymptomsNames();
 
@@ -64,11 +71,11 @@ public interface PredictionService {
 
     public List<LocalDate> getDatesInIntervals(LocalDate startDate, LocalDate endDate);
 
-    public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate);
+    public List<List<Double>> getSymptomsCountInIntervals(LocalDate startDate, LocalDate endDate, List<DiagnosisRequest> allDiagnosisRequests);
 
-    public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId);
+    public List<Double> getSymptomCountInIntervals(LocalDate startDate, LocalDate endDate, int symptomId, List<DiagnosisRequest> allDiagnosisRequests);
 
-    public List<Double> getDiseaseCountInIntervals(LocalDate startDate, LocalDate endDate, int diseaseId);
+    public List<Double> getDiseaseCountInIntervals(LocalDate startDate, LocalDate endDate, int diseaseId, List<DiagnosisRequest> allDiagnosisRequests);
 
-    public List<List<Double>> getDiseasesCountInIntervals(LocalDate startDate, LocalDate endDate);
+    public List<List<Double>> getDiseasesCountInIntervals(LocalDate startDate, LocalDate endDate, List<DiagnosisRequest> allDiagnosisRequests);
 }

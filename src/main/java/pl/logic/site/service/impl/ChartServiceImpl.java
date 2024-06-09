@@ -189,6 +189,11 @@ public class ChartServiceImpl implements ChartService {
     }
 
     @Override
+    public List<Chart> getAllCharts() {
+        return chartRepository.findAll();
+    }
+  
+    @Override
     public List<Symptom> getSymptoms(int chartId) {
         List<Symptom> symptoms = new ArrayList<>();
         return symptoms;
