@@ -61,9 +61,9 @@ public interface PredictionService {
 
     public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate);
 
-    public List<Object> getAgeGroupSymptomsPredictionInInterval(Date fromDate, Date toDate, String ageGroup);
+    public List<Object> getAgeGroupSymptomsPrediction();
 
-    public List<Object> getAgeGroupDiseasesPredictionInInterval(Date fromDate, Date toDate, String ageGroup);
+    public List<Object> getAgeGroupDiseasesPrediction();
 
     public List<String> getSymptomsNames();
 
