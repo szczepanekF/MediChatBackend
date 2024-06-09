@@ -1,6 +1,10 @@
 package pl.logic.site.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
+import io.quickchart.QuickChart;
 import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,7 @@ import pl.logic.site.repository.*;
 import pl.logic.site.service.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +35,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -72,19 +78,19 @@ public class StatisticsServiceImpl implements StatisticsService {
         report.setFiletype(reportCreateForm.getFiletype());
         report.setIdDoctor(String.valueOf(reportCreateForm.getIdDoctor()));
 
-        String fileEncoded = extractReportFileEncoded(reportCreateForm);
+        byte[] fileEncoded = extractReportFileEncoded(reportCreateForm);
         if(fileEncoded == null)
-            throw new SaveError("Failed to encode base64 raport: "+reportCreateForm.getTitle());
+            throw new SaveError("Incorrect report type for filetype");
         report.setFile(fileEncoded);
 
         return reportRepository.save(report);
     }
 
-    private String extractReportFileEncoded(ReportCreateForm reportCreateForm){
+    private byte[] extractReportFileEncoded(ReportCreateForm reportCreateForm){
         if(reportCreateForm.getFiletype() == ReportFiletype.pdf){
             return switch (reportCreateForm.getReportType()){
                 case ReportType.user -> createUserReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo(), reportCreateForm.getTitle());
-                case ReportType.diseases -> createDiseasesReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
+                case ReportType.diseases -> createDiseasesReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo(), reportCreateForm.getTitle());
                 case symptoms_date -> null;
                 case diseases_date -> null;
                 case symptoms_age_groups -> null;
@@ -107,7 +113,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return "";//return encoded file
     }
 
-    private String createUserReport(int idDoctor, Date fromDate, Date toDate, String title){
+    private byte[] createUserReport(int idDoctor, Date fromDate, Date toDate, String title){
         Doctor doctor = doctorRepository.findAllById(idDoctor);
         List<String> messagesPart = getMessagesPart(idDoctor, fromDate, toDate);
         List<String> diagnosisRequestsPart = getDiagnosisRequestsPart(idDoctor, fromDate, toDate);
@@ -124,17 +130,17 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Convert HTML to PDF
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HtmlConverter.convertToPdf(htmlContent, outputStream);
-        byte[] pdfBytes = outputStream.toByteArray();
-
-        // Save the PDF to a file or return the file path
-        String filePath = null;
-        try {
-            filePath = savePdfToFile(pdfBytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return Base64.getEncoder().encodeToString(pdfBytes);
+        return outputStream.toByteArray();
+//
+//        // Save the PDF to a file or return the file path
+//        String filePath = null;
+//        try {
+//            filePath = savePdfToFile(pdfBytes);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return Base64.getEncoder().encodeToString(pdfBytes);
     }
 
 
@@ -146,7 +152,116 @@ public class StatisticsServiceImpl implements StatisticsService {
         String toDateStr = toDate.toString();
         String generatedDateStr = new Date().toString();
 
-        // Generate HTML content using the templates
+
+
+        // Ensure messagesPart and diagnosisRequestsPart contain the required data
+        String receivedMessagesCount = messagesPart.size() > 1 ? messagesPart.get(1) : "0";
+        String answeredMessagesCount = messagesPart.size() > 0 ? messagesPart.get(0) : "0";
+        String receivedDiagnosisRequestsCount = diagnosisRequestsPart.size() > 1 ? diagnosisRequestsPart.get(1) : "0";
+        String answeredDiagnosisRequestsCount = diagnosisRequestsPart.size() > 0 ? diagnosisRequestsPart.get(0) : "0";
+
+        // Read HTML template from file
+        String htmlTemplatePath = "src/main/resources/static/pdf/user_report.html";
+        String htmlTemplate;
+        try {
+            htmlTemplate = Files.readString(Paths.get(htmlTemplatePath));
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading HTML template file", e);
+        }
+
+        StringBuilder newPatientsTable = new StringBuilder();
+        for (List<String> patient : newPatientsPart) {
+            String username = patient.get(0);
+            String contactedOn = patient.get(1);
+            String createdThroughDiagnosisRequest = patient.get(2);
+
+            newPatientsTable.append("<tr style=\"border: 1px solid lightslategray; color: black; height: 40px;\">")
+                    .append("<td style=\"padding: 4px;\">").append(username).append("</td>")
+                    .append("<td style=\"padding: 4px;\">").append(contactedOn).append("</td>")
+                    .append("<td style=\"padding: 4px; text-align:right;\">").append(createdThroughDiagnosisRequest).append("</td>")
+                    .append("</tr>");
+        }
+
+        // Prepare chart data
+        List<Integer> allPatientsData = patientAgeGroups.get(0).stream().map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> myPatientsData = patientAgeGroups.get(1).stream().map(Integer::parseInt).collect(Collectors.toList());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String labelsJson = null;
+        String allPatientsDataJson = null;
+        String myPatientsDataJson = null;
+        try {
+            labelsJson = objectMapper.writeValueAsString(ageGroups);
+            allPatientsDataJson = objectMapper.writeValueAsString(allPatientsData);
+            myPatientsDataJson = objectMapper.writeValueAsString(myPatientsData);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error converting data to JSON", e);
+        }
+
+        // Generate chart image using QuickChart
+        QuickChart chart = new QuickChart();
+        chart.setWidth(800);
+        chart.setHeight(600);
+        chart.setConfig("{" +
+                "type: 'bar'," +
+                "data: {" +
+                "labels: " + labelsJson + "," +
+                "datasets: [{" +
+                "label: 'All Patients'," +
+                "data: " + allPatientsDataJson + "," +
+                "backgroundColor: 'rgba(0, 0, 128, 0.5)'," +
+                "borderColor: 'rgba(0, 0, 128, 1)'," +
+                "borderWidth: 1" +
+                "}, {" +
+                "label: 'My Patients'," +
+                "data: " + myPatientsDataJson + "," +
+                "backgroundColor: 'rgba(0, 0, 255, 0.5)'," +
+                "borderColor: 'rgba(0, 0, 255, 1)'," +
+                "borderWidth: 1" +
+                "}]" +
+                "}," +
+                "options: {" +
+                "scales: {" +
+                "x: {" +
+                "beginAtZero: true" +
+                "}," +
+                "y: {" +
+                "beginAtZero: true" +
+                "}" +
+                "}" +
+                "}" +
+                "}");
+
+        String chartUrl = chart.getUrl();
+
+
+        String filledHtmlContent = htmlTemplate
+                .replace("{Name Surname}", doctorName)
+                .replace("{Specialisation}", specialisation)
+                .replace("{Title}", title)
+                .replace("{from}", fromDateStr)
+                .replace("{to}", toDateStr)
+                .replace("{yyyy-mm-dd H:i}", generatedDateStr)
+                .replace("{received_messages_count}", receivedMessagesCount)
+                .replace("{answered_messages_count}", answeredMessagesCount)
+                .replace("{received_diagnosis_requests_count}", receivedDiagnosisRequestsCount)
+                .replace("{answered_diagnosis_requests_count}", answeredDiagnosisRequestsCount)
+                .replace("<!--NEW_PATIENTS_TABLE-->", newPatientsTable.toString())
+                .replace("<!--NEW_PATIENTS_TABLE2-->", symptomAgeGroupsPart)
+                .replace("{new_patient_count}", String.valueOf(newPatientsPart.size()))
+                .replace("{chartUrl}", chartUrl);
+
+        return filledHtmlContent;
+    }
+
+    private String generateHtmlContent2(Doctor doctor, Date fromDate, Date toDate, String title, String symptom_date_table_part, String diseases_date_table_part, String symptom_age_groups_table_part, String diseases_age_groups_table_part) {
+        // Fill in the placeholders in the HTML templates with the fetched data
+        String doctorName = doctor.getName() + " " + doctor.getSurname();
+        String specialisation = specialisationRepository.findById(doctor.getSpecialisation_id()).get().getSpecialisation();
+        String fromDateStr = fromDate.toString();
+        String toDateStr = toDate.toString();
+        String generatedDateStr = new Date().toString();
+
         // Read HTML template from file
         String htmlTemplatePath = "src/main/resources/static/pdf/diseases_report.html";
         String htmlTemplate;
@@ -163,44 +278,14 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .replace("{from}", fromDateStr)
                 .replace("{to}", toDateStr)
                 .replace("{yyyy-mm-dd H:i}", generatedDateStr)
-                .replace("{received_messages_count}", String.valueOf(messagesPart.get(1)))
-                .replace("{answered_messages_count}", String.valueOf(messagesPart.get(0)))
-                .replace("{received_diagnosis_requests_count}", String.valueOf(diagnosisRequestsPart.get(1)))
-                .replace("{answered_diagnosis_requests_count}", String.valueOf(diagnosisRequestsPart.get(0)))
-                .replace("{symptom_age_groups_part}", symptomAgeGroupsPart);
+                .replace("{symptom_date_table_part}", symptom_date_table_part)
+                .replace("{diseases_date_table_part}", diseases_date_table_part)
+                .replace("{symptom_age_groups_table_part}", symptom_age_groups_table_part)
+                .replace("{diseases_age_groups_table_part}", diseases_age_groups_table_part);
 
         return filledHtmlContent;
     }
 
-    private String generateDataTableFragment(List<List<String>> tableData, String tableTitle) {
-        // Read HTML fragment from file
-        String dataTableFragmentPath = "src/main/resources/static/pdf/_data_table.html";
-        String dataTableFragment;
-        try {
-            dataTableFragment = Files.readString(Paths.get(dataTableFragmentPath));
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading data table fragment file", e);
-        }
-
-        // Generate HTML content for the data table fragment
-        dataTableFragment = dataTableFragment
-                .replace("{table_title}", tableTitle)
-                .replace("{tableData}", convertTableDataToString(tableData)); // Convert list of lists to string representation
-
-        return dataTableFragment;
-    }
-
-    private String convertTableDataToString(List<List<String>> tableData) {
-        StringBuilder tableContent = new StringBuilder();
-        for (List<String> row : tableData) {
-            for (String cell : row) {
-                tableContent.append(cell).append(",");
-            }
-            tableContent.deleteCharAt(tableContent.length() - 1); // Remove the last comma
-            tableContent.append("\n");
-        }
-        return tableContent.toString();
-    }
 
     private String savePdfToFile(byte[] pdfBytes) throws IOException {
         // Save the PDF to a file and return the file path
@@ -301,30 +386,42 @@ public class StatisticsServiceImpl implements StatisticsService {
         return patientAgeGroups;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private String createDiseasesReport(int idDoctor, Date fromDate, Date toDate){
+    private byte[] createDiseasesReport(int idDoctor, Date fromDate, Date toDate, String title){
         Doctor doctor = doctorRepository.findAllById(idDoctor);
+
+        // Generate HTML content for each table
         Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
-        //_data_table for symptom date data
         String symptom_date_table_part = getTableForPDF((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3], "Symptoms reported by date");
 
         Object[] diseasesDate = createDiseasesDate(idDoctor, fromDate, toDate);
-        //_data_table for diseases date data
         String diseases_date_table_part = getTableForPDF((List<String>) diseasesDate[0], (List<String>) diseasesDate[1], (List<List<Integer>>) diseasesDate[2], (String) diseasesDate[3], "Diseases diagnosed by date");
 
         Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
-        //_data_table for symptoms age groups data
         String symptom_age_groups_table_part = getTableForPDF((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups", "Symptoms reported by age groups");
 
         Object[] diseasesAgeGroups = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
-        //_data_table for symptoms age groups data
         String diseases_age_groups_table_part = getTableForPDF((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups", "Diseases diagnosed to age groups");
 
-        //generate pdf file and encode it
-        //create report in db and save
-        return "";
+        // Generate HTML content
+        String filledHtmlContent = generateHtmlContent2(doctor, fromDate, toDate, title, symptom_date_table_part, diseases_date_table_part, symptom_age_groups_table_part, diseases_age_groups_table_part);
+
+        // Convert HTML to PDF
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        HtmlConverter.convertToPdf(filledHtmlContent, outputStream);
+        return outputStream.toByteArray();
+//
+//        // Save the PDF to a file or return the file path
+//        String filePath = null;
+//        try {
+//            filePath = savePdfToFile(pdfBytes);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return Base64.getEncoder().encodeToString(pdfBytes);
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private String createSymptomsDateReport(int idDoctor, Date fromDate, Date toDate){
+    private byte[] createSymptomsDateReport(int idDoctor, Date fromDate, Date toDate){
         Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3]);
         // Generate CSV file
@@ -335,7 +432,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         // Encode CSV content to Base64
 
-        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        return csvContent.getBytes(StandardCharsets.UTF_8);
+//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createSymptomsDate(int idDoctor, Date fromDate, Date toDate){
@@ -374,7 +472,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private String createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate){
+    private byte[] createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate){
         Object[] diseasesDate = createDiseasesDate(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesDate[0], (List<String>) diseasesDate[1], (List<List<Integer>>) diseasesDate[2], (String) diseasesDate[3]);
 
@@ -384,7 +482,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         Path csvFilePath = saveCSVToFile(csvContent, "diseases_date_report.csv");
 
         // Encode CSV content to Base64
-        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        return csvContent.getBytes(StandardCharsets.UTF_8);
+//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createDiseasesDate(int idDoctor, Date fromDate, Date toDate){
@@ -425,7 +524,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private String createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
+    private byte[] createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
         Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups");
 
@@ -435,7 +534,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         Path csvFilePath = saveCSVToFile(csvContent, "symptoms_age_report.csv");
 
         // Encode CSV content to Base64
-        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        return csvContent.getBytes(StandardCharsets.UTF_8);
+//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createSymptomAgeGroups(int idDoctor, Date fromDate, Date toDate){
@@ -474,7 +574,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private String createDiseasesAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
+    private byte[] createDiseasesAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
         Object[] diseasesAgeGroups = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups");
 
@@ -484,7 +584,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         Path csvFilePath = saveCSVToFile(csvContent, "diseases_age_report.csv");
 
         // Encode CSV content to Base64
-        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        return csvContent.getBytes(StandardCharsets.UTF_8);
+//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate){
@@ -657,25 +758,68 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .toLocalDate();
     }
 
-    private String getTableForPDF(List<String> columns, List<String> rows, List<List<Integer>> data, String rowsName, String tableTitle){
+    private String getTableForPDF(List<String> columns, List<String> rows, List<List<Integer>> data, String rowsName, String tableTitle) {
+        // Prepare the data for the HTML table
         List<List<String>> result = new ArrayList<>();
+
+        // Add header row
         result.add(new ArrayList<>());
-        result.getFirst().add(rowsName);
+        result.get(0).add(""); // Placeholder for the empty cell in the top-left corner
         for (String column : columns) {
-            result.getFirst().add(column);
+            result.get(0).add(column);
         }
-        for(int i=1; i <= rows.size(); i++){
+
+        // Add data rows
+        for (int i = 0; i < rows.size(); i++) {
             result.add(new ArrayList<>());
-            result.get(i).add(rows.get(i-1));
-            for(int j=1; j <= columns.size(); j++){
-                result.get(i).add(data.get(i-1).get(j-1).toString());
+            result.get(i + 1).add(rows.get(i)); // First cell in each row is the row name
+            for (Integer datum : data.get(i)) {
+                result.get(i + 1).add(datum.toString());
             }
         }
 
-        //generate pdf table part with result List
-        return "";
-    }
+        // Read HTML template from file
+        String htmlTemplatePath = "src/main/resources/static/pdf/_data_table.html";
+        String htmlTemplate;
+        try {
+            htmlTemplate = Files.readString(Paths.get(htmlTemplatePath));
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading HTML template file", e);
+        }
 
+        // Replace placeholders in the HTML template with actual data
+        String tableHtml = htmlTemplate.replace("{table_title}", tableTitle);
+
+        // Generate table rows dynamically
+        StringBuilder tableRows = new StringBuilder();
+        for (int i = 0; i < result.size(); i++) {
+            List<String> row = result.get(i);
+            if (i == 0) {
+                // Header row
+                tableRows.append("<tr style=\"border: 1px solid lightslategray; background-color: lightslategray; color: white; font-weight: 600;\">");
+            } else {
+                tableRows.append("<tr style=\"border: 1px solid lightslategray; color: black; height: 40px;\">");
+            }
+            for (int j = 0; j < row.size(); j++) {
+                if (i == 0 && j == 0) {
+                    // Empty cell in the top-left corner
+                    tableRows.append("<th style=\"height: 40px; padding: 4px;\"></th>");
+                } else if (i == 0) {
+                    // Header cells
+                    tableRows.append("<th style=\"height: 40px; padding: 4px;\">").append(row.get(j)).append("</th>");
+                } else {
+                    // Data cells
+                    tableRows.append("<td style=\"padding: 4px;\">").append(row.get(j)).append("</td>");
+                }
+            }
+            tableRows.append("</tr>");
+        }
+
+        // Insert the generated table rows into the HTML template
+        tableHtml = tableHtml.replace("<!-- Dynamic Table Rows -->", tableRows.toString());
+
+        return tableHtml;
+    }
 
     private List<List<Object>> getTableForCSV(List<String> columns, List<String> rows, List<List<Integer>> data, String rowsName){
         List<List<Object>> result = new ArrayList<>();

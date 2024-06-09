@@ -1,37 +1,22 @@
-
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-    <div th:fragment="data_table_fragment">
-        <div class="row" style="width: 100%; padding-top: 50px;">
-            <div class="col-md-12" style="color: gray" th:text="${table_title}">{table_title}</div>
-            <div class="col-md-12"><hr></div>
-        </div>
-        <div class="row" style="width: 100%;">
-            <div class="col-md-12" style="color: gray; display: flex; justify-content: center;">
-                <table width="80%">
-                    <thead style="border: 1px solid lightslategray; background-color: lightslategray; color: white; font-weight: 600;">
-                        <tr>
-                            <th th:each="header : ${tableData[0]}" th:text="${header}" style="height: 40px; padding: 4px;">Header</th>
-                        </tr>
-<!--                    <th style="height: 40px; padding: 4px;">{rows_name}</th>-->
-<!--                    <th style="height: 40px; padding: 4px;">{item1}</th>-->
-<!--                    <th style="height: 40px; padding: 4px;">{item2}</th>-->
-<!--                    <th style="height: 40px; padding: 4px;">{item3}</th>-->
-<!--                    <th style="height: 40px; padding: 4px;">{item4}</th>-->
-<!--                    <th style="height: 40px; padding: 4px;">{item5}</th>-->
-<!--                    <th style="height: 40px; padding: 4px;">Others</th>-->
-                    </thead>
-                    <tbody>
-                        <tr th:each="row, rowStat : ${tableData}" th:if="${!rowStat.index == 0}"
-                            style="border: 1px solid lightslategray; color: black; height: 40px;">
-                            <td th:text="${row[0]}" style="padding: 4px; background-color: skyblue; color: white;"></td>
-                            <td th:each="cell, cellStat : ${row}" th:text="${cell}" th:if="${!cellStat.index == 0}"
-                                style="padding: 4px; border: 1px solid lightslategray;">
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<html xmlns:th="http://www.thymeleaf.org/" lang="en">
+<div th:fragment="data_table_fragment">
+    <div class="row" style="width: 100%; padding-top: 50px;">
+        <div class="col-md-12" style="color: rgb(128,128,128)" th:text="${table_title}">{table_title}</div>
+        <div class="col-md-12"><hr></div>
+    </div>
+    <div class="row" style="width: 100%;">
+        <div class="col-md-12 data-table-col">
+            <table width="80%">
+                <thead>
+                <tr>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Dynamic Table Rows -->
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 </html>
