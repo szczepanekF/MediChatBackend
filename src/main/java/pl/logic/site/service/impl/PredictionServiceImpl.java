@@ -3,7 +3,6 @@ package pl.logic.site.service.impl;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.mysql.*;
@@ -19,9 +18,7 @@ import pl.logic.site.model.predictions.statictic.Prediction;
 import pl.logic.site.repository.RecognitionRepository;
 import pl.logic.site.service.*;
 
-import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -328,45 +325,35 @@ public class PredictionServiceImpl implements PredictionService {
     }
 
     @Override
-    public List<Object> getAgeGroupSymptomsPredictionInInterval(Date fromDate, Date toDate, String ageGroup) {
+    public List<Object> getAgeGroupSymptomsPrediction() {
         List<Object> results = new ArrayList<>();
-        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
-        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
         List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
-        int[] ageGroupInt = convertRangeStringToArray(ageGroup);
-
-        allDiagnosisRequests = getDiagnosisRequestsByAgeGroups(allDiagnosisRequests, ageGroupInt);
-
         List<String> symptomsNames = getSymptomsNames();
-        List<String> dates = statisticsService.generateDateRange(fromDate, toDate);
-        List<List<Double>> symptomsCountInIntervals = getSymptomsCountInIntervals(startDate, endDate, allDiagnosisRequests);
+        List<String> ageGroups = List.of(statisticsService.getAgeGroups());
+
+        List<List<Double>> symptomsData = getSymptomsCount(allDiagnosisRequests, ageGroups);
 
         results.add(symptomsNames);
-        results.add(dates);
-        results.add(symptomsCountInIntervals);
+        results.add(ageGroups);
+        results.add(symptomsData);
 
         return results;
     }
 
     @Override
-    public List<Object> getAgeGroupDiseasesPredictionInInterval(Date fromDate, Date toDate, String ageGroup) {
+    public List<Object> getAgeGroupDiseasesPrediction() {
         List<Object> results = new ArrayList<>();
-        LocalDate startDate = statisticsService.convertToLocalDate(fromDate);
-        LocalDate endDate = statisticsService.convertToLocalDate(toDate);
         List<DiagnosisRequest> allDiagnosisRequests = diagnosisRequestService.getAllDiagnosisRequests();
 
-        int[] ageGroupInt = convertRangeStringToArray(ageGroup);
-
-        allDiagnosisRequests = getDiagnosisRequestsByAgeGroups(allDiagnosisRequests, ageGroupInt);
-
         List<String> diseasesNames = getDiseasesNames();
-        List<String> dates = statisticsService.generateDateRange(fromDate, toDate);
-        List<List<Double>> diseasesCountInIntervals = getDiseasesCountInIntervals(startDate, endDate, allDiagnosisRequests);
+        List<String> ageGroups = List.of(statisticsService.getAgeGroups());
+
+        List<List<Double>> diseasesData = getDiseasesCount(allDiagnosisRequests, ageGroups);
 
         results.add(diseasesNames);
-        results.add(dates);
-        results.add(diseasesCountInIntervals);
+        results.add(ageGroups);
+        results.add(diseasesData);
 
         return results;
     }
@@ -532,13 +519,13 @@ public class PredictionServiceImpl implements PredictionService {
 
             long months = ChronoUnit.MONTHS.between(startDate, endDate);
 
-            for (int i = 1; i < months+1; i++) {
+            for (int i = 1; i < months + 1; i++) {
                 yearMonth = yearMonth.plusMonths(1);
                 interval = yearMonth.lengthOfMonth();
                 intervalList.add(interval);
             }
         } else {
-            for (int i = 0; i < days+1; i++) {
+            for (int i = 0; i < days + 1; i++) {
                 intervalList.add(interval);
             }
         }
@@ -589,5 +576,82 @@ public class PredictionServiceImpl implements PredictionService {
         }
 
         return new int[]{start, end};
+    }
+
+    public List<List<Double>> getDiseasesCount(List<DiagnosisRequest> allDiagnosisRequests, List<String> ageGroups) {
+        List<List<Double>> results = new ArrayList<>();
+
+        List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups = new ArrayList<List<DiagnosisRequest>>();
+        for (String ageGroup : ageGroups) {
+            int[] ageGroupInt = convertRangeStringToArray(ageGroup);
+            allDiagnosisRequestsAgeGroups.add(getDiagnosisRequestsByAgeGroups(allDiagnosisRequests, ageGroupInt));
+        }
+
+        for (Disease disease : diseases) {
+            log.info("Disease: " + disease.getName() + " id: " + disease.getId() + " is being processed");
+            List<Double> diseaseCount = getDiseaseCount(ageGroups, disease.getId(), allDiagnosisRequestsAgeGroups);
+            results.add(diseaseCount);
+        }
+        return results;
+    }
+
+    public List<Double> getDiseaseCount(List<String> ageGroups, int diseaseId, List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups) {
+        List<Double> results = new ArrayList<>();
+        Double counter = 0.;
+
+        for (int i = 0; i < ageGroups.size(); i++) {
+            for (DiagnosisRequest request : allDiagnosisRequestsAgeGroups.get(i)) {
+                if (request.getIdDisease() == diseaseId) {
+                    counter++;
+                }
+            }
+            results.add(counter);
+            counter = 0.;
+        }
+
+        return results;
+    }
+
+    public List<List<Double>> getSymptomsCount(List<DiagnosisRequest> allDiagnosisRequests, List<String> ageGroups) {
+        List<List<Double>> results = new ArrayList<>();
+
+        List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups = new ArrayList<List<DiagnosisRequest>>();
+        for (String ageGroup : ageGroups) {
+            int[] ageGroupInt = convertRangeStringToArray(ageGroup);
+            allDiagnosisRequestsAgeGroups.add(getDiagnosisRequestsByAgeGroups(allDiagnosisRequests, ageGroupInt));
+        }
+
+        for (Symptom symptom : symptoms) {
+            log.info("Symptom: " + symptom.getName() + " id: " + symptom.getId() + " is being processed");
+            List<Double> symptomCount = getSymptomCount(ageGroups, symptom.getId(), allDiagnosisRequestsAgeGroups);
+            results.add(symptomCount);
+        }
+        return results;
+    }
+
+    public List<Double> getSymptomCount(List<String> ageGroups, int symptomId, List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups) {
+        List<Double> results = new ArrayList<>();
+        List<ChartSymptom> chartSymptoms = chartSymptomService.getAllChartSymptoms();
+        Double counter = 0.;
+
+        for (int i = 0; i < ageGroups.size(); i++) {
+            for (DiagnosisRequest request : allDiagnosisRequestsAgeGroups.get(i)) {
+                int idChart = request.getIdChart();
+                List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
+                for (ChartSymptom chartSymptom : chartSymptoms) {
+                    if (chartSymptom.getIdChart() == idChart) {
+                        chartSymptomsCopy.add(chartSymptom);
+                    }
+                }
+                for (ChartSymptom chartSymptom : chartSymptomsCopy) {
+                    if (chartSymptom.getIdSymptom() == symptomId) {
+                        counter++;
+                    }
+                }
+            }
+            results.add(counter);
+            counter = 0.;
+        }
+        return results;
     }
 }

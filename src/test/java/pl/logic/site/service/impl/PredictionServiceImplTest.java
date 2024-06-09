@@ -213,19 +213,9 @@ class PredictionServiceImplTest {
     }
 
     @Test
-    void getAgeGroupSymptomsPredictionInInterval() {
+    void getAgeGroupSymptomsPrediction() {
         try {
-            Calendar calendar = Calendar.getInstance();
-
-            calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
-            Date fromDate = calendar.getTime();
-
-            calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
-            Date toDate = calendar.getTime();
-
-            String ageGroup = "5+";
-
-            List<Object> ageGroupSymptomsPredictionInInterval = this.predictionService.getAgeGroupSymptomsPredictionInInterval(fromDate, toDate, ageGroup);
+            List<Object> ageGroupSymptomsPredictionInInterval = this.predictionService.getAgeGroupSymptomsPrediction();
             for (int i = 0; i < 3; i++) {
                 System.out.println(ageGroupSymptomsPredictionInInterval.get(i));
             }
@@ -235,21 +225,11 @@ class PredictionServiceImplTest {
     }
 
     @Test
-    void getAgeGroupDiseasesPredictionInInterval() {
+    void getAgeGroupDiseasesPrediction() {
         try {
-            Calendar calendar = Calendar.getInstance();
-
-            calendar.set(2024, Calendar.JUNE, 9); // ustawiamy datę na 1 lipca 2024
-            Date fromDate = calendar.getTime();
-
-            calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
-            Date toDate = calendar.getTime();
-
-            String ageGroup = "0-18";
-
-            List<Object> ageGroupDiseasesPredictionInInterval = this.predictionService.getAgeGroupDiseasesPredictionInInterval(fromDate, toDate, ageGroup);
+            List<Object> ageGroupDiseasesPrediction = this.predictionService.getAgeGroupDiseasesPrediction();
             for (int i = 0; i < 3; i++) {
-                System.out.println(ageGroupDiseasesPredictionInInterval.get(i));
+                System.out.println(ageGroupDiseasesPrediction.get(i));
             }
         } catch (Exception e) {
             System.out.println("No diseases found\n" + e.getMessage());

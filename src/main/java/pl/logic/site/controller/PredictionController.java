@@ -387,26 +387,9 @@ public class PredictionController {
         }
     }
 
+
     /**
-     * This endpoint returns a list of predicted symptoms for a specific age group within a specified date interval.
-     * The returned list contained 3 another list: symptoms' names, dates and data.
-     * The prediction is based on historical data and the interval is defined by the fromDate and toDate parameters.
-     * The date format should be yyyy-MM-dd. The prediction algorithm takes into account the symptom occurrences
-     * in the past intervals defined by the constant MAX_DEEP_OF_PREDICTIONS.
-     * The response includes a list of symptoms and their predicted occurrences in the given interval.
-     * If the interval between dates is up to 2 months, the time interval will be 1 day and
-     * the returned dates will be in the format yyyy-MM-dd However, if the interval is greater than or equal to 3 months,
-     * the interval will be 1 month in the format yyyy-MM.
-     * ageGroup parameter is the age group of patients who are taken into account in the prediction.
-     * ageGroup should be in the one of following format 'startAge-endAge' or 'startAge+', e.g. '0-18' or '71+'.
-     * Accurate characteristics of the returned data.
-     * First list returns symptom names in ascending order by symptom id according to their occurrence in the database.
-     * The second list returns the dates for which the prediction was calculated.
-     * The columns of the third list correspond to the rows of this list and are counted from fromDate to toDate.
-     * the third list is two-dimensional. A row represents a set of calculations for a given symptom,
-     * and the order of the rows corresponds to the symptoms in the first table.
-     * The table columns represent calculations for a given symptom and a specific date in accordance
-     * with the order of dates in the second table.
+     * This endpoint returns the predicted symptoms for a specific age groups given with StatisticService interface.
      *
      * Example of the response:
      *
@@ -415,39 +398,40 @@ public class PredictionController {
      * 1	"sore throat"
      * 2	"abdominal pain"
      * 	...
-     * Dates:
-     * 0	"2024-07-01"
-     * 1	"2024-07-02"
-     * 2	"2024-07-03"
+     * Age group:
+     * 0	"0-5"
+     * 1	"6-10"
+     * 2	"11-18"
      *  ...
      * Data:
      * (Results for the first symptom - headache)
-     * 0	0.93 // for date - 2024-07-01
-     * 1	2.4 // for date - 2024-07-02
-     * 2	4 // for date - 2024-07-03
+     * 0	0.93 // for age group "0-5"
+     * 1	2.4 // for age group "6-10"
+     * 2	4 // for age group "11-18"
+     * 	...
+     * (Results for the second symptom - sore throat)
+     * 0	0.33 // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.93 // for age group "11-18"
+     *  ...
+     * (Results for the third symptom - abdominal pain)
+     * 0	0  // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.53 // for age group "11-18"
      *  ...
      *
-     *  @param fromDate - The start date of the interval in yyyy-MM-dd format
-     *  @param toDate - The end date of the interval in yyyy-MM-dd format
-     *  @param ageGroup - Age group in the format 'startAge-endAge' or 'startAge+'
-     *  @return A ResponseEntity containing a Response object with the predicted symptoms in the given interval by age group
+     * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
-    @GetMapping(value = "/ageGroupSymptomsPrediction/{fromDate}/{toDate}/{ageGroup}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get the symptoms prediction for a specific age group in a given interval.",
-            description = "Get the symptoms prediction for a specific age group in a given interval.")
+    @GetMapping(value = "/ageGroupSymptomsPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the symptoms prediction for a specific age groups.",
+            description = "Get the symptoms prediction for a specific age groups in StatisticServiceImpl.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully computed"),
             @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
     })
-    public ResponseEntity<List<Object>> getAgeGroupSymptomsPredictionInInterval(
-            @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
-            @Parameter(description = "End date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
-            @Parameter(description = "Age group in the format 'startAge-endAge' or 'startAge+'")
-            @PathVariable String ageGroup) {
+    public ResponseEntity<List<Object>> getAgeGroupSymptomsPredictionInInterval() {
         try {
-            List<Object> result = this.predictionService.getAgeGroupSymptomsPredictionInInterval(fromDate, toDate, ageGroup);
+            List<Object> result = this.predictionService.getAgeGroupSymptomsPrediction();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
@@ -457,25 +441,7 @@ public class PredictionController {
     }
 
     /**
-     * This endpoint returns a list of predicted diseases for a specific age group within a specified date interval.
-     * The returned list contained 3 another list: diseases' names, dates and data.
-     * The prediction is based on historical data and the interval is defined by the fromDate and toDate parameters.
-     * The date format should be yyyy-MM-dd. The prediction algorithm takes into account the disease occurrences
-     * in the past intervals defined by the constant MAX_DEEP_OF_PREDICTIONS.
-     * The response includes a list of diseases and their predicted occurrences in the given interval.
-     * If the interval between dates is up to 2 months, the time interval will be 1 day and
-     * the returned dates will be in the format yyyy-MM-dd However, if the interval is greater than or equal to 3 months,
-     * the interval will be 1 month in the format yyyy-MM.
-     * ageGroup parameter is the age group of patients who are taken into account in the prediction.
-     * ageGroup should be in the one of following format 'startAge-endAge' or 'startAge+', e.g. '0-18' or '71+'.
-     * Accurate characteristics of the returned data.
-     * First list returns diseases names in ascending order by disease id according to their occurrence in the database.
-     * The second list returns the dates for which the prediction was calculated.
-     * The columns of the third list correspond to the rows of this list and are counted from fromDate to toDate.
-     * the third list is two-dimensional. A row represents a set of calculations for a given disease,
-     * and the order of the rows corresponds to the diseases in the first table.
-     * The table columns represent calculations for a given disease and a specific date in accordance
-     * with the order of dates in the second table.
+     * This endpoint returns the predicted diseases for a specific age groups given with StatisticService interface.
      *
      * Example of the response:
      *
@@ -484,39 +450,40 @@ public class PredictionController {
      * 1	"cold"
      * 2	"stomach ache"
      * 	...
-     * Dates:
-     * 0	"2024-07-01"
-     * 1	"2024-07-02"
-     * 2	"2024-07-03"
+     * Age group:
+     * 0	"0-5"
+     * 1	"6-10"
+     * 2	"11-18"
      *  ...
      * Data:
      * (Results for the first disease - flu)
-     * 0	0 // for date - 2024-07-01
-     * 1	1.33 // for date - 2024-07-02
-     * 2	1.33 // for date - 2024-07-03
+     * 0	0.93 // for age group "0-5"
+     * 1	2.4 // for age group "6-10"
+     * 2	4 // for age group "11-18"
+     * 	...
+     * (Results for the second disease - cold)
+     * 0	0.33 // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.93 // for age group "11-18"
+     *  ...
+     * (Results for the third disease - stomach ache)
+     * 0	0  // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.53 // for age group "11-18"
      *  ...
      *
-     *  @param fromDate - The start date of the interval in yyyy-MM-dd format
-     *  @param toDate - The end date of the interval in yyyy-MM-dd format
-     *  @param ageGroup - Age group in the format 'startAge-endAge' or 'startAge+'
-     *  @return A ResponseEntity containing a Response object with the predicted diseases in the given interval by age group
+     * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
-    @GetMapping(value = "/ageGroupDiseasesPrediction/{fromDate}/{toDate}/{ageGroup}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/ageGroupDiseasesPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the diseases prediction for a specific age group in a given interval.",
             description = "Get the diseases prediction for a specific age group in a given interval.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully computed"),
             @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
     })
-    public ResponseEntity<List<Object>> getAgeGroupDiseasesPredictionInInterval(
-            @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
-            @Parameter(description = "End date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
-            @Parameter(description = "Age group in the format 'startAge-endAge' or 'startAge+'")
-            @PathVariable String ageGroup) {
+    public ResponseEntity<List<Object>> getAgeGroupDiseasesPredictionInInterval() {
         try {
-            List<Object> result = this.predictionService.getAgeGroupDiseasesPredictionInInterval(fromDate, toDate, ageGroup);
+            List<Object> result = this.predictionService.getAgeGroupDiseasesPrediction();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
