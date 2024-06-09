@@ -425,7 +425,7 @@ public class PredictionController {
      * @param toDate - The end date of the interval in yyyy-MM-dd format
      * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
-    @GetMapping(value = "/ageGroupSymptomsPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/ageGroupSymptomsPrediction/{fromDate}/{toDate}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the symptoms prediction for a specific age groups.",
             description = "Get the symptoms prediction for a specific age groups in StatisticServiceImpl.")
     @ApiResponses(value = {
@@ -485,7 +485,7 @@ public class PredictionController {
      * @param toDate - The end date of the interval in yyyy-MM-dd format
      * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
-    @GetMapping(value = "/ageGroupDiseasesPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/ageGroupDiseasesPrediction/{fromDate}/{toDate}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the diseases prediction for a specific age group in a given interval.",
             description = "Get the diseases prediction for a specific age group in a given interval.")
     @ApiResponses(value = {
