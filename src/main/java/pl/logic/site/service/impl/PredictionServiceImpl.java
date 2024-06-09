@@ -532,10 +532,18 @@ public class PredictionServiceImpl implements PredictionService {
     }
 
     private int[] convertRangeStringToArray(String range) {
-        // TODO: make parser for 71+
-        String[] parts = range.split("-");
-        int start = Integer.parseInt(parts[0]);
-        int end = Integer.parseInt(parts[1]);
+        int start;
+        int end;
+
+        if (range.endsWith("+")) {
+            String[] parts = range.split("\\+");
+            start = Integer.parseInt(parts[0]);
+            end = 150;
+        } else {
+            String[] parts = range.split("-");
+            start = Integer.parseInt(parts[0]);
+            end = Integer.parseInt(parts[1]);
+        }
 
         return new int[]{start, end};
     }

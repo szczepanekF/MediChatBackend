@@ -223,7 +223,7 @@ class PredictionServiceImplTest {
             calendar.set(2024, Calendar.JUNE, 20); // ustawiamy datę na 1 listopada 2024
             Date toDate = calendar.getTime();
 
-            String ageGroup = "0-18";
+            String ageGroup = "5+";
 
             List<Object> ageGroupSymptomsPredictionInInterval = this.predictionService.getAgeGroupSymptomsPredictionInInterval(fromDate, toDate, ageGroup);
             for (int i = 0; i < 3; i++) {
