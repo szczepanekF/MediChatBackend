@@ -13,4 +13,5 @@ public interface DiagnosisRequestRepository extends JpaRepository<DiagnosisReque
     Optional<DiagnosisRequest> findAllById(int id);
     Optional<DiagnosisRequest> findById(int id);
     Optional<DiagnosisRequest> findByIdChart(int id);
+    List<DiagnosisRequest> findAllByIdDoctor(int id);
 }

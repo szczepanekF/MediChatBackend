@@ -6,6 +6,7 @@ import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Doctor;
 import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.views.DoctorChat;
 import pl.logic.site.model.views.DoctorPatientsWithData;
 
 import java.util.ArrayList;
@@ -34,5 +35,9 @@ public interface DoctorService {
 
     public List<DiagnosisRequest> getMyDiagnosisRequests(int doctorId, Date from, Date to);
 
-    public List<Chart> getMyCharts(int doctorId, Date from, Date to);
+    public List<Chart> getMyCharts(final int doctorId, Date from, Date to);
+
+    public List<DoctorChat> getMyChats(final int doctorId);
+
+    public String getMySpecializationName(int doctorId);
 }

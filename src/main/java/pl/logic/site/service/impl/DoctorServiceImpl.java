@@ -5,19 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.logic.site.model.exception.DeleteError;
-import pl.logic.site.model.mysql.Chart;
-import pl.logic.site.model.mysql.DiagnosisRequest;
-import pl.logic.site.model.mysql.Patient;
+import pl.logic.site.model.mysql.*;
+import pl.logic.site.model.views.DoctorChat;
 import pl.logic.site.model.views.DoctorPatientsFromChats;
-import pl.logic.site.repository.DiagnosisRequestRepository;
-import pl.logic.site.repository.DoctorPatientsFromChatsRepository;
-import pl.logic.site.repository.PatientRepository;
+import pl.logic.site.repository.*;
 import pl.logic.site.service.DoctorService;
 import pl.logic.site.model.dao.DoctorDAO;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.exception.EntityNotFound;
-import pl.logic.site.model.mysql.Doctor;
-import pl.logic.site.repository.DoctorRepository;
 import pl.logic.site.utils.Consts;
 import pl.logic.site.model.views.DoctorPatientsWithData;
 
@@ -36,6 +31,12 @@ public class DoctorServiceImpl implements DoctorService {
     private DoctorPatientsFromChatsRepository doctorPatientsFromChatsRepository;
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
+    private SpecialisationRepository specialisationRepository;
+    @Autowired
+    private ChartRepository chartRepository;
 
 
     @Override
@@ -197,7 +198,74 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<Chart> getMyCharts(int doctorId, Date from, Date to) {
-        return List.of();
+    public List<Chart> getMyCharts(final int doctorId, Date from, Date to) {
+        // Retrieve all Diagnosis Requests for the given doctor
+        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAllByIdDoctor(doctorId);
+
+        // Extract chart IDs from the Diagnosis Requests
+        List<Integer> chartIds = new ArrayList<>();
+        for (DiagnosisRequest diagnosisRequest : diagnosisRequests)
+            chartIds.add(diagnosisRequest.getIdChart());
+
+
+        // Retrieve the charts by their IDs
+        List<Chart> charts = new ArrayList<>();
+        for (Integer chartId : chartIds)
+            chartRepository.findById(chartId).ifPresent(charts::add);
+
+
+        return charts;
     }
+
+    @Override
+    public List<DoctorChat> getMyChats(final int doctorId) {
+        // Fetch the list of DoctorPatientsFromChats entities for the given doctorId
+        List<DoctorPatientsFromChats> doctorPatientsFromChatsList = doctorPatientsFromChatsRepository.findAllByDoctorID(doctorId);
+
+        // Filter out null values and collect distinct pairs of doctor and patient IDs
+        Set<String> doctorPatientIds = doctorPatientsFromChatsList.stream()
+                .filter(Objects::nonNull)
+                .map(dpfc -> dpfc.getDoctorID() + "_" + dpfc.getPatientID())
+                .collect(Collectors.toSet());
+
+
+        // Map DoctorPatientsFromChats to DoctorChat objects
+        List<DoctorChat> doctorChats = new ArrayList<>();
+        for (String idPair : doctorPatientIds) {
+            if(idPair.contains("null"))
+                continue;
+
+            String[] ids = idPair.split("_");
+            int doctorID = Integer.parseInt(ids[0]);
+            int patientID = Integer.parseInt(ids[1]);
+            DoctorPatientsFromChats doctorPatient = doctorPatientsFromChatsList.stream()
+                    .filter(dpfc -> dpfc.getDoctorID() == doctorID && dpfc.getPatientID() == patientID)
+                    .findFirst()
+                    .orElse(null);
+            if (doctorPatient != null) {
+                DoctorChat doctorChat = new DoctorChat(
+                        doctorPatient.getId(),
+                        doctorID,
+                        patientID,
+                        Math.toIntExact(doctorPatient.getSpringUserID()),
+                        new ArrayList<>()
+                );
+                doctorChats.add(doctorChat);
+            }
+        }
+
+        // Fetch messages for each chat and populate DoctorChat objects
+        for (DoctorChat doctorChat : doctorChats) {
+            List<Message> messages = messageRepository.findAllBySenderId(doctorChat.getSpringUserId());
+            doctorChat.setMessages(messages);
+        }
+
+        return doctorChats;
+    }
+
+    @Override
+    public String getMySpecializationName(final int doctorId) {
+        return specialisationRepository.findById(doctorId).get().getSpecialisation();
+    }
+
 }

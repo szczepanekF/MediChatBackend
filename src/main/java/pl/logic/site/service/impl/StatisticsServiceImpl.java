@@ -9,11 +9,9 @@ import pl.logic.site.model.enums.ReportFiletype;
 import pl.logic.site.model.enums.ReportType;
 import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.reportsForms.ReportCreateForm;
+import pl.logic.site.model.views.DoctorChat;
 import pl.logic.site.model.views.DoctorPatientsWithData;
-import pl.logic.site.repository.DiseaseRepository;
-import pl.logic.site.repository.DoctorRepository;
-import pl.logic.site.repository.PatientRepository;
-import pl.logic.site.repository.SymptomRepository;
+import pl.logic.site.repository.*;
 import pl.logic.site.service.*;
 
 import java.security.InvalidParameterException;
@@ -34,6 +32,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     private SymptomRepository symptomRepository;
     @Autowired
     private DiseaseRepository diseaseRepository;
+    @Autowired
+    private SpringUserRepository springUserRepository;
     @Autowired
     private DoctorService doctorService;
     @Autowired
@@ -110,9 +110,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         int answered = 0;
         int received = 0;
         //get doctor chats
-
+        List<DoctorChat> chats = doctorService.getMyChats(idDoctor);
         //foreach chat get messages from timespan
-        //if message recipient is doctor add to received else to answered
+        for (DoctorChat chat : chats) {
+            //if message recipient is doctor add to received else to answered
+            for (Message message : chat.getMessages()) { //getMessagesByDates
+                if(message.getRecipientId() == springUserRepository.getByDoctorId(idDoctor).getId()){
+                    received += 1;
+                } else  {
+                    answered += 1;
+                }
+            }
+        }
         messagesPart.add(String.valueOf(answered));
         messagesPart.add(String.valueOf(received));
         return messagesPart;

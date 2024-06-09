@@ -18,5 +18,6 @@ public interface SpringUserRepository extends JpaRepository<SpringUser, Integer>
     List<SpringUser> findAllByDoctorIdNotNull();
     @Query(value = "SELECT k FROm SpringUser k")
     List<SpringUser> retrieveAll();
+    SpringUser getByDoctorId(int doctorId);
 
 }
