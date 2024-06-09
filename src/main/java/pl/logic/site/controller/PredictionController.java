@@ -388,6 +388,40 @@ public class PredictionController {
     }
 
 
+    /**
+     * This endpoint returns the predicted symptoms for a specific age groups given with StatisticService interface.
+     *
+     * Example of the response:
+     *
+     * Symptoms' names:
+     * 0	"headache"
+     * 1	"sore throat"
+     * 2	"abdominal pain"
+     * 	...
+     * Age group:
+     * 0	"0-5"
+     * 1	"6-10"
+     * 2	"11-18"
+     *  ...
+     * Data:
+     * (Results for the first symptom - headache)
+     * 0	0.93 // for age group "0-5"
+     * 1	2.4 // for age group "6-10"
+     * 2	4 // for age group "11-18"
+     * 	...
+     * (Results for the second symptom - sore throat)
+     * 0	0.33 // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.93 // for age group "11-18"
+     *  ...
+     * (Results for the third symptom - abdominal pain)
+     * 0	0  // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.53 // for age group "11-18"
+     *  ...
+     *
+     * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
+     */
     @GetMapping(value = "/ageGroupSymptomsPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the symptoms prediction for a specific age groups.",
             description = "Get the symptoms prediction for a specific age groups in StatisticServiceImpl.")
@@ -406,7 +440,40 @@ public class PredictionController {
         }
     }
 
-
+    /**
+     * This endpoint returns the predicted diseases for a specific age groups given with StatisticService interface.
+     *
+     * Example of the response:
+     *
+     * Diseases' names:
+     * 0	"flu"
+     * 1	"cold"
+     * 2	"stomach ache"
+     * 	...
+     * Age group:
+     * 0	"0-5"
+     * 1	"6-10"
+     * 2	"11-18"
+     *  ...
+     * Data:
+     * (Results for the first disease - flu)
+     * 0	0.93 // for age group "0-5"
+     * 1	2.4 // for age group "6-10"
+     * 2	4 // for age group "11-18"
+     * 	...
+     * (Results for the second disease - cold)
+     * 0	0.33 // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.93 // for age group "11-18"
+     *  ...
+     * (Results for the third disease - stomach ache)
+     * 0	0  // for age group "0-5"
+     * 1	1.33 // for age group "6-10"
+     * 2	1.53 // for age group "11-18"
+     *  ...
+     *
+     * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
+     */
     @GetMapping(value = "/ageGroupDiseasesPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the diseases prediction for a specific age group in a given interval.",
             description = "Get the diseases prediction for a specific age group in a given interval.")
