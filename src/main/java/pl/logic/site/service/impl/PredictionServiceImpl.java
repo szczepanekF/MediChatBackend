@@ -274,6 +274,18 @@ public class PredictionServiceImpl implements PredictionService {
         }
     }
 
+
+    @Override
+    public List<String> getTopNDiseases(int N) throws IllegalArgumentException {
+        List<String> diseasesNames = new ArrayList<String>();
+        List<Disease> diseases = getTopNDiseasesToDiseases(N);
+        for (Disease disease : diseases) {
+            diseasesNames.add(disease.getName());
+        }
+        return diseasesNames;
+    }
+
+
     @Override
     public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate) {
         List<Object> results = new ArrayList<>();
@@ -475,6 +487,38 @@ public class PredictionServiceImpl implements PredictionService {
         }
         return calculateFraction(symptomCounter);
     }
+
+    private List<Disease> getTopNDiseasesToDiseases(int N) {
+        if (N < 0) {
+            throw new IllegalArgumentException("N must be greater than 0");
+        }
+
+        Map<Disease, Integer> diseaseCount = new HashMap<>();
+        for (Chart chart : this.charts) {
+            Disease disease = getPatientDisease(chart.getId());
+            diseaseCount.put(disease, diseaseCount.getOrDefault(disease, 0) + 1);
+        }
+
+        List<Map.Entry<Disease, Integer>> diseaseCountList = new ArrayList<>(diseaseCount.entrySet());
+        diseaseCountList.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+        if (N > diseaseCountList.size()) {
+//            throw new IllegalArgumentException("N must be less than or equal to " + diseaseCountList.size());
+            log.warn("N should be less than or equal to " + diseaseCountList.size());
+//            System.out.println("N should be less than or equal to " + diseaseCountList.size());
+        }
+
+        List<Disease> topNDiseases = new ArrayList<>();
+        for (int i = 0; i < N && i < diseaseCountList.size(); i++) {
+            topNDiseases.add(diseaseCountList.get(i).getKey());
+        }
+//        for (int i = 0; i < N; i++) {
+//            topNDiseases.add(diseaseCountList.get(i).getKey());
+//        }
+
+        return topNDiseases;
+    }
+
 
     private List<Integer> getIntervalList(LocalDate startDate, LocalDate endDate) {
         List<Integer> intervalList = new ArrayList<>();

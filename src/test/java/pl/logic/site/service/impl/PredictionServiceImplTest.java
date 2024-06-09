@@ -34,7 +34,7 @@ class PredictionServiceImplTest {
             Object statisticDisease = this.predictionService.getStatisticDisease();
             System.out.println(statisticDisease.toString());
         } catch (Exception e) {
-            System.out.println("No diseases found");
+            System.out.println("No diseases found\n" + e.getMessage());
         }
     }
 
@@ -44,17 +44,17 @@ class PredictionServiceImplTest {
             double accuracy = this.predictionService.getPredictionAccuracy(new String[]{"1", "1"});
             System.out.println(accuracy);
         } catch (Exception e) {
-            System.out.println("No prediction found");
+            System.out.println("No prediction found\n" + e.getMessage());
         }
     }
 
     @Test
     void getPatientDisease() {
         try {
-            Disease predictedDisease = this.predictionService.getPatientDisease(1);
+            Disease predictedDisease = this.predictionService.getPatientDisease(138);
             System.out.println(predictedDisease.getName());
         } catch (Exception e) {
-            System.out.println("No disease found");
+            System.out.println("No disease found\n" + e.getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ class PredictionServiceImplTest {
             double futureDiagnosisRequest = this.predictionService.getFutureDiagnosisRequest(31);
             System.out.println(futureDiagnosisRequest);
         } catch (Exception e) {
-            System.out.println("No diagnosis request found");
+            System.out.println("No diagnosis request found\n" + e.getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ class PredictionServiceImplTest {
             Doctor doctor = this.predictionService.getMostWantedDoctor(31);
             System.out.println(doctor.getName() + " " + doctor.getSurname() + " id: " + doctor.getId());
         } catch (NullPointerException e) {
-            System.out.println("No doctor found");
+            System.out.println("No doctor found\n" + e.getMessage());
         }
     }
 
@@ -256,4 +256,13 @@ class PredictionServiceImplTest {
         }
     }
 
+    @Test
+    void getTopNDiseases() {
+        try {
+            List<String> topNDiseases = this.predictionService.getTopNDiseases(5);
+            System.out.println(topNDiseases);
+        } catch (Exception e) {
+            System.out.println("No diseases found\n" + e.getMessage());
+        }
+    }
 }

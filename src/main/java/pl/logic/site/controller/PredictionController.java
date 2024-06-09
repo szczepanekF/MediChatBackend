@@ -208,6 +208,36 @@ public class PredictionController {
     }
 
 
+    /**
+     * This endpoint returns the top N diseases' names that are most often predicted for people who have not yet contracted the disease.
+     * The diseases are returned in descending order by the number of occurrences in the database.
+     * knn is counted for the entire database, so with increasingly larger data sets you will have to wait a while.
+     * If the number of different predicted diseases is smaller than N,
+     * then the program will return such many results that have or empty array.
+     * different diseases in the database, then the program will throw an appropriate exception.
+     *
+     * @param N - The number of top diseases to return
+     * @return A ResponseEntity containing a list of the top N diseases' names
+     */
+    @GetMapping(value = "/topNDiseases/{N}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the top N diseases.",
+            description = "Get the top N diseases.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully computed"),
+            @ApiResponse(responseCode = "500", description = "An internal server error occurred while processing the request."),
+    })
+    public ResponseEntity<List<String>> getTopNDiseases(
+            @Parameter(description = "The number of top diseases to return")
+            @PathVariable int N) {
+        try {
+            List<String> result = this.predictionService.getTopNDiseases(N);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
     /**
      * This endpoint returns a list of predicted symptoms within a specified date interval.

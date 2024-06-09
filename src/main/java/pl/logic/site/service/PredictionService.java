@@ -55,6 +55,8 @@ public interface PredictionService {
      */
     Doctor getMostWantedDoctor(int daysInterval);
 
+    public List<String> getTopNDiseases(int N);
+
     public List<Object> getSymptomsPredictionInInterval(Date fromDate, Date toDate);
 
     public List<Object> getDiseasesPredictionInInterval(Date fromDate, Date toDate);
