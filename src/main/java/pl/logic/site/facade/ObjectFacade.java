@@ -14,6 +14,8 @@ import pl.logic.site.model.reportsForms.ReportCreateForm;
 import pl.logic.site.service.*;
 import pl.logic.site.utils.Consts;
 
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,7 +187,27 @@ public class ObjectFacade {
         }
     }
 
-    public Report createReport(ReportCreateForm reportCreateForm) {
+    public Report createReport(ReportCreateForm reportCreateForm) throws SQLException {
         return statisticsService.createReport(reportCreateForm);
+    }
+
+    public List<List<Object>> getSymptomsDate(int idDoctor, Date fromDate, Date toDate) {
+        // Implement the method using the appropriate services
+        return statisticsService.getSymptomsDate(idDoctor, fromDate, toDate);
+    }
+
+    public List<List<Object>> getDiseasesDate(int idDoctor, Date fromDate, Date toDate) {
+        // Implement the method using the appropriate services
+        return statisticsService.getDiseasesDate(idDoctor, fromDate, toDate);
+    }
+
+    public List<List<Object>> getSymptomsAgeGroups(int idDoctor, Date fromDate, Date toDate) {
+        // Implement the method using the appropriate services
+        return statisticsService.getSymptomsAgeGroups(idDoctor, fromDate, toDate);
+    }
+
+    public List<List<Object>> getDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate) {
+        // Implement the method using the appropriate services
+        return statisticsService.getDiseasesAgeGroups(idDoctor, fromDate, toDate);
     }
 }

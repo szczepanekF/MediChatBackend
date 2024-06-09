@@ -22,6 +22,7 @@ import pl.logic.site.model.views.DoctorPatientsWithData;
 import pl.logic.site.repository.*;
 import pl.logic.site.service.*;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,6 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidParameterException;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -72,13 +75,13 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     @Transactional
-    public Report createReport(ReportCreateForm reportCreateForm) {
+    public Report createReport(ReportCreateForm reportCreateForm) throws SQLException {
         Report report = new Report();
         report.setTitle(reportCreateForm.getTitle());
         report.setFiletype(reportCreateForm.getFiletype());
         report.setIdDoctor(String.valueOf(reportCreateForm.getIdDoctor()));
 
-        byte[] fileEncoded = extractReportFileEncoded(reportCreateForm);
+        Blob fileEncoded = extractReportFileEncoded(reportCreateForm);
         if(fileEncoded == null)
             throw new SaveError("Incorrect report type for filetype");
         report.setFile(fileEncoded);
@@ -86,7 +89,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return reportRepository.save(report);
     }
 
-    private byte[] extractReportFileEncoded(ReportCreateForm reportCreateForm){
+    private Blob extractReportFileEncoded(ReportCreateForm reportCreateForm) throws SQLException {
         if(reportCreateForm.getFiletype() == ReportFiletype.pdf){
             return switch (reportCreateForm.getReportType()){
                 case ReportType.user -> createUserReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo(), reportCreateForm.getTitle());
@@ -109,11 +112,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         return null;
     }
 
-    private String createPDF(int idDoctor, int from, int to, String content) {
-        return "";//return encoded file
-    }
 
-    private byte[] createUserReport(int idDoctor, Date fromDate, Date toDate, String title){
+
+    private Blob createUserReport(int idDoctor, Date fromDate, Date toDate, String title) throws SQLException {
         Doctor doctor = doctorRepository.findAllById(idDoctor);
         List<String> messagesPart = getMessagesPart(idDoctor, fromDate, toDate);
         List<String> diagnosisRequestsPart = getDiagnosisRequestsPart(idDoctor, fromDate, toDate);
@@ -130,17 +131,22 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Convert HTML to PDF
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HtmlConverter.convertToPdf(htmlContent, outputStream);
-        return outputStream.toByteArray();
-//
-//        // Save the PDF to a file or return the file path
-//        String filePath = null;
-//        try {
-//            filePath = savePdfToFile(pdfBytes);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return Base64.getEncoder().encodeToString(pdfBytes);
+
+        // Get the PDF content as a byte array
+        byte[] pdfBytes = outputStream.toByteArray();
+
+        // Save the PDF to a file or return the file path
+        String filePath = null;
+        try {
+            filePath = savePdfToFile(pdfBytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Blob blob = new SerialBlob(pdfBytes);
+
+        return blob;
+
     }
 
 
@@ -386,7 +392,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return patientAgeGroups;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private byte[] createDiseasesReport(int idDoctor, Date fromDate, Date toDate, String title){
+    private Blob createDiseasesReport(int idDoctor, Date fromDate, Date toDate, String title) throws SQLException {
         Doctor doctor = doctorRepository.findAllById(idDoctor);
 
         // Generate HTML content for each table
@@ -408,20 +414,24 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Convert HTML to PDF
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HtmlConverter.convertToPdf(filledHtmlContent, outputStream);
-        return outputStream.toByteArray();
-//
-//        // Save the PDF to a file or return the file path
-//        String filePath = null;
-//        try {
-//            filePath = savePdfToFile(pdfBytes);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return Base64.getEncoder().encodeToString(pdfBytes);
+
+        // Get the PDF content as a byte array
+        byte[] pdfBytes = outputStream.toByteArray();
+
+        // Save the PDF to a file or return the file path
+        String filePath = null;
+        try {
+            filePath = savePdfToFile(pdfBytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Blob blob = new SerialBlob(pdfBytes);
+
+        return blob;
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private byte[] createSymptomsDateReport(int idDoctor, Date fromDate, Date toDate){
+    private Blob createSymptomsDateReport(int idDoctor, Date fromDate, Date toDate) throws SQLException {
         Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3]);
         // Generate CSV file
@@ -432,7 +442,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         // Encode CSV content to Base64
 
-        return csvContent.getBytes(StandardCharsets.UTF_8);
+        Blob blob = new SerialBlob(csvContent.getBytes(StandardCharsets.UTF_8));
+
+        return blob;
 //        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -472,7 +484,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private byte[] createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate){
+    private Blob createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate) throws SQLException {
         Object[] diseasesDate = createDiseasesDate(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesDate[0], (List<String>) diseasesDate[1], (List<List<Integer>>) diseasesDate[2], (String) diseasesDate[3]);
 
@@ -481,9 +493,10 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Save to file
         Path csvFilePath = saveCSVToFile(csvContent, "diseases_date_report.csv");
 
-        // Encode CSV content to Base64
-        return csvContent.getBytes(StandardCharsets.UTF_8);
-//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        Blob blob = new SerialBlob(csvContent.getBytes(StandardCharsets.UTF_8));
+
+        return blob;
+
     }
 
     private Object[] createDiseasesDate(int idDoctor, Date fromDate, Date toDate){
@@ -524,7 +537,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private byte[] createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
+    private Blob createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate) throws SQLException {
         Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups");
 
@@ -533,9 +546,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Save to file
         Path csvFilePath = saveCSVToFile(csvContent, "symptoms_age_report.csv");
 
-        // Encode CSV content to Base64
-        return csvContent.getBytes(StandardCharsets.UTF_8);
-//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        Blob blob = new SerialBlob(csvContent.getBytes(StandardCharsets.UTF_8));
+
+        return blob;
     }
 
     private Object[] createSymptomAgeGroups(int idDoctor, Date fromDate, Date toDate){
@@ -574,7 +587,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private byte[] createDiseasesAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
+    private Blob createDiseasesAgeGroupsReport(int idDoctor, Date fromDate, Date toDate) throws SQLException {
         Object[] diseasesAgeGroups = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups");
 
@@ -583,9 +596,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Save to file
         Path csvFilePath = saveCSVToFile(csvContent, "diseases_age_report.csv");
 
-        // Encode CSV content to Base64
-        return csvContent.getBytes(StandardCharsets.UTF_8);
-//        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
+        Blob blob = new SerialBlob(csvContent.getBytes(StandardCharsets.UTF_8));
+
+        return blob;
     }
 
     private Object[] createDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate){
@@ -862,5 +875,23 @@ public class StatisticsServiceImpl implements StatisticsService {
         } catch (Exception e) {
             throw new RuntimeException("Error while generating CSV", e);
         }
+    }
+
+
+    public List<List<Object>> getSymptomsDate(int idDoctor, Date fromDate, Date toDate){
+        Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
+        return getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3]);
+    }
+    public List<List<Object>> getDiseasesDate(int idDoctor, Date fromDate, Date toDate){
+        Object[] symptomDate = createDiseasesDate(idDoctor, fromDate, toDate);
+        return getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3]);
+    }
+    public List<List<Object>> getSymptomsAgeGroups(int idDoctor, Date fromDate, Date toDate){
+        Object[] symptomDate = createSymptomAgeGroups(idDoctor, fromDate, toDate);
+        return getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], "Age groups");
+    }
+    public List<List<Object>> getDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate){
+        Object[] symptomDate = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
+        return getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], "Age groups");
     }
 }

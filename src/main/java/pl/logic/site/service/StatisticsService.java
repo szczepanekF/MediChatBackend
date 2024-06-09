@@ -5,12 +5,13 @@ import pl.logic.site.model.mysql.Report;
 import pl.logic.site.model.mysql.Symptom;
 import pl.logic.site.model.reportsForms.ReportCreateForm;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 public interface StatisticsService {
-    Report createReport(ReportCreateForm reportCreateForm);
+    Report createReport(ReportCreateForm reportCreateForm) throws SQLException;
 
     public String[] getAgeGroups();
 
@@ -25,4 +26,9 @@ public interface StatisticsService {
     public int findIndexForDate(Date searchDate, List<String> timeList);
 
     public LocalDate convertToLocalDate(Date date);
+
+    public List<List<Object>> getSymptomsDate(int idDoctor, Date fromDate, Date toDate);
+    public List<List<Object>> getDiseasesDate(int idDoctor, Date fromDate, Date toDate);
+    public List<List<Object>> getSymptomsAgeGroups(int idDoctor, Date fromDate, Date toDate);
+    public List<List<Object>> getDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate);
 }

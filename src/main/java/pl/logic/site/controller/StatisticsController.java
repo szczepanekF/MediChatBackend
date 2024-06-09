@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,10 @@ import pl.logic.site.utils.Consts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @Slf4j
 @RestController
@@ -100,6 +105,98 @@ public class StatisticsController  {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
                     LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), reports));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    @GetMapping(value = "/symptoms/date", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get symptoms by date range", description = "Get symptoms for a specific doctor by date range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getSymptomsDate(@Parameter(description = "doctorId") @RequestParam int doctorId,
+                                                    @Parameter(description = "from date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date fromDate,
+                                                    @Parameter(description = "to date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date toDate) {
+        try {
+            List<List<Object>> symptoms = objectFacade.getSymptomsDate(doctorId, fromDate, toDate);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", symptoms));
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    @GetMapping(value = "/diseases/date", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get diseases by date range", description = "Get diseases for a specific doctor by date range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getDiseasesDate(@Parameter(description = "doctorId") @RequestParam int doctorId,
+                                                    @Parameter(description = "from date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date fromDate,
+                                                    @Parameter(description = "to date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date toDate) {
+        try {
+            List<List<Object>> diseases = objectFacade.getDiseasesDate(doctorId, fromDate, toDate);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diseases));
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    @GetMapping(value = "/symptoms/age-groups", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get symptoms by age groups", description = "Get symptoms for a specific doctor by age groups")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getSymptomsAgeGroups(@Parameter(description = "doctorId") @RequestParam int doctorId,
+                                                         @Parameter(description = "from date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date fromDate,
+                                                         @Parameter(description = "to date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date toDate) {
+        try {
+            List<List<Object>> symptoms = objectFacade.getSymptomsAgeGroups(doctorId, fromDate, toDate);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", symptoms));
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(500).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+    @GetMapping(value = "/diseases/age-groups", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get diseases by age groups", description = "Get diseases for a specific doctor by age groups")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> getDiseasesAgeGroups(@Parameter(description = "doctorId") @RequestParam int doctorId,
+                                                         @Parameter(description = "from date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date fromDate,
+                                                         @Parameter(description = "to date") @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam Date toDate) {
+        try {
+            List<List<Object>> diseases = objectFacade.getDiseasesAgeGroups(doctorId, fromDate, toDate);
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", diseases));
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
         } catch (Exception e) {
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
                     LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
