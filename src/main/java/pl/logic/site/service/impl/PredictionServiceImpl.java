@@ -334,7 +334,7 @@ public class PredictionServiceImpl implements PredictionService {
         List<String> symptomsNames = getSymptomsNames();
         List<String> ageGroups = List.of(statisticsService.getAgeGroups());
 
-        List<List<Double>> symptomsData = getSymptomsCount(allDiagnosisRequests, ageGroups);
+        List<List<Double>> symptomsData = getSymptomsCount(allDiagnosisRequests, ageGroups, startDate, endDate);
 
         results.add(symptomsNames);
         results.add(ageGroups);
@@ -418,7 +418,7 @@ public class PredictionServiceImpl implements PredictionService {
 
         for (int i = 0; i < intervalList.size(); i++) {
             int intervalSum = (int) ChronoUnit.DAYS.between(currentDate, startDate);
-            ;
+
             for (int j = 0; j <= i; j++) {
                 intervalSum += intervalList.get(j);
             }
@@ -616,7 +616,7 @@ public class PredictionServiceImpl implements PredictionService {
         return results;
     }
 
-    public List<List<Double>> getSymptomsCount(List<DiagnosisRequest> allDiagnosisRequests, List<String> ageGroups) {
+    public List<List<Double>> getSymptomsCount(List<DiagnosisRequest> allDiagnosisRequests, List<String> ageGroups, LocalDate startDate, LocalDate endDate) {
         List<List<Double>> results = new ArrayList<>();
 
         List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups = new ArrayList<List<DiagnosisRequest>>();
@@ -627,34 +627,38 @@ public class PredictionServiceImpl implements PredictionService {
 
         for (Symptom symptom : symptoms) {
             log.info("Symptom: " + symptom.getName() + " id: " + symptom.getId() + " is being processed");
-            List<Double> symptomCount = getSymptomCount(ageGroups, symptom.getId(), allDiagnosisRequestsAgeGroups);
+            List<Double> symptomCount = getSymptomCount(ageGroups, symptom.getId(), allDiagnosisRequestsAgeGroups, startDate, endDate);
             results.add(symptomCount);
         }
         return results;
     }
 
-    public List<Double> getSymptomCount(List<String> ageGroups, int symptomId, List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups) {
+    public List<Double> getSymptomCount(List<String> ageGroups, int symptomId, List<List<DiagnosisRequest>> allDiagnosisRequestsAgeGroups, LocalDate startDate, LocalDate endDate) {
         List<Double> results = new ArrayList<>();
         List<ChartSymptom> chartSymptoms = chartSymptomService.getAllChartSymptoms();
-        Double counter = 0.;
+        List<Integer> intervalList = getIntervalList(startDate, endDate);
+        LocalDate currentDate = LocalDate.now();
+        int days = (int) ChronoUnit.DAYS.between(startDate, endDate);
+
 
         for (int i = 0; i < ageGroups.size(); i++) {
-            for (DiagnosisRequest request : allDiagnosisRequestsAgeGroups.get(i)) {
-                int idChart = request.getIdChart();
-                List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
-                for (ChartSymptom chartSymptom : chartSymptoms) {
-                    if (chartSymptom.getIdChart() == idChart) {
-                        chartSymptomsCopy.add(chartSymptom);
-                    }
-                }
-                for (ChartSymptom chartSymptom : chartSymptomsCopy) {
-                    if (chartSymptom.getIdSymptom() == symptomId) {
-                        counter++;
-                    }
-                }
-            }
-            results.add(counter);
-            counter = 0.;
+            results.add(getSymptomCountInInterval(allDiagnosisRequestsAgeGroups.get(i), chartSymptoms, days, symptomId));
+//            for (DiagnosisRequest request : allDiagnosisRequestsAgeGroups.get(i)) {
+//                int idChart = request.getIdChart();
+//                List<ChartSymptom> chartSymptomsCopy = new ArrayList<>();
+//                for (ChartSymptom chartSymptom : chartSymptoms) {
+//                    if (chartSymptom.getIdChart() == idChart) {
+//                        chartSymptomsCopy.add(chartSymptom);
+//                    }
+//                }
+//                for (ChartSymptom chartSymptom : chartSymptomsCopy) {
+//                    if (chartSymptom.getIdSymptom() == symptomId) {
+//                        counter++;
+//                    }
+//                }
+//            }
+//            results.add(counter);
+//            counter = 0.;
         }
         return results;
     }
