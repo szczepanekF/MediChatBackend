@@ -10,11 +10,14 @@ import pl.logic.site.model.dao.DiagnosisRequestDAO;
 import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
+import pl.logic.site.model.mysql.Chart;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Message;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.SpringUser;
+import pl.logic.site.repository.ChartRepository;
 import pl.logic.site.repository.DiagnosisRequestRepository;
+import pl.logic.site.repository.PatientRepository;
 import pl.logic.site.service.ChartService;
 import pl.logic.site.service.DiagnosisRequestService;
 import pl.logic.site.utils.Consts;
@@ -28,12 +31,17 @@ import java.util.Optional;
 @AllArgsConstructor
 @Service
 public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
+    @Autowired
+    private PatientRepository patientRepository;
 
 
     private final DiagnosisRequestRepository diagnosisRequestRepository;
     private final MessageServiceImpl messageService;
     private final ChartService chartService;
     private final UserServiceImpl userService;
+
+    @Autowired
+    ChartRepository chartRepository;
 
     /**
      * Create diagnosis request based on given data access object
@@ -217,7 +225,23 @@ public class DiagnosisRequestServiceImpl implements DiagnosisRequestService {
     }
 
     @Override
-    public Patient getPatient(int id) {
-        return null;
+    public Patient getPatient(int diagnosisRequestId) {
+        DiagnosisRequest diagnosisRequest = diagnosisRequestRepository.findById(diagnosisRequestId).orElse(null);
+
+        if (diagnosisRequest == null) {
+            return null; //
+        }
+
+        int chartId = diagnosisRequest.getIdChart();
+        Chart chart = chartRepository.findById(chartId).orElse(null);
+
+        if (chart == null) {
+            return null;
+        }
+
+        int patientId = chart.getIdPatient();
+        Patient patient = patientRepository.findById(patientId).orElse(null);
+
+        return patient;
     }
 }

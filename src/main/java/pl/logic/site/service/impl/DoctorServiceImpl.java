@@ -199,7 +199,11 @@ public class DoctorServiceImpl implements DoctorService {
 
         // Filter diagnosis requests by the date range (from and to)
         List<DiagnosisRequest> filteredRequests = diagnosisRequests.stream()
-                .filter(request -> request.getCreationDate() != null && !request.getModificationDate().before(from) && !request.getModificationDate().after(to))
+                .filter(request -> request.getCreationDate() != null && request.getModificationDate() != null)
+                .collect(Collectors.toList());
+
+        filteredRequests = filteredRequests.stream()
+                .filter(request -> !request.getModificationDate().before(from) && !request.getModificationDate().after(to))
                 .collect(Collectors.toList());
 
         return filteredRequests;
@@ -236,38 +240,38 @@ public class DoctorServiceImpl implements DoctorService {
         // Fetch the list of DoctorPatientsFromChats entities for the given doctorId
         List<DoctorPatientsFromChats> doctorPatientsFromChatsList = doctorPatientsFromChatsRepository.findAllByDoctorID(doctorId);
 
-        // Filter out null values and collect distinct pairs of doctor and patient IDs
-        Set<String> doctorPatientIds = doctorPatientsFromChatsList.stream()
-                .filter(Objects::nonNull)
-                .map(dpfc -> dpfc.getDoctorID() + "_" + dpfc.getPatientID())
+        // Filter out entries with null patientID or doctorID
+        List<DoctorPatientsFromChats> validDoctorPatientsFromChatsList = doctorPatientsFromChatsList.stream()
+                .filter(dpfc -> dpfc.getPatientID() != null && dpfc.getDoctorID() != null)
+                .toList();
+
+        // Collect distinct patient IDs
+        Set<Long> distinctPatientIds = validDoctorPatientsFromChatsList.stream()
+                .map(DoctorPatientsFromChats::getPatientID)
                 .collect(Collectors.toSet());
 
         // Map DoctorPatientsFromChats to DoctorChat objects
-        List<DoctorChat> doctorChats = new ArrayList<>();
-        for (String idPair : doctorPatientIds) {
-            if (idPair.contains("null"))
-                continue;
+        List<DoctorChat> doctorChats = distinctPatientIds.stream()
+                .map(patientID -> {
+                    DoctorPatientsFromChats doctorPatient = validDoctorPatientsFromChatsList.stream()
+                            .filter(dpfc -> dpfc.getPatientID().equals(patientID))
+                            .findFirst()
+                            .orElse(null);
+                    if (doctorPatient != null) {
+                        return new DoctorChat(
+                                doctorPatient.getId(),
+                                doctorPatient.getDoctorID().intValue(),
+                                patientID.intValue(),
+                                Math.toIntExact(doctorPatient.getSpringUserID()),
+                                new ArrayList<>()
+                        );
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-            String[] ids = idPair.split("_");
-            int doctorID = Integer.parseInt(ids[0]);
-            int patientID = Integer.parseInt(ids[1]);
-            DoctorPatientsFromChats doctorPatient = doctorPatientsFromChatsList.stream()
-                    .filter(dpfc -> dpfc.getDoctorID() == doctorID && dpfc.getPatientID() == patientID)
-                    .findFirst()
-                    .orElse(null);
-            if (doctorPatient != null) {
-                DoctorChat doctorChat = new DoctorChat(
-                        doctorPatient.getId(),
-                        doctorID,
-                        patientID,
-                        Math.toIntExact(doctorPatient.getSpringUserID()),
-                        new ArrayList<>()
-                );
-                doctorChats.add(doctorChat);
-            }
-        }
-
-        // Fetch messages for each chat, filter by date, and populate DoctorChat objects
+        // Fetch messages for each chat sort and populate DoctorChat objects
         for (DoctorChat doctorChat : doctorChats) {
             List<Message> messages = messageRepository.findAllBySenderId(doctorChat.getSpringUserId()).stream()
                     .sorted(Comparator.comparing(Message::getTimestamp))

@@ -53,7 +53,7 @@ public class StatisticsController  {
     public ResponseEntity<Response> createSpecialisation(@RequestBody ReportCreateForm reportCreateForm) {
         Report report = new Report();
         try {
-            report = (Report) objectFacade.createReport(reportCreateForm);
+            report = objectFacade.createReport(reportCreateForm);
             loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_SUCCESFULLY_CREATED + "Specialisation ", report,
                     LogType.create, AuthorizationHeaderHolder.getAuthorizationHeader());
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", report));

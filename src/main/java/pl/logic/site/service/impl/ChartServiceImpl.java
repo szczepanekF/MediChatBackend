@@ -10,11 +10,15 @@ import pl.logic.site.model.exception.DeleteError;
 import pl.logic.site.model.exception.EntityNotFound;
 import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.Chart;
+import pl.logic.site.model.mysql.ChartSymptom;
 import pl.logic.site.model.mysql.DiagnosisRequest;
 import pl.logic.site.model.mysql.Patient;
 import pl.logic.site.model.mysql.Symptom;
 import pl.logic.site.repository.ChartRepository;
+import pl.logic.site.repository.ChartSymptomRepository;
 import pl.logic.site.repository.DiagnosisRequestRepository;
+import pl.logic.site.repository.PatientRepository;
+import pl.logic.site.repository.SymptomRepository;
 import pl.logic.site.service.ChartService;
 import pl.logic.site.utils.Consts;
 
@@ -27,9 +31,15 @@ import java.util.stream.Collectors;
 @Service
 public class ChartServiceImpl implements ChartService {
     @Autowired
+    private PatientRepository patientRepository;
+    @Autowired
     private ChartRepository chartRepository;
     @Autowired
     private DiagnosisRequestRepository diagnosisRequestRepository;
+    @Autowired
+    private ChartSymptomRepository chartSymptomRepository;
+    @Autowired
+    private SymptomRepository symptomRepository;
 
 
     /**
@@ -190,13 +200,29 @@ public class ChartServiceImpl implements ChartService {
 
     @Override
     public List<Symptom> getSymptoms(int chartId) {
-        List<Symptom> symptoms = new ArrayList<>();
+        List<ChartSymptom> chartSymptoms = chartSymptomRepository.findAllByIdChart(chartId);
+
+        List<Integer> symptomIds = chartSymptoms.stream()
+                .map(ChartSymptom::getIdSymptom)
+                .collect(Collectors.toList());
+
+        List<Symptom> symptoms = symptomRepository.findAllById(symptomIds);
+
         return symptoms;
     }
 
     @Override
-    public Patient getPatient(int id) {
-        return null;
+    public Patient getPatient(int chartId) {
+        Chart chart = chartRepository.findById(chartId).orElse(null);
+
+        if (chart == null) {
+            return null;
+        }
+
+        int patientId = chart.getIdPatient();
+        Patient patient = patientRepository.findById(patientId).orElse(null);
+
+        return patient;
     }
 
 }

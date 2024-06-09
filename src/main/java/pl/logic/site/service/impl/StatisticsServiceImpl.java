@@ -3,10 +3,13 @@ package pl.logic.site.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.logic.site.model.enums.ReportFiletype;
 import pl.logic.site.model.enums.ReportType;
+import pl.logic.site.model.exception.SaveError;
 import pl.logic.site.model.mysql.*;
 import pl.logic.site.model.reportsForms.ReportCreateForm;
 import pl.logic.site.model.views.DoctorChat;
@@ -14,6 +17,13 @@ import pl.logic.site.model.views.DoctorPatientsWithData;
 import pl.logic.site.repository.*;
 import pl.logic.site.service.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -42,6 +52,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     private ChartService chartService;
     @Autowired
     private DiagnosisRequestService diagnosisRequestService;
+    @Autowired
+    private ReportRepository reportRepository;
 
 
     @Override
@@ -53,14 +65,16 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Transactional
     public Report createReport(ReportCreateForm reportCreateForm) {
         Report report = new Report();
-
         report.setTitle(reportCreateForm.getTitle());
+        report.setFiletype(reportCreateForm.getFiletype());
+        report.setIdDoctor(String.valueOf(reportCreateForm.getIdDoctor()));
 
         String fileEncoded = extractReportFileEncoded(reportCreateForm);
+        if(fileEncoded == null)
+            throw new SaveError("Failed to encode base64 raport: "+reportCreateForm.getTitle());
+        report.setFile(fileEncoded);
 
-
-
-        return report;
+        return reportRepository.save(report);
     }
 
     private String extractReportFileEncoded(ReportCreateForm reportCreateForm){
@@ -99,7 +113,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         //create bar chart with 2 series for all patients and my patients: darkblue and blue from front (btn-default but just rgb)
         Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
         //html table to insert
-        String symptomAgeGroupsPart = getTableForPDF((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[3], "Age groups", "Symptoms reported by age groups");
+        String symptomAgeGroupsPart = getTableForPDF((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups", "Symptoms reported by age groups");
 
 
         return "";
@@ -196,7 +210,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         return patientAgeGroups;
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createDiseasesReport(int idDoctor, Date fromDate, Date toDate){
         Doctor doctor = doctorRepository.findAllById(idDoctor);
         Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
@@ -219,13 +233,19 @@ public class StatisticsServiceImpl implements StatisticsService {
         //create report in db and save
         return "";
     }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createSymptomsDateReport(int idDoctor, Date fromDate, Date toDate){
         Object[] symptomDate = createSymptomsDate(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) symptomDate[0], (List<String>) symptomDate[1], (List<List<Integer>>) symptomDate[2], (String) symptomDate[3]);
-        //generate csvfile and encode it
-        //create report in db and save
-        return "";
+        // Generate CSV file
+        String csvContent = generateCSV(csvTable);
+
+        // Save to file
+        Path csvFilePath = saveCSVToFile(csvContent, "symptoms_date_report.csv");
+
+        // Encode CSV content to Base64
+
+        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createSymptomsDate(int idDoctor, Date fromDate, Date toDate){
@@ -267,9 +287,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     private String createDiseasesDateReport(int idDoctor, Date fromDate, Date toDate){
         Object[] diseasesDate = createDiseasesDate(idDoctor, fromDate, toDate);
         List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesDate[0], (List<String>) diseasesDate[1], (List<List<Integer>>) diseasesDate[2], (String) diseasesDate[3]);
-        //generate csvfile and encode it
-        //create report in db and save
-        return "";
+
+        String csvContent = generateCSV(csvTable);
+
+        // Save to file
+        Path csvFilePath = saveCSVToFile(csvContent, "diseases_date_report.csv");
+
+        // Encode CSV content to Base64
+        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createDiseasesDate(int idDoctor, Date fromDate, Date toDate){
@@ -291,6 +316,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         List<DiagnosisRequest> diagnosisRequests = doctorService.getMyDiagnosisRequests(idDoctor, fromDate, toDate);
         for(DiagnosisRequest diagnosisRequest : diagnosisRequests){
+            if(diagnosisRequest.getIdDisease() == -1 ||diagnosisRequest.getIdDisease()  == 0)
+                continue;
+
             int dateIndex = findIndexForDate(diagnosisRequest.getModificationDate(), dateRanges);
 
             int diseaseIndex = findDiseaseIndexById(diseases, diagnosisRequest.getIdDisease());
@@ -309,9 +337,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createSymptomsAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
         Object[] symptomAgeGroups = createSymptomAgeGroups(idDoctor, fromDate, toDate);
-        List<List<Object>> table = getTableForCSV((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups");
-        //create file
-        return "";
+        List<List<Object>> csvTable = getTableForCSV((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups");
+
+        String csvContent = generateCSV(csvTable);
+
+        // Save to file
+        Path csvFilePath = saveCSVToFile(csvContent, "symptoms_age_report.csv");
+
+        // Encode CSV content to Base64
+        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createSymptomAgeGroups(int idDoctor, Date fromDate, Date toDate){
@@ -352,10 +386,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String createDiseasesAgeGroupsReport(int idDoctor, Date fromDate, Date toDate){
         Object[] diseasesAgeGroups = createDiseasesAgeGroups(idDoctor, fromDate, toDate);
-        List<List<Object>> table = getTableForCSV((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups");
-        //generate csvfile and encode it
-        //create report in db and save
-        return "";
+        List<List<Object>> csvTable = getTableForCSV((List<String>) diseasesAgeGroups[0], (List<String>) diseasesAgeGroups[1], (List<List<Integer>>) diseasesAgeGroups[2], "Age groups");
+
+        String csvContent = generateCSV(csvTable);
+
+        // Save to file
+        Path csvFilePath = saveCSVToFile(csvContent, "diseases_age_report.csv");
+
+        // Encode CSV content to Base64
+        return Base64.getEncoder().encodeToString(csvContent.getBytes(StandardCharsets.UTF_8));
     }
 
     private Object[] createDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate){
@@ -376,10 +415,14 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         List<DiagnosisRequest> diagnosisRequests = doctorService.getMyDiagnosisRequests(idDoctor, fromDate, toDate);
         for(DiagnosisRequest diagnosisRequest : diagnosisRequests){
+
             Patient diagnosisRequestPatient = diagnosisRequestService.getPatient(diagnosisRequest.getId());
             int ageIndex = findAgeGroupIndex(patientService.getAge(diagnosisRequestPatient.getId()));
 
             int diseaseIndex = findDiseaseIndexById(diseases, diagnosisRequest.getIdDisease());
+            if(diseaseIndex == -1)
+                continue;
+
             data.get(ageIndex).set(diseaseIndex, data.get(ageIndex).get(diseaseIndex) + 1);
         }
 
@@ -532,9 +575,10 @@ public class StatisticsServiceImpl implements StatisticsService {
             result.getFirst().add(column);
         }
         for(int i=1; i <= rows.size(); i++){
+            result.add(new ArrayList<>());
             result.get(i).add(rows.get(i-1));
             for(int j=1; j <= columns.size(); j++){
-                result.get(i).add(data.get(i).get(j).toString());
+                result.get(i).add(data.get(i-1).get(j-1).toString());
             }
         }
 
@@ -551,11 +595,38 @@ public class StatisticsServiceImpl implements StatisticsService {
             result.getFirst().add(column);
         }
         for(int i=1; i <= rows.size(); i++){
+            result.add(new ArrayList<>());
             result.get(i).add(rows.get(i-1));
             for(int j=1; j <= columns.size(); j++){
-                result.get(i).add(data.get(i).get(j));
+                result.get(i).add(data.get(i-1).get(j-1));
             }
         }
         return result;
+    }
+
+    private Path saveCSVToFile(String csvContent, String fileName) {
+        try {
+            Path path = Paths.get(fileName);
+            Files.write(path, csvContent.getBytes(StandardCharsets.UTF_8));
+            return path;
+        } catch (IOException e) {
+            throw new RuntimeException("Error while saving CSV to file", e);
+        }
+    }
+
+    private String generateCSV(List<List<Object>> csvTable) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+             OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+
+            for (List<Object> row : csvTable) {
+                csvPrinter.printRecord(row);
+            }
+
+            csvPrinter.flush();
+            return out.toString(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while generating CSV", e);
+        }
     }
 }

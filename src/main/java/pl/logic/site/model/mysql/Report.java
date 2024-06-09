@@ -32,7 +32,7 @@ public class Report {
     private String idDoctor;
 
     @Column(name = "file")
-    private Blob file; //file encoded as base64
+    private String file; //file encoded as base64
 
     @Column(name = "filetype", nullable = false)
     @Enumerated(EnumType.STRING)
