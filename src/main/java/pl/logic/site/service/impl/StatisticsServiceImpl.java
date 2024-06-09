@@ -114,7 +114,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         //foreach chat get messages from timespan
         for (DoctorChat chat : chats) {
             //if message recipient is doctor add to received else to answered
-            for (Message message : chat.getMessages()) { //getMessagesByDates
+            for (Message message : chat.getMessagesByDates(fromDate, toDate)) {
                 if(message.getRecipientId() == springUserRepository.getByDoctorId(idDoctor).getId()){
                     received += 1;
                 } else  {

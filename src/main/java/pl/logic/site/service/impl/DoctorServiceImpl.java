@@ -194,9 +194,16 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public List<DiagnosisRequest> getMyDiagnosisRequests(int doctorId, Date from, Date to) {
-        return List.of();
-    }
+        // Retrieve all Diagnosis Requests for the given doctor
+        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestRepository.findAllByIdDoctor(doctorId);
 
+        // Filter diagnosis requests by the date range (from and to)
+        List<DiagnosisRequest> filteredRequests = diagnosisRequests.stream()
+                .filter(request -> request.getCreationDate() != null && !request.getModificationDate().before(from) && !request.getModificationDate().after(to))
+                .collect(Collectors.toList());
+
+        return filteredRequests;
+    }
     @Override
     public List<Chart> getMyCharts(final int doctorId, Date from, Date to) {
         // Retrieve all Diagnosis Requests for the given doctor
@@ -204,17 +211,24 @@ public class DoctorServiceImpl implements DoctorService {
 
         // Extract chart IDs from the Diagnosis Requests
         List<Integer> chartIds = new ArrayList<>();
-        for (DiagnosisRequest diagnosisRequest : diagnosisRequests)
+        for (DiagnosisRequest diagnosisRequest : diagnosisRequests) {
             chartIds.add(diagnosisRequest.getIdChart());
-
+        }
 
         // Retrieve the charts by their IDs
         List<Chart> charts = new ArrayList<>();
-        for (Integer chartId : chartIds)
+        for (Integer chartId : chartIds) {
             chartRepository.findById(chartId).ifPresent(charts::add);
+        }
 
+        List<Chart> filteredCharts = new ArrayList<>();
+        for (Chart chart : charts) {
+            if (chart.getDate() != null && !chart.getDate().before(from) && !chart.getDate().after(to)) {
+                filteredCharts.add(chart);
+            }
+        }
 
-        return charts;
+        return filteredCharts;
     }
 
     @Override
@@ -228,11 +242,10 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(dpfc -> dpfc.getDoctorID() + "_" + dpfc.getPatientID())
                 .collect(Collectors.toSet());
 
-
         // Map DoctorPatientsFromChats to DoctorChat objects
         List<DoctorChat> doctorChats = new ArrayList<>();
         for (String idPair : doctorPatientIds) {
-            if(idPair.contains("null"))
+            if (idPair.contains("null"))
                 continue;
 
             String[] ids = idPair.split("_");
@@ -254,9 +267,11 @@ public class DoctorServiceImpl implements DoctorService {
             }
         }
 
-        // Fetch messages for each chat and populate DoctorChat objects
+        // Fetch messages for each chat, filter by date, and populate DoctorChat objects
         for (DoctorChat doctorChat : doctorChats) {
-            List<Message> messages = messageRepository.findAllBySenderId(doctorChat.getSpringUserId());
+            List<Message> messages = messageRepository.findAllBySenderId(doctorChat.getSpringUserId()).stream()
+                    .sorted(Comparator.comparing(Message::getTimestamp))
+                    .collect(Collectors.toList());
             doctorChat.setMessages(messages);
         }
 
