@@ -332,7 +332,7 @@ public class PredictionServiceImpl implements PredictionService {
         List<String> symptomsNames = getSymptomsNames();
         List<String> ageGroups = List.of(statisticsService.getAgeGroups());
 
-        List<List<Double>> symptomsData = getDiseasesCount(allDiagnosisRequests, ageGroups);
+        List<List<Double>> symptomsData = getSymptomsCount(allDiagnosisRequests, ageGroups);
 
         results.add(symptomsNames);
         results.add(ageGroups);
