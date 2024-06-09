@@ -48,6 +48,8 @@ public class ObjectFacade {
     private final DiseaseService diseaseService;
     @Autowired
     private final StatisticsService statisticsService;
+    @Autowired
+    private final ReportService reportService;
 
     /**
      * Create object of given data access object class using suitable service
@@ -137,6 +139,7 @@ public class ObjectFacade {
             case DictionaryExaminationDAO dictionaryExamination ->
                     dictionaryExaminationService.getDictionaryExaminations();
             case DiseaseDAO disease -> diseaseService.getDiseases();
+            case ReportDAO reportDAO -> reportService.getReportsByDoctorId(String.valueOf(filter));
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
     }

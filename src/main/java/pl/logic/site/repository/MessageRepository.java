@@ -12,4 +12,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByChatId(String chatId);
 
     List<Message> findAllBySenderId(int springUserId);
+    List<Message> findAllByRecipientId(int recipientId);
 }

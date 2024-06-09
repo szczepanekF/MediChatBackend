@@ -52,29 +52,28 @@
     <div class="col-md-12" style="color: gray; display: flex; justify-content: center;">
         <table width="80%">
             <thead style="border: 1px solid lightslategray; background-color: lightslategray; color: white; font-weight: 600;">
-                <tr>
-                    <th style="height: 40px; padding: 4px;">Username</th>
-                    <th style="height: 40px; padding: 4px;">Contacted on</th>
-                    <th style="height: 40px; padding: 4px; text-align:right;">Created through diagnosis request</th>
-                </tr>
+            <tr>
+                <th style="height: 40px; padding: 4px;">Username</th>
+                <th style="height: 40px; padding: 4px;">Contacted on</th>
+                <th style="height: 40px; padding: 4px; text-align:right;">Created through diagnosis request</th>
+            </tr>
             </thead>
             <tbody>
-                <tr style="border: 1px solid lightslategray; color: black; height: 40px;"
+            <tr style="border: 1px solid lightslategray; color: black; height: 40px;"
                 th:each="patient, patientStat : ${newPatients}" th:if="${!patientStat.index == 0}">
-                    <td style="padding: 4px;" th:each="cell, cellStat : ${patient}" th:text="${cell}" th:if="${!cellStat.index == 0}">{patient info}</td>
-                    <td style="padding: 4px; text-align:right;" th:text="${patient[2]}">{via_diagnosis}</td>
-                </tr>
+                <td style="padding: 4px;" th:each="cell, cellStat : ${patient}" th:text="${cell}" th:if="${!cellStat.index == 0}">{patient info}</td>
+                <td style="padding: 4px; text-align:right;" th:text="${patient[2]}">{via_diagnosis}</td>
+            </tr>
             </tbody>
             <tfoot style="border: 1px solid lightslategray; background-color: lightslategray; color: white; font-weight: 600; text-align:right;">
-                <tr><td colspan=3 style="padding: 4px;" th:text="${new_patient_count}">Sum: {new_patient_count}</td></tr>
+            <tr><td colspan=3 style="padding: 4px;" th:text="${new_patient_count}">Sum: {new_patient_count}</td></tr>
             </tfoot>
         </table>
     </div>
 </div>
 <div class="row" style="padding: 30px 0;">
     <div class="col-md-12" style="display: flex; justify-content: center;">
-        <img  th:src="@{${chart_new_users_by_date}}" alt="Dynamic Logo" src="{chart_new_users_by_date}" width="80%"/> <!-- path to img -->
-<!--        <img th:src="'data:image/png;base64,' + ${chart_new_users_by_date}" alt="Base64 Image">-->
+        <<!--        <img th:src="'data:image/png;base64,' + ${chart_new_users_by_date}" alt="Base64 Image">-->
     </div>
 </div>
 

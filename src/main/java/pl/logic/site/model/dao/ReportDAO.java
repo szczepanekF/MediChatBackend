@@ -1,4 +1,6 @@
 package pl.logic.site.model.dao;
 
-public record ReportDAO() {
+import pl.logic.site.model.mysql.Report;
+
+public record ReportDAO(Report report) {
 }

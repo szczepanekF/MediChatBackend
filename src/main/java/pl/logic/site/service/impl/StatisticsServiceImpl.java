@@ -1,5 +1,6 @@
 package pl.logic.site.service.impl;
 
+import com.itextpdf.html2pdf.HtmlConverter;
 import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Autowired
     private SymptomRepository symptomRepository;
     @Autowired
+    private SpecialisationRepository specialisationRepository;
+    @Autowired
     private DiseaseRepository diseaseRepository;
     @Autowired
     private SpringUserRepository springUserRepository;
@@ -80,7 +83,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     private String extractReportFileEncoded(ReportCreateForm reportCreateForm){
         if(reportCreateForm.getFiletype() == ReportFiletype.pdf){
             return switch (reportCreateForm.getReportType()){
-                case ReportType.user -> createUserReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
+                case ReportType.user -> createUserReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo(), reportCreateForm.getTitle());
                 case ReportType.diseases -> createDiseasesReport(reportCreateForm.getIdDoctor(), reportCreateForm.getFrom(), reportCreateForm.getTo());
                 case symptoms_date -> null;
                 case diseases_date -> null;
@@ -104,7 +107,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return "";//return encoded file
     }
 
-    private String createUserReport(int idDoctor, Date fromDate, Date toDate){
+    private String createUserReport(int idDoctor, Date fromDate, Date toDate, String title){
         Doctor doctor = doctorRepository.findAllById(idDoctor);
         List<String> messagesPart = getMessagesPart(idDoctor, fromDate, toDate);
         List<String> diagnosisRequestsPart = getDiagnosisRequestsPart(idDoctor, fromDate, toDate);
@@ -115,8 +118,95 @@ public class StatisticsServiceImpl implements StatisticsService {
         //html table to insert
         String symptomAgeGroupsPart = getTableForPDF((List<String>) symptomAgeGroups[0], (List<String>) symptomAgeGroups[1], (List<List<Integer>>) symptomAgeGroups[2], "Age groups", "Symptoms reported by age groups");
 
+        // Generate HTML content
+        String htmlContent = generateHtmlContent(doctor, messagesPart, diagnosisRequestsPart, newPatientsPart, patientAgeGroups, symptomAgeGroupsPart, fromDate, toDate, title);
 
-        return "";
+        // Convert HTML to PDF
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        HtmlConverter.convertToPdf(htmlContent, outputStream);
+        byte[] pdfBytes = outputStream.toByteArray();
+
+        // Save the PDF to a file or return the file path
+        String filePath = null;
+        try {
+            filePath = savePdfToFile(pdfBytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return Base64.getEncoder().encodeToString(pdfBytes);
+    }
+
+
+    private String generateHtmlContent(Doctor doctor, List<String> messagesPart, List<String> diagnosisRequestsPart, List<List<String>> newPatientsPart, List<List<String>> patientAgeGroups, String symptomAgeGroupsPart, Date fromDate, Date toDate, String title) {
+        // Fill in the placeholders in the HTML templates with the fetched data
+        String doctorName = doctor.getName() + " " + doctor.getSurname();
+        String specialisation = specialisationRepository.findById(doctor.getSpecialisation_id()).get().getSpecialisation();
+        String fromDateStr = fromDate.toString();
+        String toDateStr = toDate.toString();
+        String generatedDateStr = new Date().toString();
+
+        // Generate HTML content using the templates
+        // Read HTML template from file
+        String htmlTemplatePath = "src/main/resources/static/pdf/diseases_report.html";
+        String htmlTemplate;
+        try {
+            htmlTemplate = Files.readString(Paths.get(htmlTemplatePath));
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading HTML template file", e);
+        }
+
+        String filledHtmlContent = htmlTemplate
+                .replace("{Name Surname}", doctorName)
+                .replace("{Specialisation}", specialisation)
+                .replace("{Title}", title)
+                .replace("{from}", fromDateStr)
+                .replace("{to}", toDateStr)
+                .replace("{yyyy-mm-dd H:i}", generatedDateStr)
+                .replace("{received_messages_count}", String.valueOf(messagesPart.get(1)))
+                .replace("{answered_messages_count}", String.valueOf(messagesPart.get(0)))
+                .replace("{received_diagnosis_requests_count}", String.valueOf(diagnosisRequestsPart.get(1)))
+                .replace("{answered_diagnosis_requests_count}", String.valueOf(diagnosisRequestsPart.get(0)))
+                .replace("{symptom_age_groups_part}", symptomAgeGroupsPart);
+
+        return filledHtmlContent;
+    }
+
+    private String generateDataTableFragment(List<List<String>> tableData, String tableTitle) {
+        // Read HTML fragment from file
+        String dataTableFragmentPath = "src/main/resources/static/pdf/_data_table.html";
+        String dataTableFragment;
+        try {
+            dataTableFragment = Files.readString(Paths.get(dataTableFragmentPath));
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading data table fragment file", e);
+        }
+
+        // Generate HTML content for the data table fragment
+        dataTableFragment = dataTableFragment
+                .replace("{table_title}", tableTitle)
+                .replace("{tableData}", convertTableDataToString(tableData)); // Convert list of lists to string representation
+
+        return dataTableFragment;
+    }
+
+    private String convertTableDataToString(List<List<String>> tableData) {
+        StringBuilder tableContent = new StringBuilder();
+        for (List<String> row : tableData) {
+            for (String cell : row) {
+                tableContent.append(cell).append(",");
+            }
+            tableContent.deleteCharAt(tableContent.length() - 1); // Remove the last comma
+            tableContent.append("\n");
+        }
+        return tableContent.toString();
+    }
+
+    private String savePdfToFile(byte[] pdfBytes) throws IOException {
+        // Save the PDF to a file and return the file path
+        String filePath = "report.pdf";
+        java.nio.file.Files.write(java.nio.file.Paths.get(filePath), pdfBytes);
+        return filePath;
     }
 
     private List<String> getMessagesPart(int idDoctor, Date fromDate, Date toDate){
