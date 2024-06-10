@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.security.InvalidParameterException;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -161,8 +162,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Fill in the placeholders in the HTML templates with the fetched data
         String doctorName = doctor.getName() + " " + doctor.getSurname();
         String specialisation = specialisationRepository.findById(doctor.getSpecialisation_id()).get().getSpecialisation();
-        String fromDateStr = fromDate.toString();
-        String toDateStr = toDate.toString();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String fromDateStr = dateFormat.format(fromDate);
+        String toDateStr = dateFormat.format(toDate);
         String generatedDateStr = new Date().toString();
 
 
@@ -271,8 +273,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         // Fill in the placeholders in the HTML templates with the fetched data
         String doctorName = doctor.getName() + " " + doctor.getSurname();
         String specialisation = specialisationRepository.findById(doctor.getSpecialisation_id()).get().getSpecialisation();
-        String fromDateStr = fromDate.toString();
-        String toDateStr = toDate.toString();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String fromDateStr = dateFormat.format(fromDate);
+        String toDateStr = dateFormat.format(toDate);
         String generatedDateStr = new Date().toString();
 
         // Read HTML template from file

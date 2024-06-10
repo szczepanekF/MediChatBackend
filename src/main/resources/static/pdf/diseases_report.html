@@ -5,6 +5,28 @@
     <title>Diseases Report</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
+        .row{
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .header-row{
+            margin-top: 20px;
+            border-bottom: 1px solid lightslategrey;
+        }
+        .header-row:first-of-type{
+            margin-top: 0;
+        }
+        .col-md-12{
+            width: 100%;
+        }
+        .col-md-12:has(hr){
+            display: block;
+        }
+        hr{
+            width: 100%;
+        }
         .report-header, .report-footer {
             width: 100%;
             color: rgb(128,128,128);
@@ -44,20 +66,26 @@
             font-weight: 600;
         }
         .chart-container {
-            margin-left: 100px; /* Add bottom margin */
-            max-width: 80%; /* Ensure the image does not exceed its container width */
-        }
-        .data-table-col{
             width: 100%;
-            overflow-x: scroll;
-            & table{
-                font-size: 3px;
-                & tbody tr td:first-of-type{
-                    padding: 4px;
-                    background-color: rgb(135,204, 235);
-                    color: white;
-                }
-            }
+            padding: 0 20%;
+            /*margin-left: 100px; !* Add bottom margin *!*/
+            /*max-width: 80%; !* Ensure the image does not exceed its container width *!*/
+            /*display: flex;*/
+            /*justify-content: center;*/
+        }
+        .chart-container>img{
+            width: 60%;
+        }
+        .data-table-col {
+            width: 100%;
+            max-width: 2300px;
+        }
+        .data-table-col table{
+            font-size: 5px;
+        }
+        .data-table-col table tbody tr td:first-of-type{
+            background-color: rgb(135,204, 235);
+            color: white;
         }
     </style>
     <div class="row" style="width: 100%; color: gray">
@@ -68,7 +96,7 @@
     <hr>
 
 </head>
-<body style="padding: 50px; height: 100%; width: 100%;">
+<body style="padding: 10px; height: 100%; width: 100%;">
 <div class="row" style="width: 100%;">
     <div class="col-md-6"><b>{Name Surname}</b></div>
     <div class="col-md-6" style="text-align: right;">{yyyy-mm-dd H:i}</div>
