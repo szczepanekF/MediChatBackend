@@ -86,7 +86,14 @@ public class StatisticsServiceImpl implements StatisticsService {
             throw new SaveError("Incorrect report type for filetype");
         report.setFile(fileEncoded);
 
-        return reportRepository.save(report);
+        Report report1 = new Report();
+        try {
+            report1 = reportRepository.save(report);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return report1;
     }
 
     private Blob extractReportFileEncoded(ReportCreateForm reportCreateForm) throws SQLException {
