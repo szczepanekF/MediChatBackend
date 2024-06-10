@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.logic.site.aspects.AuthorizationHeaderHolder;
 import pl.logic.site.aspects.ControllerUtils;
@@ -228,7 +229,7 @@ public class PredictionController {
     })
     public ResponseEntity<List<String>> getTopNDiseases(
             @Parameter(description = "The number of top diseases to return")
-            @PathVariable int N) {
+            @RequestParam int N) {
         try {
             List<String> result = this.predictionService.getTopNDiseases(N);
             return ResponseEntity.ok(result);
@@ -425,7 +426,7 @@ public class PredictionController {
      * @param toDate - The end date of the interval in yyyy-MM-dd format
      * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
-    @GetMapping(value = "/ageGroupSymptomsPrediction/{fromDate}/{toDate}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/ageGroupSymptomsPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the symptoms prediction for a specific age groups.",
             description = "Get the symptoms prediction for a specific age groups in StatisticServiceImpl.")
     @ApiResponses(value = {
@@ -434,9 +435,9 @@ public class PredictionController {
     })
     public ResponseEntity<List<Object>> getAgeGroupSymptomsPredictionInInterval(
             @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
             @Parameter(description = "End date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
     ) {
         try {
             List<Object> result = this.predictionService.getAgeGroupSymptomsPrediction(fromDate, toDate);
@@ -485,7 +486,7 @@ public class PredictionController {
      * @param toDate - The end date of the interval in yyyy-MM-dd format
      * @return A ResponseEntity containing a Response object with the predicted diseases in the given interval
      */
-    @GetMapping(value = "/ageGroupDiseasesPrediction/{fromDate}/{toDate}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/ageGroupDiseasesPrediction", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the diseases prediction for a specific age group in a given interval.",
             description = "Get the diseases prediction for a specific age group in a given interval.")
     @ApiResponses(value = {
@@ -494,9 +495,9 @@ public class PredictionController {
     })
     public ResponseEntity<List<Object>> getAgeGroupDiseasesPredictionInInterval(
             @Parameter(description = "Start date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
             @Parameter(description = "End date of the interval in yyyy-MM-dd format")
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
     ) {
         try {
             List<Object> result = this.predictionService.getAgeGroupDiseasesPrediction(fromDate, toDate);
