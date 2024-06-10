@@ -122,7 +122,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 
     private Blob createUserReport(int idDoctor, Date fromDate, Date toDate, String title) throws SQLException {
-        Doctor doctor = doctorRepository.findAllById(idDoctor);
+        Doctor doctor = doctorRepository.findById(idDoctor).get();
         List<String> messagesPart = getMessagesPart(idDoctor, fromDate, toDate);
         List<String> diagnosisRequestsPart = getDiagnosisRequestsPart(idDoctor, fromDate, toDate);
         List<List<String>> newPatientsPart = getNewPatientsPart(idDoctor, fromDate, toDate);
@@ -152,7 +152,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         Blob blob = new SerialBlob(pdfBytes);
 
-        return blob;
+        return new SerialBlob(pdfBytes);
 
     }
 
