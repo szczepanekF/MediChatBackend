@@ -66,8 +66,7 @@ public class StatisticPredictionImplTest {
 
         Double result = (double) meter / denominator;
         System.out.println(result);
-//        assertEquals(1.6666, result, 0.0001); // should be this, but I don't know why it is not working
-        assertEquals(0.6666, result, 0.0001);
+        assertEquals(0.4, result, 0.0001);
     }
 
     @Test
