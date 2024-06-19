@@ -134,7 +134,7 @@ public class AuthenticationServiceImpl {
             Patient patient = patientRepository.findById(springUser.getPatientId()).orElseThrow();
             return getExtraPatientClaims(patient);
         } else {
-            throw new RuntimeException("Both doctor id and patient id equals to null");
+            return getExtraAdminClaims(springUser);
         }
     }
 
@@ -146,6 +146,14 @@ public class AuthenticationServiceImpl {
         doctorClaims.put("birth_date", getHumanReadableDate(doctor.getBirth_date()));
         doctorClaims.put("specialisation_id", doctor.getSpecialisation_id());
         return doctorClaims;
+    }
+
+    private Map<String, Object> getExtraAdminClaims(SpringUser springUser) {
+        Map<String, Object> adminClaims = new HashMap<>();
+        adminClaims.put("name", springUser.getUsername());
+        adminClaims.put("surname", " ");
+        adminClaims.put("birth_date", getHumanReadableDate(springUser.getCreationDate()));
+        return adminClaims;
     }
 
     private Map<String, Object> getExtraPatientClaims(Patient patient) {
