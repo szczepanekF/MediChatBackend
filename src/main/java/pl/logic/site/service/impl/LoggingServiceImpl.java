@@ -20,6 +20,7 @@ import pl.logic.site.service.MessageService;
 import pl.logic.site.utils.Consts;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * A service used for managing logs.
@@ -64,6 +65,11 @@ public class LoggingServiceImpl implements LoggingService {
             System.out.println("Error creating log.");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<Log> getAllLogs() {
+        return logRepository.findAll();
     }
 
 }

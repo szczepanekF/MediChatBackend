@@ -117,6 +117,31 @@ public class UserController {
 //    }
 
 
+    @GetMapping(value = "/getLogs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Find logs", description = "Find logs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public ResponseEntity<Response> findLogs() {
+        Object user;
+        try {
+            user = loggingService.getAllLogs();
+
+            return ResponseEntity.ok(new Response<>(Consts.C200, 200, "", user));
+        } catch (EntityNotFound e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response<>(e.getMessage(), 404, Arrays.toString(e.getStackTrace()), null));
+        } catch (Exception e) {
+            loggingService.createLog(ControllerUtils.combinePaths(request) + Consts.LOG_ERROR, e.getStackTrace(),
+                    LogType.error, AuthorizationHeaderHolder.getAuthorizationHeader());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response<>(e.getMessage(), 500, Arrays.toString(e.getStackTrace()), null));
+        }
+    }
+
+
+
     @GetMapping(value = "/findUser/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Find user", description = "Find user")
     @ApiResponses(value = {
