@@ -49,7 +49,7 @@ public class EmailServiceImpl {
 //        return placeholders;
 //    }
     public void sendEmail(EmailType emailType, Map<String, String> params) throws IOException, MessagingException {
-        params.put("appname", "Medi_ZZJP");
+        params.put("appname", "Thank you for joining MediChat");
 
         String htmlContent = getCompletedHtmlContent(params, emailType);
         System.out.print(htmlContent);
