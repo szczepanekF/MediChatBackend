@@ -58,9 +58,9 @@ public class UserServiceImpl implements UserService {
     public Object findUser(int id) {
         Optional<SpringUser> springUser = springUserRepository.findById(id);
         if(springUser.get().getPatientId() != null)
-            return repository.findById(springUser.get().getPatientId());
+            return repository.findById(springUser.get().getPatientId()).get();
         else
-            return doctorRepository.findById(springUser.get().getDoctorId());
+            return doctorRepository.findById(springUser.get().getDoctorId()).get();
     }
 
     public Optional<SpringUser> findSpringUser(int id, boolean patient) {
