@@ -77,6 +77,7 @@ public class AuthenticationController {
                 put("emailAddress", request.getEmail());
                 put("name", request.getName());
                 put("subject", "GREETING");
+                put("appname", "MediChat");
             }};
             emailService.sendEmail(EmailType.NEW_ACCOUNT, emailParameters);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>(Consts.C201, 201, "", authenticationResponse));
