@@ -43,6 +43,8 @@ public class ObjectFacade {
     @Autowired
     private final SpecialisationService specialisationService;
     @Autowired
+    private final DictionaryExaminationService dictionaryExaminationService;
+    @Autowired
     private final ExaminationService examinationService;
     @Autowired
     private final DiseaseService diseaseService;
@@ -89,6 +91,8 @@ public class ObjectFacade {
             case SymptomDAO symptomDAO -> symptomService.getSymptom(id);
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisation(id);
             case ExaminationDAO examination -> examinationService.getExamination(id);
+            case DictionaryExaminationDAO dictionaryExamination ->
+                    dictionaryExaminationService.getDictionaryExamination(id);
             case DiseaseDAO disease -> diseaseService.getDisease(id);
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
         };
@@ -134,6 +138,8 @@ public class ObjectFacade {
             case SymptomValuesDAO symptomValues -> symptomValuesService.getSymptomsValues();
             case SpecialisationDAO specialisation -> specialisationService.getSpecialisations();
             case ExaminationDAO examination -> examinationService.getExaminations(filter);
+            case DictionaryExaminationDAO dictionaryExamination ->
+                    dictionaryExaminationService.getDictionaryExaminations();
             case DiseaseDAO disease -> diseaseService.getDiseases();
             case ReportDAO reportDAO -> reportService.getReportsByDoctorId(String.valueOf(filter));
             default -> throw new UnknownObjectType(Consts.C452_UKNOWN_OBJECT_TYPE);
@@ -186,22 +192,18 @@ public class ObjectFacade {
     }
 
     public List<List<Object>> getSymptomsDate(int idDoctor, Date fromDate, Date toDate) {
-        // Implement the method using the appropriate services
         return statisticsService.getSymptomsDate(idDoctor, fromDate, toDate);
     }
 
     public List<List<Object>> getDiseasesDate(int idDoctor, Date fromDate, Date toDate) {
-        // Implement the method using the appropriate services
         return statisticsService.getDiseasesDate(idDoctor, fromDate, toDate);
     }
 
     public List<List<Object>> getSymptomsAgeGroups(int idDoctor, Date fromDate, Date toDate) {
-        // Implement the method using the appropriate services
         return statisticsService.getSymptomsAgeGroups(idDoctor, fromDate, toDate);
     }
 
     public List<List<Object>> getDiseasesAgeGroups(int idDoctor, Date fromDate, Date toDate) {
-        // Implement the method using the appropriate services
         return statisticsService.getDiseasesAgeGroups(idDoctor, fromDate, toDate);
     }
 }
